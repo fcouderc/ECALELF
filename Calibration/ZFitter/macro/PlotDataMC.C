@@ -15,6 +15,8 @@
 #include <iostream>
 #include <fstream>
 #include "src/runDivide_class.cc"
+#include <sstream>
+#include <string>
 
 TString GetRunRangeTime(TChain *chain, TString runRange){
   runDivide_class runDivide;
@@ -68,15 +70,6 @@ TCut GetCut(TString category, int indexEle=0){
   return cutter.GetCut(category, false,indexEle);
 }
 
-/*TCanvas *Plot2D_my(TChain *data, TChain *mc, TString branchname, TString binning, 
-		      TCut selection, 
-		      TString dataLabel, TString mcLabel, 
-		      TString xLabel, TString yLabel, 
-		      int type=2, TString opt="colz", bool usePU=true, bool smear=false, bool scale=false){*/
-/*TCanvas *PlotDataMCs(TChain *data, std::vector<TChain *> mc_vec, TString branchname, TString binning,
-                     TString category, TString selection,
-                     TString dataLabel, std::vector<TString> mcLabel_vec, TString xLabel, TString yLabelUnit,
-                     bool logy=false, bool usePU=true, bool ratio=true,bool smear=false, bool scale=false, bool useR9Weight=false){*/
 
 TCanvas *Plot2D_profileX_my(TChain *data, TString branchname, TString binning,TString selection,TString opt,TString xLabel, TString yLabel){
   //type == 0: data only
@@ -98,36 +91,17 @@ TCanvas *Plot2D_profileX_my(TChain *data, TString branchname, TString binning,TS
   return c1;
 }
 
-TCanvas *Plot2D_my(TChain *data, TString branchname, TString binning,TString selection,TString opt,TString xLabel, TString yLabel){
-  //type == 0: data only
-  //type == 1: MC only
-  //type == 2: data/MC
-   
-  TCanvas *c = new TCanvas();
-  c->SetRightMargin(0.2);
-  //  data->Draw(branchname+">>data_hist"+binning, selection,opt);
-  data->Draw(branchname+">>data_hist"+binning,selection,opt);
-  TH2F *d = (TH2F *) gROOT->FindObject("data_hist");
-  d->GetYaxis()->SetTitle(yLabel);
-  d->GetXaxis()->SetTitle(xLabel);
-  d->GetZaxis()->SetTitle("Events");
-  d->GetZaxis()->SetNdivisions(510);
-  d->Draw("colz");
-
-  return c;
-}
-
-
 
 TCanvas *PlotDataMC2D(TChain *data, TChain *mc, TString branchname, TString binning, 
-		      TCut selection, 
+		      TString category, TString selection, 
 		      TString dataLabel, TString mcLabel, 
 		      TString xLabel, TString yLabel, 
-		      int type=2, TString opt="colz", bool usePU=true, bool smear=false, bool scale=false){
+		      int type=2, TString opt="colz", bool usePU=true, bool smear=false, bool scale=false, bool single_ele=false,int ele_index=0,TString name_root="name_root"){
   //type == 0: data only
   //type == 1: MC only
   //type == 2: data/MC
-   
+  //You should adapt this one   
+
   TCanvas *c = new TCanvas("c","");
   TString weightVar;
   if(branchname.Contains("map")){
@@ -138,15 +112,81 @@ TCanvas *PlotDataMC2D(TChain *data, TChain *mc, TString branchname, TString binn
     xLabel="iPhi";
     c->SetGridx();
   }
-  if(weightVar!="") selection+="*"+weightVar;
-  data->Draw(branchname+">>data_hist"+binning, selection,opt);
-  if(usePU)  mc->Draw(branchname+">>mc_hist"+binning, selection *"puWeight",opt);
-  else  mc->Draw(branchname+">>mc_hist"+binning, selection,opt);
+
+  TString branchNameData=branchname;
+  TString branchNameMC=branchname;
+
+  ElectronCategory_class cutter;
+
+  if(branchNameData.Contains("energySCEle_regrCorrSemiParV5_pho")) cutter.energyBranchName="energySCEle_regrCorrSemiParV5_pho";
+  else if(branchNameData.Contains("energySCEle_regrCorrSemiParV5_ele")) cutter.energyBranchName="energySCEle_regrCorrSemiParV5_ele";
+
+  TCut selection_data=""; 
+  TCut selection_MC="";
+
+  if(single_ele==false){//aplly cut to both electrons
+    if(category.Sizeof()>1) selection_data = cutter.GetCut(category, false,0,scale);
+    selection_data+=selection;
+    if(category.Sizeof()>1) selection_MC = cutter.GetCut(category, false,0);
+    selection_MC+=selection;
+    }else{
+    //single electron case:
+    if(category.Sizeof()>1) selection_data = cutter.GetCut(category, false,ele_index,scale);
+    selection_data+=selection;
+
+    if(category.Sizeof()>1) selection_MC = cutter.GetCut(category, false,ele_index);
+    selection_MC+=selection;
+  }
+
+
+  if(smear){
+    branchNameMC.ReplaceAll("invMass_SC_regrCorr_pho ","(invMass_SC_regrCorr_pho*sqrt(smearEle[0]*smearEle[1]))");
+    branchNameMC.ReplaceAll("invMass_SC_regrCorrSemiParV5_pho","(invMass_SC_regrCorrSemiParV5_pho*sqrt(smearEle[0]*smearEle[1]))");
+    branchNameMC.ReplaceAll("invMass_SC_regrCorrSemiParV5_ele","(invMass_SC_regrCorrSemiParV5_ele*sqrt(smearEle[0]*smearEle[1]))");
+    branchNameMC.ReplaceAll("energySCEle_regrCorr_pho ","(energySCEle_regrCorr_pho*smearEle) ");
+    branchNameMC.ReplaceAll("energySCEle_regrCorr_pho[0]","(energySCEle_regrCorr_pho[0]*smearEle[0])");
+    branchNameMC.ReplaceAll("energySCEle_regrCorr_pho[1]","(energySCEle_regrCorr_pho[1]*smearEle[1])");
+    branchNameMC.ReplaceAll("energySCEle_regrCorrSemiParV5_ele[0]","(energySCEle_regrCorrSemiParV5_ele[0]*smearEle[0])");
+    branchNameMC.ReplaceAll("energySCEle_regrCorrSemiParV5_ele[1]","(energySCEle_regrCorrSemiParV5_ele[1]*smearEle[1])");
+    if(!branchNameMC.Contains("smear")) branchNameMC.ReplaceAll("energySCEle_regrCorrSemiParV5_ele","(energySCEle_regrCorrSemiParV5_ele*smearEle)");
+
+  }
+  if(scale){
+    std::cout << "Apply scale" << std::endl;
+    branchNameData.ReplaceAll("invMass_SC_regrCorr_pho ","(invMass_SC_regrCorr_pho*sqrt(scaleEle[0]*scaleEle[1]))");
+    branchNameData.ReplaceAll("invMass_SC_regrCorrSemiParV5_pho","(invMass_SC_regrCorrSemiParV5_pho*sqrt(scaleEle[0]*scaleEle[1]))");
+    branchNameData.ReplaceAll("invMass_SC_regrCorrSemiParV5_ele","(invMass_SC_regrCorrSemiParV5_ele*sqrt(scaleEle[0]*scaleEle[1]))");
+    branchNameData.ReplaceAll("energySCEle_regrCorrSemiParV5_pho ","(energySCEle_regrCorrSemiParV5_pho*scaleEle)");
+    branchNameData.ReplaceAll("energySCEle_regrCorrSemiParV5_pho[0]","(energySCEle_regrCorrSemiParV5_pho[0]*scaleEle[0])");
+    branchNameData.ReplaceAll("energySCEle_regrCorrSemiParV5_pho[1]","(energySCEle_regrCorrSemiParV5_pho[1]*scaleEle[1])");
+    branchNameData.ReplaceAll("energySCEle_regrCorrSemiParV5_ele[0]","(energySCEle_regrCorrSemiParV5_ele[0]*scaleEle[0])");
+    branchNameData.ReplaceAll("energySCEle_regrCorrSemiParV5_ele[1]","(energySCEle_regrCorrSemiParV5_ele[1]*scaleEle[1])");
+    if(!branchNameData.Contains("scale"))    branchNameData.ReplaceAll("energySCEle_regrCorrSemiParV5_ele","(energySCEle_regrCorrSemiParV5_ele*scaleEle)");
+  }    
+  
+  // Draw histograms
+    cout<<"Filling Data and MC histos"<<endl;
+    cout<<"data "<<branchNameData<<" "<<selection_data<<endl;
+    cout<<"MC "<<branchNameMC<<" "<<selection_MC<<endl;
+
+    if(weightVar!="") selection+="*"+weightVar;
+
+    data->Draw(branchNameData+">>data_hist"+binning, selection_data,opt);
+    if(usePU)  mc->Draw(branchNameMC+">>mc_hist"+binning, selection_MC *"puWeight",opt);
+    else  mc->Draw(branchNameMC+">>mc_hist"+binning, selection_MC,opt);
 
   c->Clear();
   
   TH2F *d = (TH2F *) gROOT->FindObject("data_hist");
   TH2F *s = (TH2F *) gROOT->FindObject("mc_hist");
+
+  stringstream ss;
+  ss << ele_index;
+  string index = ss.str();
+  cout<<index<<endl;
+
+  d->SaveAs("tmp/Sanity_Plots/d_hist_"+name_root+"_"+index+".root");//You can hadd a string (index) to a TString (mcLabel) and this is a TString
+  s->SaveAs("tmp/Sanity_Plots/s_hist"+mcLabel+"_"+name_root+"_"+index+".root");
 
   if(type==0) d->Draw(opt);
   else if(type==1) s->Draw(opt);
@@ -161,11 +201,14 @@ TCanvas *PlotDataMC2D(TChain *data, TChain *mc, TString branchname, TString binn
   d->GetYaxis()->SetTitle(yLabel);
   s->GetYaxis()->SetTitle(yLabel);
   c->SetRightMargin(0.2);
+
   return c;
   
 }
 
-TCanvas *PlotDataMC2D(TChain *data, TChain *mc, 
+
+
+/*TCanvas *PlotDataMC2D(TChain *data, TChain *mc, 
 		      TString branchname, TString binning, 
 		      TString category, TString selection, 
 		      TString dataLabel, TString mcLabel, 
@@ -177,14 +220,15 @@ TCanvas *PlotDataMC2D(TChain *data, TChain *mc,
   if(category.Sizeof()>1) sel= GetCut(category, 0);
   sel+=selection;
   return PlotDataMC2D(data, mc, branchname, binning, sel, dataLabel, mcLabel, xLabel, yLabel, type, opt,usePU, smear, scale);
-} 
+  } */
+
 
 
 TCanvas *PlotDataMC(TChain *data, TChain *mc, TString branchname, TString binning, 
 		    TString category, TString selection, 
 		    TString dataLabel, TString mcLabel, TString xLabel, TString yLabelUnit, 
 		    bool logy=false, bool usePU=true, bool smear=false, bool scale=false){
-  
+  //Not this one: See PlotDataMCs
   TString yLabel; 
   
   TCanvas *c = new TCanvas("c","");
@@ -571,11 +615,11 @@ TCanvas *PlotDataMCMC(TChain *data, TChain *mc, TChain *mc2,
 TCanvas *PlotDataMCs(TChain *data, std::vector<TChain *> mc_vec, TString branchname, TString binning, 
 		     TString category,  TString selection, 
 		     TString dataLabel, std::vector<TString> mcLabel_vec, TString xLabel, TString yLabelUnit, 
-		     bool logy=false, bool usePU=true, bool ratio=true,bool smear=false, bool scale=false, bool useR9Weight=false, TString pdfIndex=""){
+		     bool logy=false, bool usePU=true, bool ratio=true,bool smear=false, bool scale=false, bool single_ele=false,int ele_index=0,TString name_root="name_root", bool useR9Weight=false, TString pdfIndex=""){
+  //Plot Data MC => the version I'm currently using
   TStopwatch watch;
   watch.Start();
-  //gStyle->SetOptStat(11);//Giuseppe
-
+  std::cout<<"Inside PlotDataMCs of macro/PlotDataMC.C"<<std::endl;
   int nHist= mc_vec.size();
   int colors[4]={kRed,kGreen,kBlue,kCyan};
   int fillstyle[4]={0,0,0,0}; //3003,3004,3005,3006};
@@ -624,16 +668,28 @@ TCanvas *PlotDataMCs(TChain *data, std::vector<TChain *> mc_vec, TString branchn
   if(branchNameData.Contains("energySCEle_regrCorrSemiParV5_pho")) cutter.energyBranchName="energySCEle_regrCorrSemiParV5_pho";
   else if(branchNameData.Contains("energySCEle_regrCorrSemiParV5_ele")) cutter.energyBranchName="energySCEle_regrCorrSemiParV5_ele";
 
-  TCut selection_data="";
-  if(category.Sizeof()>1) selection_data = cutter.GetCut(category, false,0,scale);
-  selection_data+=selection;
+  TCut selection_data=""; 
   TCut selection_MC="";
-  if(category.Sizeof()>1) selection_MC = cutter.GetCut(category, false,0);
-  selection_MC+=selection;
+
+  if(single_ele==false){
+    if(category.Sizeof()>1) selection_data = cutter.GetCut(category, false,0,scale);
+    selection_data+=selection;
+    if(category.Sizeof()>1) selection_MC = cutter.GetCut(category, false,0);
+    selection_MC+=selection;
+  }else{
+    //single electron case:
+    if(category.Sizeof()>1) selection_data = cutter.GetCut(category, false,ele_index,scale);
+    selection_data+=selection;
+
+    if(category.Sizeof()>1) selection_MC = cutter.GetCut(category, false,ele_index);
+    selection_MC+=selection;
+  }
+
 
   if(smear){
     branchNameMC.ReplaceAll("invMass_SC_regrCorr_pho ","(invMass_SC_regrCorr_pho*sqrt(smearEle[0]*smearEle[1]))");
     branchNameMC.ReplaceAll("invMass_SC_regrCorrSemiParV5_pho","(invMass_SC_regrCorrSemiParV5_pho*sqrt(smearEle[0]*smearEle[1]))");
+    branchNameMC.ReplaceAll("invMass_SC_regrCorrSemiParV5_ele","(invMass_SC_regrCorrSemiParV5_ele*sqrt(smearEle[0]*smearEle[1]))");
     branchNameMC.ReplaceAll("energySCEle_regrCorr_pho ","(energySCEle_regrCorr_pho*smearEle) ");
     branchNameMC.ReplaceAll("energySCEle_regrCorr_pho[0]","(energySCEle_regrCorr_pho[0]*smearEle[0])");
     branchNameMC.ReplaceAll("energySCEle_regrCorr_pho[1]","(energySCEle_regrCorr_pho[1]*smearEle[1])");
@@ -646,6 +702,7 @@ TCanvas *PlotDataMCs(TChain *data, std::vector<TChain *> mc_vec, TString branchn
     std::cout << "Apply scale" << std::endl;
     branchNameData.ReplaceAll("invMass_SC_regrCorr_pho ","(invMass_SC_regrCorr_pho*sqrt(scaleEle[0]*scaleEle[1]))");
     branchNameData.ReplaceAll("invMass_SC_regrCorrSemiParV5_pho","(invMass_SC_regrCorrSemiParV5_pho*sqrt(scaleEle[0]*scaleEle[1]))");
+    branchNameData.ReplaceAll("invMass_SC_regrCorrSemiParV5_ele","(invMass_SC_regrCorrSemiParV5_ele*sqrt(scaleEle[0]*scaleEle[1]))");
     branchNameData.ReplaceAll("energySCEle_regrCorrSemiParV5_pho ","(energySCEle_regrCorrSemiParV5_pho*scaleEle)");
     branchNameData.ReplaceAll("energySCEle_regrCorrSemiParV5_pho[0]","(energySCEle_regrCorrSemiParV5_pho[0]*scaleEle[0])");
     branchNameData.ReplaceAll("energySCEle_regrCorrSemiParV5_pho[1]","(energySCEle_regrCorrSemiParV5_pho[1]*scaleEle[1])");
@@ -659,29 +716,23 @@ TCanvas *PlotDataMCs(TChain *data, std::vector<TChain *> mc_vec, TString branchn
 
   
   // Draw histograms
+    cout<<"Filling Data histos"<<endl;
+    cout<<branchNameData<<" "<<selection_data<<endl;
     data->Draw(branchNameData+">>data_hist"+binning, selection_data);
     if(nHist > 0){
+      cout<<"Filling MC histograms "<<endl;
       for(std::vector<TChain *>::const_iterator mc_itr = mc_vec.begin();
 	  mc_itr != mc_vec.end();
 	  mc_itr++){
 	TChain *mc = *mc_itr;
-// 	mc->SetBranchStatus("*",0);
-// 	for(std::set<TString>::const_iterator itr = branchList.begin();
-// 	    itr != branchList.end();
-// 	    itr++){
-// 	  //std::cout << "[STATUS] Enabling branch: " << *itr << std::endl;
-// 	  mc->SetBranchStatus(*itr, 1);
-// 	}
-// 	mc->SetBranchStatus("invMass_SC_regrCorrSemiParV4_ele", 1);
-// 	mc->SetBranchStatus("invMass_SC_regrCorrSemiParV5_ele", 1);
-// 	mc->SetBranchStatus("puWeight",1);
-
 	TString mcHistName; mcHistName+=mc_itr-mc_vec.begin(); mcHistName+="_hist";
 	TString weights="mcGenWeight";
 	if(pdfIndex!="") weights+="*(pdfWeights_cteq66["+pdfIndex+"]/pdfWeights_cteq66[0])";
 	if(usePU) weights+="*puWeight";
 	if(useR9Weight) weights+="*r9Weight";
-	mc->Draw(branchNameMC+">>"+mcHistName+binning, selection_MC *weights.Data());
+	//mc->Draw(branchNameMC+">>"+mcHistName+binning, selection_MC *weights.Data());
+	cout<<branchNameMC+">>"+mcHistName+binning<<" "<<selection_MC<<endl;
+	mc->Draw(branchNameMC+">>"+mcHistName+binning, selection_MC);
 
       }
     }
@@ -692,8 +743,7 @@ TCanvas *PlotDataMCs(TChain *data, std::vector<TChain *> mc_vec, TString branchn
   leg->SetBorderSize(1);
   leg->SetFillColor(0);
   leg->SetTextSize(0.04);
-//   if(dataLabel !="" && mcLabel !="") leg->Draw();
-//   //c->GetListOfPrimitives()->Add(leg,"");
+
 
 
   TH1F *d = (TH1F *) gROOT->FindObject("data_hist");
@@ -706,9 +756,15 @@ TCanvas *PlotDataMCs(TChain *data, std::vector<TChain *> mc_vec, TString branchn
     d=(TH1F *) gROOT->FindObject("0_hist");
     d->SetMarkerSize(0);
   }
-  //d->SaveAs("tmp/d_hist.root");
-  //s->SaveAs("tmp/s_hist.root");
 
+
+  stringstream ss;
+  ss << ele_index;
+  string index = ss.str();
+  cout<<index<<endl;
+
+  d->SaveAs("tmp/Sanity_Plots/d_hist_"+name_root+"_"+index+".root");
+ 
   yLabel.Form("Events /(%.2f %s)", d->GetBinWidth(2), yLabelUnit.Data());
   
   float max = 0; //1.1 * std::max(
@@ -727,15 +783,18 @@ TCanvas *PlotDataMCs(TChain *data, std::vector<TChain *> mc_vec, TString branchn
       d->GetYaxis()->SetRangeUser(0,max);
   }
 
-  for(int i=0; i < nHist; i++){
-    TString mcHistName; mcHistName+=i; mcHistName+="_hist";
+  for(int i=0; i < nHist; i++){//Loop over MCs
+    TString mcHistName; mcHistName+=i; mcHistName+="_hist";//0_hist;1_hist;2_hist 
     TH1F *s = (TH1F *) gROOT->FindObject(mcHistName);
-    if(s==NULL) continue;
+    if(s==NULL) {cout<<"s is null"<<endl; continue;}
     std::cout << "nEvents signal: " << s->Integral() << "\t" << s->GetEntries() << std::endl;
     if(d->Integral()==0 && s->Integral()==0){
       delete c;
       return NULL;
     }
+
+    s->SaveAs("tmp/Sanity_Plots/s_hist"+mcLabel_vec[i]+"_"+name_root+"_"+index+".root");//You can hadd a string (index) to a TString (mcLabel) and this is a TString
+
     if(logy){
       s->GetYaxis()->SetRangeUser(0.1,max);
     } else {
@@ -773,12 +832,14 @@ TCanvas *PlotDataMCs(TChain *data, std::vector<TChain *> mc_vec, TString branchn
 //       else sRatio->Draw("same");
 //     }
 //     pad1->cd();
-  }
 
+  }
   //TH1F* d_norm = s_norm;
   //if(d!=s) d_norm = (TH1F *) (d->DrawNormalized("p same", d->Integral()));
+
   if(nHist>0) d->Draw("p same");
   else d->Draw("p");
+  
 
 //   std::cout << "Variable  & Data & Simulation \\" << std::endl;
 //   std::cout << "Mean      & " << d->GetMean() << " " << d->GetMeanError() 

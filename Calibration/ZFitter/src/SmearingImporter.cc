@@ -56,6 +56,8 @@ SmearingImporter::regions_cache_t SmearingImporter::GetCacheToy(Long64_t nEvents
 }
 
 void SmearingImporter::ImportToy(Long64_t nEvents, event_cache_t& eventCache, bool isMC){
+
+  std::cout<<"You are calling ImportToy. I didn't test it with the general targetVariable. Be Careful"<<std::endl;
   TRandom3 gen(12345);
   if(isMC) nEvents*=2;
   //std::cout << "[DEBUG] constTermToy = " << _constTermToy << std::endl;
@@ -64,8 +66,10 @@ void SmearingImporter::ImportToy(Long64_t nEvents, event_cache_t& eventCache, bo
     event.weight=1;
     event.energy_ele1=45;
     event.energy_ele2=45;
-    event.invMass = gen.BreitWigner(91.188,2.48);
-    if(isMC==false) event.invMass*= sqrt(gen.Gaus(_scaleToy, _constTermToy) * gen.Gaus(_scaleToy, _constTermToy));//gen.Gaus(_scaleToy, _constTermToy); //
+    //event.invMass = gen.BreitWigner(91.188,2.48);
+    event.targetVariable = gen.BreitWigner(91.188,2.48);
+    //if(isMC==false) event.invMass*= sqrt(gen.Gaus(_scaleToy, _constTermToy) * gen.Gaus(_scaleToy, _constTermToy));//gen.Gaus(_scaleToy, _constTermToy); //
+    if(isMC==false) event.targetVariable*= sqrt(gen.Gaus(_scaleToy, _constTermToy) * gen.Gaus(_scaleToy, _constTermToy));//gen.Gaus(_scaleToy, _constTermToy); //
     eventCache.push_back(event);
   }
   return;
@@ -74,7 +78,7 @@ void SmearingImporter::ImportToy(Long64_t nEvents, event_cache_t& eventCache, bo
 
 
 void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddString, bool isMC, Long64_t nEvents, bool isToy, bool externToy){
-
+  std::cout<<"[STATUS] Importing the events in SmearingImporter::Import"<<std::endl;
   TRandom3 gen(0);
   if(!isMC) gen.SetSeed(12345);
   TRandom3 excludeGen(12345);
@@ -228,6 +232,8 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
   }
   }
 
+  TRandom3 rand(0);//Use a seed generated using machine clock (different every second)
+  double rn;
   for(Long64_t jentry=0; jentry < entries; jentry++){
     Long64_t entryNumber= chain->GetEntryNumber(jentry);
     chain->GetEntry(entryNumber);
@@ -283,14 +289,7 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
     if(evIndex<0) continue; // event in no category
 
     ZeeEvent event;
-    //       if(jentry<30){
-    // 	//chain->Show(chain->GetEntryNumber(jentry));
-    // 	std::cout << "[INFO] corrEle[0] = " << corrEle_[0] << std::endl;
-    // 	std::cout << "[INFO] corrEle[1] = " << corrEle_[1] << std::endl;
-    // 	std::cout << "[INFO] smearEle[0] = " << smearEle_[0] << std::endl;
-    // 	std::cout << "[INFO] smearEle[1] = " << smearEle_[1] << std::endl;
-    // 	std::cout << "[INFO] Category = " << evIndex << std::endl;
-    //       }
+
     
     float t1=TMath::Exp(-etaEle[0]);
     float t2=TMath::Exp(-etaEle[1]);
@@ -310,10 +309,48 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
       event.energy_ele1 = energyEle[0] * corrEle_[0] * smearEle_[0];
       event.energy_ele2 = energyEle[1] * corrEle_[1] * smearEle_[1];
     }
-    //event.angle_eta_ele1_ele2=  (1-((1-t1q)*(1-t2q)+4*t1*t2*cos(phiEle[0]-phiEle[1]))/((1+t1q)*(1+t2q)));
-    event.invMass= sqrt(2 * event.energy_ele1 * event.energy_ele2 *
-			(1-((1-t1q)*(1-t2q)+4*t1*t2*cos(phiEle[0]-phiEle[1]))/((1+t1q)*(1+t2q)))
-			);
+
+    event.targetVariable=-999;
+    if(GetTargetVariable()=="invMass"){
+      // to calculate the invMass: invMass = sqrt(2 * energy_ele1 * energy_ele2 * angle_eta_ele1_ele2)
+      //if(event.invMass < 70 || event.invMass > 110) continue;
+      //event.angle_eta_ele1_ele2=  (1-((1-t1q)*(1-t2q)+4*t1*t2*cos(phiEle[0]-phiEle[1]))/((1+t1q)*(1+t2q)));
+      event.targetVariable= sqrt(2 * event.energy_ele1 * event.energy_ele2 *
+				  (1-((1-t1q)*(1-t2q)+4*t1*t2*cos(phiEle[0]-phiEle[1]))/((1+t1q)*(1+t2q)))
+				  );
+    }else if(GetTargetVariable()=="ptRatio"){
+      //Decide which is 1 and which is 2, in this case
+      //Option 1: 1 is the leading and 2 is the subleading
+      double pt1=event.energy_ele1/cosh(etaEle[0]);
+      double pt2=event.energy_ele2/cosh(etaEle[1]);
+
+      if(GetConfiguration()=="leading"){
+	if(pt1 > pt2){
+	  event.targetVariable=(pt1/pt2);
+	  event.isSwapped=false;
+	}else{
+	  event.targetVariable=(pt2/pt1);
+	  event.isSwapped=true;
+	}
+      }else if(GetConfiguration()=="random"){
+	rn=rand.Uniform(0,1);
+	if(rn<0.5){
+	  event.targetVariable=(pt1/pt2);
+	  event.isSwapped=false;
+	}else{
+	  event.targetVariable=(pt2/pt1);
+	  event.isSwapped=true;
+	}
+      }
+
+    }else if(GetTargetVariable()=="ptSum"){
+      double pt1=event.energy_ele1/cosh(etaEle[0]);
+      double pt2=event.energy_ele2/cosh(etaEle[1]);
+      event.targetVariable=(pt1 + pt2);
+      event.pt1=pt1;//Needed for RooSmearer::SetSmearedHisto
+      event.pt2=pt2;
+    }
+
     if(_isSmearingEt){
       if(_swap){
 	event.energy_ele2/=cosh(etaEle[0]);
@@ -323,8 +360,6 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 	event.energy_ele2/=cosh(etaEle[1]);
       }	
     }
-    // to calculate the invMass: invMass = sqrt(2 * energy_ele1 * energy_ele2 * angle_eta_ele1_ele2)
-    //if(event.invMass < 70 || event.invMass > 110) continue;
 
     event.weight = 1.;
     if(_usePUweight) event.weight *= weight;
@@ -339,14 +374,13 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 
       
 #ifdef DEBUG      
-      if(jentry<10 || event.weight!=event.weight || event.weight>1.3){
-	std::cout << "jentry = " << jentry 
-		  << "\tevent.weight = " << event.weight 
-	  //<< "\t" << (*pdfWeights)[_pdfWeightIndex]/(*pdfWeights)[0] << "\t" << (*pdfWeights)[_pdfWeightIndex] << "\t" << (*pdfWeights)[0] 
-		  << "\t" << r9weight[0] << " " << r9weight[1] 
-		  << "\t" << ptweight[0] << " " << ptweight[1]
-		  << "\t" << WEAKweight << "\t" << FSRweight
-		  << std::endl;
+      //if(jentry<10 || event.weight!=event.weight || event.weight>1.3){
+      //	std::cout << "jentry = " << jentry 
+      //		  << "\tevent.weight = " << event.weight 
+      //		  << "\t" << r9weight[0] << " " << r9weight[1] 
+      //		  << "\t" << ptweight[0] << " " << ptweight[1]
+      //		  << "\t" << WEAKweight << "\t" << FSRweight
+      //		  << std::endl;
       }
 #endif
 
@@ -415,7 +449,7 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 }
 
 SmearingImporter::regions_cache_t SmearingImporter::GetCache(TChain *_chain, bool isMC, bool odd, Long64_t nEvents, bool isToy, bool externToy){
-
+  std::cout<<"[STATUS] Preparing the cache and activating branches in SmearingImporter::GetCache"<<std::endl;
   TString eleID_="eleID_"+_eleID;
 
   TString oddString;

@@ -31,7 +31,8 @@ RooSmearer::RooSmearer(const char *name,  ///< name of the variable
   importer(regionList, energyBranchName),
   _params_vec(params),
   _paramSet("paramSet","Set of parameters",this),
-  invMass_min_(80), invMass_max_(100), invMass_bin_(0.25),
+  targetVariable_min_(-999), targetVariable_max_(+999), targetVariable_bin_(2000),//default values for ranges
+  targetVariable_("invMass"),//default target Variable is invMass
   deltaNLLMaxSmearToy(330),
   _deactive_minEventsDiag(1000), _deactive_minEventsOffDiag(1500), _nSmearToy(20), 
   nllBase(0),
@@ -52,35 +53,7 @@ RooSmearer::RooSmearer(const char *name,  ///< name of the variable
     }
   }
 
-//   //std::cout << "[INFO] Creating truthArgs" << std::endl;
-//     truthSet=(RooArgSet *)parset.snapshot();
-//     RooArgList 	 argList_(parset), truthArgList_(*truthSet);
-//     TIterator 	*it_ = argList_.createIterator();
-//     TIterator 	*itTruth = truthArgList_.createIterator();
-//     RooRealVar *truthvar=(RooRealVar*)itTruth->Next();
-//     for(RooRealVar *var = (RooRealVar*)it_->Next(); 
-// 	var != NULL; 
-// 	var = (RooRealVar*)it_->Next(), truthvar = (RooRealVar*)itTruth->Next()){
-//       RooPullVar *pullVar = new RooPullVar(TString(var->GetName())+"_pull","", *var, *truthvar);
-//       pullArgs.add(*pullVar);
-//     }
-  
-  
-//   for(std::vector<RooArgSet>::const_iterator par_itr = params.begin();
-//       par_itr != params.end();
-//       par_itr++){
-//     TIterator *it = par_itr->createIterator();
-//     for(RooRealVar *v = (RooRealVar*)it->Next(); v!=NULL; v = (RooRealVar*)it->Next()){
-//       if(! v->isConstant() && v->isLValue()) _paramSet.add((*v));
-//     }
-//     //_paramSet.add((*par_itr));
-//     _params.add((*par_itr));
-//   }
-  //    std::cout << "###############################" << std::endl;
-  //    _params.Print();
 
-  nBins_= (int) ((invMass_max_ - invMass_min_)/invMass_bin_);
-  
   rgen_=new TRandom3(0); // inizializzo il generatore con seed impostato sull'ora
   myClock=new TStopwatch();
   
@@ -90,8 +63,9 @@ RooSmearer::RooSmearer(const char *name,  ///< name of the variable
 
 
 void RooSmearer::SetCache(Long64_t nEvents, bool cacheToy, bool externToy){
+  //regions_cache_t GetCache(TChain *_chain, bool isMC, bool odd, Long64_t nEvents=0, bool isToy=false, bool externToy=true, TString targetVariable="invMass");
   std::cout << "------------------------------------------------------------" << std::endl;
-  std::cout << "[STATUS] Importing cache events" << std::endl;
+  std::cout << "[STATUS] Importing cache events in RooSmearer::SetCache" << std::endl;
 
   if(data_events_cache.empty()){
     if(cacheToy){
@@ -126,7 +100,7 @@ void RooSmearer::SetCache(Long64_t nEvents, bool cacheToy, bool externToy){
 }
 
 void RooSmearer::InitCategories(bool mcToy){
-
+  //std::cout<<"[STATUS] In RooSmearer::InitCategories "<<std::endl;
   int index=0;
   ZeeCategories.reserve((int)(importer._regionList.size()*(importer._regionList.size()+1)/2 +1));
   for(std::vector<TString>::const_iterator region_ele1_itr = importer._regionList.begin();
@@ -135,18 +109,11 @@ void RooSmearer::InitCategories(bool mcToy){
     for(std::vector<TString>::const_iterator region_ele2_itr = region_ele1_itr; //importer._regionList.begin();
 	region_ele2_itr != importer._regionList.end();
 	region_ele2_itr++){
-#ifdef DEBUG
-      std::cout << "==============================" << std::endl;
-#endif
+
       ZeeCategory cat;
       cat.categoryIndex1 = region_ele1_itr - importer._regionList.begin();
       cat.categoryIndex2 = region_ele2_itr - importer._regionList.begin();
 
-//       if(!mcToy) cat.data_events = &(data_events_cache[index]);
-//       else {
-// 	std::cout << "[INFO] Initializing data_events with mc" << std::endl;
-// 	cat.data_events = &(mc_events_cache[index]);
-//       }
       cat.data_events = &(data_events_cache[index]);
       cat.mc_events = &(mc_events_cache[index]);
       
@@ -163,40 +130,29 @@ void RooSmearer::InitCategories(bool mcToy){
       cat.alpha2=0;
       cat.constant2=0;
 
-//       RooArgList argList1(cat.pars1);
-//       TIterator *it = argList1.createIterator();
-//       for(RooRealVar *v = (RooRealVar *) it->Next(); v!=NULL; v = (RooRealVar*) it->Next())
-// 	cat.pars1_old.add( *((RooRealVar*) v->Clone(TString(v->GetName())+"_old")));
-//       RooArgList argList2(cat.pars2);
-//       it = argList2.createIterator();
-//       for(RooRealVar *v = (RooRealVar *) it->Next(); v!=NULL; v = (RooRealVar*) it->Next())
-// 	cat.pars2_old.add( *((RooRealVar*) v->Clone(TString(v->GetName())+"_old")));
-      
-
       cat.nBins=nBins_;
-      cat.invMass_min=invMass_min_;
-      cat.invMass_max=invMass_max_;
+      cat.targetVariable_min=targetVariable_min_;
+      cat.targetVariable_max=targetVariable_max_;
       
 #ifdef DEBUG
       std::cout << "[DEBUG] Cat ele1: " << cat.categoryName1 << "\t" << cat.categoryIndex1 << std::endl;
       cat.pars1.Print();
       std::cout << "[DEBUG] Cat ele2: " << cat.categoryName2 << "\t" << cat.categoryIndex2 << std::endl;
       cat.pars2.Print();
-
-      //cat.data_events->size();
 #endif
 
       // allocating the histograms
       TString histoName;
       histoName= cat.categoryName1+cat.categoryName2+"_";
+      histoName.ReplaceAll("-","_");
 
-      cat.hist_mc=new TH1F(histoName+"MC", histoName+"MC", cat.nBins, cat.invMass_min, cat.invMass_max);
+      cat.hist_mc=new TH1F(histoName+"MC", histoName+"MC", cat.nBins, cat.targetVariable_min, cat.targetVariable_max);
       cat.hist_mc->Sumw2();
-      cat.smearHist_mc=new TH1F(histoName+"smearMC", histoName+"smearMC", cat.nBins, cat.invMass_min, cat.invMass_max);
+      cat.smearHist_mc=new TH1F(histoName+"smearMC", histoName+"smearMC", cat.nBins, cat.targetVariable_min, cat.targetVariable_max);
       cat.smearHist_mc->Sumw2();
-      cat.hist_data=new TH1F(histoName+"data", histoName+"data", cat.nBins, cat.invMass_min, cat.invMass_max);
+      cat.hist_data=new TH1F(histoName+"data", histoName+"data", cat.nBins, cat.targetVariable_min, cat.targetVariable_max);
       cat.hist_data->Sumw2();
-      cat.smearHist_data=new TH1F(histoName+"smeardata", histoName+"smeardata", cat.nBins, cat.invMass_min, cat.invMass_max);
+      cat.smearHist_data=new TH1F(histoName+"smeardata", histoName+"smeardata", cat.nBins, cat.targetVariable_min, cat.targetVariable_max);
       cat.smearHist_data->Sumw2();
       SetHisto(*(cat.mc_events), cat.hist_mc);
       SetHisto(*(cat.data_events), cat.hist_data);
@@ -212,20 +168,23 @@ void RooSmearer::InitCategories(bool mcToy){
 		  << " has been deactivated (nEvents < "; 
 	if(cat.categoryIndex1 != cat.categoryIndex2) std::cout << _deactive_minEventsOffDiag << ")";
 	else std::cout << _deactive_minEventsDiag << ")";
-	std::cout << " nEvents mc invMass: " << cat.hist_mc->Integral()
+	std::cout << " nEvents mc targetVariable: " << cat.hist_mc->Integral()
 		  << std::endl;
 	cat.active=false;
       }     
       float max=cat.hist_mc->GetMaximum();
       float left=cat.hist_mc->GetBinContent(1);
       float right=cat.hist_mc->GetBinContent(cat.hist_mc->GetNbinsX());
+      //if(targetVariable_=="invMass"){
+      //deactivate for high shoulder only if targetVaribale is the invariant mass
       if((right - left)/max > 0.2 || (left - right)/max > 0.4){
 	cat.active=false;
 	std::cout << "[INFO] Category: " << ZeeCategories.size() 
 		  << ": " << cat.categoryName1 << "\t" << cat.categoryName2
-		  << " has been deactivated for high sholder: " << right << " " << left << " " << max 
+		  << " has been deactivated for high shoulder: " << right << " " << left << " " << max 
 		  << std::endl;
       }
+      //}
       //------------------------------ 
       if (_autoBin){
 	//SetAutoBin(cat,cat.invMass_min-20,cat.invMass_max+20); 
@@ -266,11 +225,7 @@ void RooSmearer::InitCategories(bool mcToy){
 TH1F *RooSmearer::GetSmearedHisto(ZeeCategory& category, bool isMC,
 				  bool smearEnergy, bool forceNew, bool multiSmearToy){
 
-// #ifdef MEM_DEBUG
-//   ProcInfo_t info;
-//   gSystem->GetProcInfo(&info);
-//   std::cout << "GET MEM INFO AT GetSmearedHisto START " << info.fMemResident << std::endl;
-// #endif
+  //std::cout<<"[STATUS] Calling RooSmearer::GetSmearedHisto"<<std::endl;
 
   TH1F **h = NULL;
   if(isMC) h = (smearEnergy) ? &category.smearHist_mc : &category.hist_mc;
@@ -281,10 +236,8 @@ TH1F *RooSmearer::GetSmearedHisto(ZeeCategory& category, bool isMC,
     std::cerr << "[ERROR] histogram pointer is NULL!!!" << std::endl;
     exit(1);
   }
-  //std::cerr << "[DEBUG] isMC: " << isMC << "\tsmearEnergy: " << smearEnergy << std::endl;
 #endif
 
-  // to be put as single if
   if(smearEnergy==false && (*h)->GetEntries() != 0) return *h;
   if(smearEnergy==true && isMC==false && (*h)->GetEntries() != 0) return *h;
 
@@ -293,12 +246,8 @@ TH1F *RooSmearer::GetSmearedHisto(ZeeCategory& category, bool isMC,
 
   if(smearEnergy){
     
-    //bool changed=isCategoryChanged(category);
-    
-    //if(changed || forceNew){ //else use the old smeared histo!
     (*h)->Reset();
     if(isMC && multiSmearToy){
-      //std::cout << "[DEBUG] Smearing MC: " << category.categoryName1 << " " << category.categoryName2 << std::endl;
       SetSmearedHisto(*cache,
 		      category.pars1, category.pars2, 
 		      category.categoryName1, category.categoryName2, category.nSmearToy,
@@ -310,26 +259,18 @@ TH1F *RooSmearer::GetSmearedHisto(ZeeCategory& category, bool isMC,
 		      *h);
     }
     if(isMC) (*h)->Scale(1./(*h)->Integral());
-    //} //else  std::cout << "Not changed: " << category.categoryName1 << "\t" << category.categoryName2 << std::endl;
-      
-    (*h)->Smooth();
+    //(*h)->Smooth();//What does this do?
   } else{
     (*h)->Reset(); // unuseful: histogram should be empty
     SetHisto(*cache, *h);
   }
 
-//   if(isMC==false){
-//     delete cache;
-//   }
-// #ifdef MEM_DEBUG
-//   gSystem->GetProcInfo(&info);
-//   std::cout << "GET MEM INFO AT GetSmearedHisto END " << info.fMemResident << std::endl;
-// #endif
-
   return *h;
 }
 
 void RooSmearer::SetHisto(const zee_events_t& cache, TH1F *hist) const{
+
+  //std::cout<<"[STATUS] Calling RooSmearer::SetHisto"<<std::endl;
 #ifdef DEBUG
   hist->Print();
 #endif
@@ -337,7 +278,7 @@ void RooSmearer::SetHisto(const zee_events_t& cache, TH1F *hist) const{
   for(zee_events_t::const_iterator event_itr = cache.begin(); 
       event_itr!= cache.end();
       event_itr++){
-    hist->Fill( event_itr->invMass, 
+    hist->Fill( event_itr->targetVariable, 
 		//sqrt(2 * event_itr->energy_ele1 * event_itr->energy_ele2 * event_itr->angle_eta_ele1_ele2),
 		event_itr->weight);
   }
@@ -352,9 +293,8 @@ void RooSmearer::SetSmearedHisto(const zee_events_t& cache,
 				 RooArgSet pars1, RooArgSet pars2, 
 				 TString categoryName1, TString categoryName2, unsigned int nSmearToy,
 				 TH1F *hist) const{
-#ifdef CPU_DEBUG
-  //  myClock->Stop(); myClock->Start();
-#endif
+
+  //std::cout<<"Inside RooSmearer::SetSmearedHisto"<<std::endl;
 
   // retrieve values from params for the category
   float scale1 = pars1.getRealValue("scale_"+categoryName1, 0., kTRUE);
@@ -369,15 +309,9 @@ void RooSmearer::SetSmearedHisto(const zee_events_t& cache,
   pars1.writeToStream(std::cout, kFALSE);
   std::cout << "--" << std::endl;
   pars2.writeToStream(std::cout, kFALSE);
-  //std::cout << "---" << std::endl;
-  //_paramSet.writeToStream(std::cout, kFALSE);
 #endif
-//   if(nSmearToy>NSMEARTOYLIM){
-//     std::cerr << "[ERROR] nSmearToy = " << nSmearToy << std::endl;
-//     exit(1);
-//   }
 
-  //double smearEne1[NSMEARTOYLIM], smearEne2[NSMEARTOYLIM]; // _nSmearToy<100
+  //std::cout<<"Target Variable attribute in RooSmearer is "<<targetVariable_<<std::endl;
   double smearEne1[1000], smearEne2[1000]; // _nSmearToy<100
   if(cache.begin()->smearings_ele1==NULL){
     std::cerr<< "[ERROR] No smearings" << std::endl;
@@ -387,34 +321,32 @@ void RooSmearer::SetSmearedHisto(const zee_events_t& cache,
 	  event_itr!= cache.end();
 	  event_itr++){
 
-    //#ifdef FIXEDSMEARINGS
     smearedEnergy(smearEne1, nSmearToy, event_itr->energy_ele1, scale1, alpha1, constant1, event_itr->smearings_ele1);
     smearedEnergy(smearEne2, nSmearToy, event_itr->energy_ele2, scale2, alpha2, constant2, event_itr->smearings_ele2);
-    //#else
-    //	// random gen time is consuming!!! test different _nSmearToy to verify
-    //    smearedEnergy(smearEne1, nSmearToy, event_itr->energy_ele1, scale1, alpha1, constant1,NULL);
-    //    smearedEnergy(smearEne2, nSmearToy, event_itr->energy_ele2, scale2, alpha2, constant2,NULL);
-    //#endif
-//     if(event_itr==cache.begin()){
-//       std::cout << "fixedSmearings: " << event_itr->smearings_ele1[0] << "\t"  << scale1 << "\t" << alpha1 << "\t" << event_itr->energy_ele1 << "\t" << constant1 << "\t" << smearEne1[0] << std::endl;
-//     }
+
     for(unsigned int iSmearToy=0; iSmearToy < nSmearToy; iSmearToy++){
-      hist->Fill(event_itr->invMass * sqrt(smearEne1[iSmearToy] * smearEne2[iSmearToy]),
-		 event_itr->weight);
+
+      if(targetVariable_=="invMass"){
+	hist->Fill(event_itr->targetVariable * sqrt(smearEne1[iSmearToy] * smearEne2[iSmearToy]),
+		   event_itr->weight);
+      }else if(targetVariable_=="ptRatio"){
+	//std::cout<<"\"smear 1\" "<<smearEne1[iSmearToy]<<std::endl;
+	//std::cout<<"\"smear 2\" "<<smearEne2[iSmearToy]<<std::endl;
+	if(!(event_itr->isSwapped)){
+	hist->Fill(event_itr->targetVariable * (smearEne1[iSmearToy]/smearEne2[iSmearToy]), event_itr->weight);
+	}else{
+	hist->Fill(event_itr->targetVariable * (smearEne2[iSmearToy]/smearEne1[iSmearToy]), event_itr->weight);
+	}
+      }else if(targetVariable_=="ptSum"){
+	hist->Fill((smearEne1[iSmearToy]*event_itr->pt1 + smearEne2[iSmearToy]*event_itr->pt2), event_itr->weight);
+      }
+
     }
+
   }
+
   hist->Scale(1./nSmearToy);
-//   if(hist->GetEntries()<hist->Integral()){
-//     hist->Print();
-//     std::cout << hist->GetName() << "\t" << hist->GetEntries() << "\t" << hist->Integral() << "\t" << cache.size() << std::endl;
-//   }
 
-  //  hist->Scale(1./hist->Integral()); // now saved as pdf
-
-#ifdef CPU_DEBUG
-  //  myClock->Stop();
-  //  std::cout << "nSmearToy: " << nSmearToy;      myClock->Print();
-#endif
   return;
 }
 
@@ -469,16 +401,6 @@ double RooSmearer::getLogLikelihood(TH1F* data, TH1F* prob) const
       std::cout << "ERROR: data and probabilities are binned differently" << std::endl;
       return -9999999.;
     }
-  
-#ifdef FUNC_DEBUG
-  //  std::cout << "Probability integral " << prob->Integral() << std::endl;
-#endif
-  
-  //   if (fabs(prob->Integral() -1 ) > 1e-4 )    
-  //     {
-  //       std::cout << "ERROR: probabilities are not properly normalized" << std::endl;
-  //       return -9999999.;
-  //     }
 
   double logL=0.;
   //Not using underflows and overflows at the moment
@@ -526,27 +448,13 @@ double RooSmearer::getLogLikelihood(TH1F* data, TH1F* prob) const
 
 double RooSmearer::getCompatibility(bool forceUpdate) const
 {
+
+  //std::cout<<"[STATUS] In RooSmearer::getCompatibility, i.e. computing the likelihood function"<<std::endl;
   RooSmearer* myClass=(RooSmearer *) this;
-  // myClock->Start();
 
   std::vector<TH1F *> mcHistos, dataHistos;
 
   double compatibility = 0.;
-  //------------------------------ fill the histograms 
-//   for(std::vector<ZeeCategory>::iterator cat_itr = myClass->ZeeCategories.begin();
-//       cat_itr != myClass->ZeeCategories.end();
-//       cat_itr++){
-//     if(!cat_itr->active) continue;
-//     if(isCategoryChanged(*cat_itr,false)){
-//      myClass->UpdateCategoryNLL(*cat_itr, cat_itr->nLLtoy,false); //the new nll has been updated for the category
-//     }
-//     compatibility+=cat_itr->nll;
-//     myClass->lastNLLrms+= (cat_itr->nllRMS*cat_itr->nllRMS);
-//   }
-
-  //bool withSmearToy=(compatibility - nllMin < deltaNLLMaxSmearToy);
-  //std::cout << "[DEBUG] Compatibility1: " << compatibility << "\t" << compatibility - nllMin << std::endl;
-  //compatibility=0;
   bool updated=false;
   for(std::vector<ZeeCategory>::iterator cat_itr = myClass->ZeeCategories.begin();
       cat_itr != myClass->ZeeCategories.end();
@@ -582,9 +490,6 @@ double RooSmearer::getCompatibility(bool forceUpdate) const
       myClass->nllMin=compatibility;
     }
   }
-
-  //  myClock->Stop();
-  //  myClock->Print();
   return compatibility;
 }
 
@@ -594,49 +499,14 @@ double RooSmearer::getCompatibility(bool forceUpdate) const
 
 Double_t RooSmearer::evaluate() const
 {
-#ifdef CPU_DEBUG
-  myClock->Start();
-#endif
-
-#ifdef MEM_DEBUG
-  ProcInfo_t info;
-  gSystem->GetProcInfo(&info);
-  std::cout << "GET MEM INFO AT  EVALUATE START " << info.fMemResident << std::endl;
-#endif
-
+  //std::cout<<"[INFO] Calling RooSmearer::evaluate()"<<std::endl;
   //update last result
   double comp_mean = getCompatibility();
-
-#ifdef CPU_DEBUG
-  myClock->Stop();
-  std::cout << "Elapsed time for eval: CPU " << myClock->CpuTime() << "; Real " <<  myClock->RealTime() << " s " << std::endl;
-  //  myClock->Start();
-#endif
-
-#ifdef MEM_DEBUG
-  gSystem->GetProcInfo(&info);
-  std::cout << "GET MEM INFO JUST BEFORE END EVALUATE " << info.fMemResident << std::endl;
-#endif
-
-  //#ifdef CPU_DEBUG
-  //  myClock->Print();
-  //#endif
-
-  //_markov.AddFast(*((RooArgSet *)_params.Clone()), comp_mean, 1.);
   RooSmearer* myClass=(RooSmearer *) this;
   double weight=(nllBase*2-comp_mean);
   if(weight<0) weight=1;
   myClass->_markov.AddFast(myClass->_paramSet, comp_mean, weight);
-#ifdef CPU_DEBUG
-  ///  myClock->Stop();
-  //  std::cout << "Elapsed time for add to MarkovChain: CPU " << myClock->CpuTime() << "; Real " <<  myClock->RealTime() << " s " << std::endl;
-#endif
-
-  //_paramSet.writeToStream(std::cout, kFALSE);
-  //  _paramSet.first()->Print();
-  //  std::cout << "    " << comp_mean << std::endl;
   return comp_mean;
-  //    return compatibility;
 }
 
 
@@ -663,33 +533,31 @@ void RooSmearer::SetAutoBin(ZeeCategory& category,double min, double max){
     xq[i] = (double)(i+1)/nq;
   wide->GetQuantiles(nq,yq,xq);
   
-  //  category.invMass_min = yq[1];
-  //  category.invMass_max = yq[95];
 
   // center the mean of the distribution
-  float middle=0.5*(category.invMass_max+category.invMass_min);
+  float middle=0.5*(category.targetVariable_max+category.targetVariable_min);
   
   if(fabs(middle - wide->GetMean()) > 5){
     int shift = (int)(wide->GetMean() - middle);
-    std::cout << "[INFO] Shifting invMass range of " << shift << std::endl;
-    std::cout << "       invMass_min = " << category.invMass_min+shift << std::endl;
-    std::cout << "       invMass_max = " << category.invMass_max+shift << std::endl;
-    category.invMass_min+=shift;
-    category.invMass_max+=shift;
+    std::cout << "[INFO] Shifting targetVariable range of " << shift << std::endl;
+    std::cout << "       targetVariable_min = " << category.targetVariable_min+shift << std::endl;
+    std::cout << "       targetVariable_max = " << category.targetVariable_max+shift << std::endl;
+    category.targetVariable_min+=shift;
+    category.targetVariable_max+=shift;
   }
   ResetBinning(category);
 }
 
 void RooSmearer::ResetBinning(ZeeCategory& category){
-  category.hist_mc->SetBins(category.nBins, category.invMass_min, category.invMass_max);
+  category.hist_mc->SetBins(category.nBins, category.targetVariable_min, category.targetVariable_max);
   category.hist_mc->Reset();
-  category.smearHist_mc->SetBins(category.nBins, category.invMass_min, category.invMass_max);
+  category.smearHist_mc->SetBins(category.nBins, category.targetVariable_min, category.targetVariable_max);
   category.smearHist_mc->Reset();
 
-  category.hist_data->SetBins(category.nBins, category.invMass_min, category.invMass_max);
+  category.hist_data->SetBins(category.nBins, category.targetVariable_min, category.targetVariable_max);
   category.hist_data->Reset();
   if(category.smearHist_data!=NULL){
-    category.smearHist_data->SetBins(category.nBins, category.invMass_min, category.invMass_max);
+    category.smearHist_data->SetBins(category.nBins, category.targetVariable_min, category.targetVariable_max);
     category.smearHist_data->Reset();
   }
   return;
@@ -1017,11 +885,10 @@ void RooSmearer::SetNSmear(unsigned int n_smear, unsigned int nlltoy){
 
 
 void RooSmearer::Init(TString commonCut, TString eleID, Long64_t nEvents, bool mcToy, bool externToy, TString initFile){
+  std::cout<<"[STATUS] In RooSmearer::Init, targetVariable considered is "<<targetVariable_<<std::endl;
   if(mcToy) _isDataSmeared=!externToy; //mcToy;
   if(initFile.Sizeof()>1){
     std::cout << "[INFO] Truth values for toys initialized to " << std::endl;
-    //truthSet->readFromFile(initFile);
-    //truthSet->writeToStream(std::cout, kFALSE);
     std::cout << "------------------------------ Read init toy MC:" << std::endl;
     _paramSet.readFromFile(initFile);
     _paramSet.writeToStream(std::cout, kFALSE);
@@ -1032,7 +899,7 @@ void RooSmearer::Init(TString commonCut, TString eleID, Long64_t nEvents, bool m
   cl.Start();
   evaluate();
   cl.Stop();
-  std::cout << "[INFO] Time for first eval: ";
+  std::cout << "[INFO] In RooSmearer::Init ==> Time for first eval: "<<std::endl;
   cl.Print();
   if(mcToy && false){
     RooArgList argList(_paramSet);
@@ -1050,8 +917,8 @@ void RooSmearer::Init(TString commonCut, TString eleID, Long64_t nEvents, bool m
 }
 
 void RooSmearer::UpdateCategoryNLL(ZeeCategory& cat, unsigned int nLLtoy, bool multiSmearToy){
+  //std::cout<<"[INFO] in RooSmearer::UpdateCategoryNLL is called"<<std::endl;
   TH1F *data = GetSmearedHisto(cat, false, _isDataSmeared,true, false); ///-----> not need to repeate! 1 one smearing! otherwise bin errors are wrongly reduced
-      
   double comp=0., comp2=0.;
   for(unsigned int itoy=0; itoy < nLLtoy; itoy++){
     TH1F *mc = GetSmearedHisto(cat, true, true,true,true); // regenerate the histogram: forceNew
@@ -1062,8 +929,7 @@ void RooSmearer::UpdateCategoryNLL(ZeeCategory& cat, unsigned int nLLtoy, bool m
   }
   comp/=nLLtoy;
   comp2/=nLLtoy;
-//   std::cout << std::fixed << setprecision(10) << cat.categoryName1 << "  " << cat.categoryName2 
-// 	    << "\t nll - comp = " << cat.nll +comp << std::endl;
+
   cat.nll= -comp;
   cat.nllRMS= sqrt(comp2-comp*comp);
   return;

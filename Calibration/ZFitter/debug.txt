@@ -1,0 +1,172 @@
+22Jan2012-runDepMCAll_checkMee.dat
+scaleStep0
+ptRatio
+
+Processing tmp/haddFiles.C...
+[STATUS] Making Likelihood plots
+
+Processing tmp/fitProfiles_ptRatio_leading.C...
+EB_invMass_100_2000_ZPt_0_10_Et_25_trigger_noPF constTerm	50
+Getting g1 mean graph
+[INFO] n = 1350
+Fitting iteratively for minumum and error estimation
+[FIT STATUS]: Preliminary fit to pol2
+ FCN=14064.2 FROM MIGRAD    STATUS=CONVERGED      55 CALLS          56 TOTAL
+                     EDM=1.86913e-13    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  p0          -1.04194e+01   1.54594e-01   7.87899e-03  -1.52083e-06
+   2  p1           2.28685e+05   9.73812e+01   1.94546e+00  -1.79121e-08
+   3  p2           1.99323e+06   2.94174e+03   5.97494e+01  -5.56890e-10
+[INFO] Init ------------------------------
+        minX: 0.001
+        sigma: 0.000500849
+[FIT STATUS] Iter: 0 : Fit range: [ 0 : 0.045]
+ FCN=5.7016e+06 FROM HESSE     STATUS=FAILED          7 CALLS         141 TOTAL
+                     EDM=1.00741e-10    STRATEGY= 1  ERROR MATRIX UNCERTAINTY 100.0 per cent
+  EXT PARAMETER                APPROXIMATE        STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  p0           1.00000e+02   1.64983e-04   2.11789e-03** at limit **
+   2  p1           0.00000e+00   1.11801e-09   2.01315e-04** at limit **
+   3  p2           2.96777e+08   2.37803e+08   2.78098e-09   0.00000e+00
+   4  p3           8.49141e+06   1.05366e+03  -5.03513e-09   1.58592e+00
+[INFO] Fixing min
+[FIT STATUS] Iter: 1 : Fit range: [ 0 : 0.00121329]
+ FCN=9262.69 FROM MIGRAD    STATUS=CONVERGED     285 CALLS         286 TOTAL
+                     EDM=1.06086e-09    STRATEGY= 1  ERROR MATRIX UNCERTAINTY   0.2 per cent
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  p0           3.24595e+01   1.82601e-01   4.95082e-07   3.85844e-03
+   2  p1           8.32667e-18   2.69023e-08   9.20875e-07** at limit **
+   3  p2           5.00000e+01   7.21676e+01  -0.00000e+00   0.00000e+00
+   4  p3           2.06657e+08   5.29752e+05   9.19885e-07   1.38576e-01
+[WARNING] Incrementing ranges by 20% because less than 10 points in range
+ITER to converge = 2
+SCALING ERROR by 39.291
+Shifting by 32.4595
+RooRealVar::constTerm_EB_invMass_100_2000_ZPt_0_10_Et_25_trigger_noPF = 8.32667e-18 +/- 0.0500246  L(-0.1 - 4.9188e-05) 
+Scale shift = 0.000000 + 0.000049 - 0.100000
+EE_invMass_100_2000_ZPt_0_10_Et_25_trigger_noPF constTerm	50
+Getting g1 mean graph
+[INFO] n = 1350
+Fitting iteratively for minumum and error estimation
+[FIT STATUS]: Preliminary fit to pol2
+ FCN=1329.83 FROM MIGRAD    STATUS=CONVERGED      64 CALLS          65 TOTAL
+                     EDM=8.48049e-18    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  p0          -9.62307e-01   8.02379e-02   1.24631e-03  -5.70117e-08
+   2  p1           5.27458e+04   5.69674e+01   3.37614e-01  -1.01021e-11
+   3  p2           6.79748e+05   1.64152e+03   1.00320e+01   1.01992e-12
+[INFO] Init ------------------------------
+        minX: 0.001000
+        sigma: 0.000858
+[FIT STATUS] Iter: 0 : Fit range: [ 0.000000 : 0.045000]
+ FCN=858610 FROM MIGRAD    STATUS=CONVERGED     128 CALLS         129 TOTAL
+                     EDM=7.56504e-08    STRATEGY= 1  ERROR MATRIX UNCERTAINTY   2.2 per cent
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  p0           3.46876e+01   7.03900e-02   1.00294e-05  -3.95490e-01
+   2  p1           3.24740e-16   7.24605e-09  -6.70026e-07** at limit **
+   3  p2           1.23865e+07   1.16544e+05  -2.29634e-08   0.00000e+00
+   4  p3           2.10525e+06   5.69229e+02   3.73710e-10  -3.72520e+01
+[INFO] Fixing min
+[FIT STATUS] Iter: 1 : Fit range: [ 0.000000 : 0.002437]
+ FCN=10215.8 FROM MIGRAD    STATUS=CONVERGED     294 CALLS         295 TOTAL
+                     EDM=1.79026e-09    STRATEGY= 1  ERROR MATRIX UNCERTAINTY   0.0 per cent
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  p0           1.25116e+01   8.19416e-02  -3.67597e-07  -9.59522e-02
+   2  p1           8.32667e-18   4.25982e-08   1.01857e-06** at limit **
+   3  p2           5.00000e+01   6.68707e+01  -0.00000e+00   0.00000e+00
+   4  p3           2.88267e+07   1.10920e+05   5.27485e-07  -8.28301e-03
+[WARNING] Incrementing ranges by 20% because less than 10 points in range
+ITER to converge = 2
+SCALING ERROR by 35.734818
+Shifting by 12.511572
+RooRealVar::constTerm_EE_invMass_100_2000_ZPt_0_10_Et_25_trigger_noPF = 0.000000 +/- 0.050066  L(-0.100000 - 0.000132) 
+Scale shift = 0.000000 + 0.000132 - 0.100000
+EB_invMass_100_2000_ZPt_0_10_Et_25_trigger_noPF scale	50
+Getting g1 mean graph
+[INFO] n = 2250
+Fitting iteratively for minumum and error estimation
+[FIT STATUS]: Preliminary fit to pol2
+ FCN=219657 FROM HESSE     STATUS=NOT POSDEF     18 CALLS         135 TOTAL
+                     EDM=3.4002e-12    STRATEGY= 1      ERR MATRIX NOT POS-DEF
+  EXT PARAMETER                APPROXIMATE        STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  p0           2.25930e+06   9.46691e-01   5.38660e-01  -4.49800e-08
+   2  p1          -4.51861e+06   9.47765e-01   2.15464e-01  -2.49065e-06
+   3  p2           2.25932e+06   9.46880e-01   5.38663e-01   4.89104e-07
+[INFO] Init ------------------------------
+        minX: 1.000000
+        sigma: 0.000470
+[FIT STATUS] Iter: 0 : Fit range: [ 0.960000 : 1.040000]
+ FCN=153998 FROM MIGRAD    STATUS=CONVERGED     112 CALLS         113 TOTAL
+                     EDM=3.29819e-07    STRATEGY= 1  ERROR MATRIX UNCERTAINTY   2.5 per cent
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  p0           4.67822e+00   1.23539e-01  -3.57959e-06  -8.72771e-02
+   2  p1           1.00218e+00   1.40102e-05   1.29123e-06  -1.50537e+00
+   3  p2           1.88655e+06   2.00432e+03  -1.49709e-07  -1.01383e+02
+   4  p3           3.23447e+06   4.87012e+03   1.66123e-07  -1.87847e+01
+[WARNING] Incrementing ranges by 20% because less than 10 points in range
+[WARNING] Incrementing ranges by 20% because less than 10 points in range
+[WARNING] Incrementing ranges by 20% because less than 10 points in range
+[WARNING] Incrementing ranges by 20% because less than 10 points in range
+[WARNING] Incrementing ranges by 20% because less than 10 points in range
+[WARNING] Incrementing ranges by 20% because less than 10 points in range
+[FIT STATUS] Iter: 1 : Fit range: [ 0.994456 : 1.030110]
+ FCN=31249 FROM MIGRAD    STATUS=CONVERGED     149 CALLS         150 TOTAL
+                     EDM=7.29158e-09    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  p0           8.92918e+00   6.61308e-02   5.52494e-05  -4.36008e-02
+   2  p1           1.00000e+00   8.33692e-06   9.87051e-06   8.91724e-01
+   3  p2           8.94641e+06   4.17641e+04   6.93761e-06   1.17237e+00
+   4  p3           2.83032e+06   4.72085e+03   2.18317e-06   1.36851e-02
+ITER to converge = 2
+SCALING ERROR by 34.020149
+Shifting by 8.929179
+RooRealVar::scale_EB_invMass_100_2000_ZPt_0_10_Et_25_trigger_noPF = 1.000005 +/- 0.000328  L(0.999768 - 1.000425) 
+Scale shift = 1.000005 + 0.000420 - 0.000236
+EE_invMass_100_2000_ZPt_0_10_Et_25_trigger_noPF scale	50
+Getting g1 mean graph
+[INFO] n = 2250
+Fitting iteratively for minumum and error estimation
+[FIT STATUS]: Preliminary fit to pol2
+ FCN=255272 FROM HESSE     STATUS=NOT POSDEF     16 CALLS         122 TOTAL
+                     EDM=2.87537e-09    STRATEGY= 1      ERR MATRIX NOT POS-DEF
+  EXT PARAMETER                APPROXIMATE        STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  p0           2.23728e+06   9.34727e-01   5.33409e-01   1.20979e-03
+   2  p1          -4.47191e+06   9.35721e-01   1.06619e+00   1.20634e-03
+   3  p2           2.23465e+06   9.34710e-01   5.32781e-01   1.20408e-03
+[INFO] Init ------------------------------
+        minX: 1.000000
+        sigma: 0.000473
+[FIT STATUS] Iter: 0 : Fit range: [ 0.960000 : 1.040000]
+ FCN=163376 FROM MIGRAD    STATUS=CONVERGED     125 CALLS         126 TOTAL
+                     EDM=3.33889e-09    STRATEGY= 1  ERROR MATRIX UNCERTAINTY   2.2 per cent
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  p0           7.53702e+00   1.00186e-01  -5.01561e-07  -2.86281e-02
+   2  p1           9.98189e-01   1.35082e-05  -1.65296e-07   4.32062e-01
+   3  p2           3.38965e+06   4.93101e+03   2.55635e-08   3.70032e+00
+   4  p3           1.82720e+06   1.88750e+03  -1.34204e-08  -8.00854e+00
+[FIT STATUS] Iter: 1 : Fit range: [ 0.992428 : 1.003420]
+ FCN=6831.22 FROM MIGRAD    STATUS=CONVERGED     168 CALLS         169 TOTAL
+                     EDM=6.09094e-07    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  p0           5.88933e+00   6.72187e-02   2.56532e-05   8.43853e-01
+   2  p1           9.99886e-01   7.38414e-06   4.07309e-06   5.79857e+00
+   3  p2           6.59995e+06   3.71747e+04   4.24106e-06   9.22188e+00
+   4  p3           1.29061e+07   9.47302e+04   6.74118e-06   6.72995e-01
+[WARNING] Incrementing ranges by 20% because less than 10 points in range
+ITER to converge = 2
+SCALING ERROR by 18.961491
+Shifting by 5.889328
+RooRealVar::scale_EE_invMass_100_2000_ZPt_0_10_Et_25_trigger_noPF = 0.999886 +/- 0.000236  L(0.999611 - 1.000083) 
+Scale shift = 0.999886 + 0.000197 - 0.000275
+RooArgSet:: = (constTerm_EB_invMass_100_2000_ZPt_0_10_Et_25_trigger_noPF,constTerm_EE_invMass_100_2000_ZPt_0_10_Et_25_trigger_noPF,scale_EB_invMass_100_2000_ZPt_0_10_Et_25_trigger_noPF,scale_EE_invMass_100_2000_ZPt_0_10_Et_25_trigger_noPF)

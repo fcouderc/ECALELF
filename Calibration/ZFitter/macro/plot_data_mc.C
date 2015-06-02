@@ -159,17 +159,24 @@ void Plot(TCanvas *c, TH1F *data, TH1F *mc, TH1F *mcSmeared=NULL, TLegend *legen
        
   mc->SetLineColor(kRed);
   mc->SetLineWidth(2);
-  mc->SetFillStyle(1001); //3002
+  mc->SetFillStyle(1001);
   mc->SetFillColor(kRed);
   
   mc->Draw();
   
-  mc->GetXaxis()->SetTitle("M_{ee} (GeV/c^{2})");
-  //    mc->GetXaxis()->SetRangeUser(75,105);
+  if(mc->GetXaxis()->GetXmax()<3){
+    mc->GetXaxis()->SetTitle("ptRatio");
+  }else if(mc->GetXaxis()->GetXmax()<150){
+    mc->GetXaxis()->SetTitle("M_{ee} (GeV/c^{2})");
+  }else if(mc->GetXaxis()->GetXmax()>150){
+    mc->GetXaxis()->SetTitle("ptSum (GeV/c^{2})");
+  }
+
   char ylabel[100];
-  sprintf(ylabel,"Events/%.1f GeV",mc->GetBinWidth(1));
+  //sprintf(ylabel,"Events/%.1f GeV",mc->GetBinWidth(1));
+  sprintf(ylabel,"Events");
   mc->GetYaxis()->SetTitle(ylabel);
-  mc->GetYaxis()->SetTitleOffset(1.3);
+  mc->GetYaxis()->SetTitleOffset(1.05);
 
   TH1* mcNorm = mc->DrawNormalized("hist",data->Integral());
   float ymax=std::max(mcNorm->GetMaximum(),data->GetMaximum())*1.2;
@@ -177,12 +184,9 @@ void Plot(TCanvas *c, TH1F *data, TH1F *mc, TH1F *mcSmeared=NULL, TLegend *legen
   
   mcSmeared->SetLineWidth(3);
   TH1* mcSmeared_norm = mcSmeared->DrawNormalized("same hist",data->Integral());
-  
+ 
   data->Draw("E same");
-  
-  //	std::cout << data->Integral() << std::endl;
-  
-  //    PlotCanvas(c, mc, data, mcSmeared);
+
   
   legend->Clear();
   legend->AddEntry(mc,"MC","f");
@@ -204,21 +208,13 @@ void Plot(TCanvas *c, TH1F *data, TH1F *mc, TH1F *mcSmeared=NULL, TLegend *legen
   pave.AddText("CMS Preliminary");
   pave.AddText("#sqrt{s}="+energy);
   if(lumi.Sizeof()>1) pave.AddText("L="+lumi+" fb^{-1}");
-  //    pave.AddText("");
-  
-  //pave.AddText(ks);
-  
-  
-  //c->cd(0);
+
   pave.Draw();	
 
-
-    //    pave.Paint();
-    //    pave.Print();
-    legend->SetTextFont(22); // 132
-    legend->SetTextSize(0.04); // l'ho preso mettendo i punti con l'editor e poi ho ricavato il valore con il metodo GetTextSize()
-    //  legend->SetFillColor(0); // colore di riempimento bianco
-    legend->SetMargin(0.4);  // percentuale della larghezza del simbolo
+  legend->SetTextFont(22); // 132
+  legend->SetTextSize(0.04); // l'ho preso mettendo i punti con l'editor e poi ho ricavato il valore con il metodo GetTextSize()
+  //  legend->SetFillColor(0); // colore di riempimento bianco
+  legend->SetMargin(0.4);  // percentuale della larghezza del simbolo
   //    SetLegendStyle(legend);
     
     legend->SetBorderSize(0);
@@ -237,11 +233,13 @@ void Plot(TCanvas *c, TH1F *data, TH1F *mc, TH1F *mcSmeared=NULL, TLegend *legen
       TGraphErrors *ratioGraph = new TGraphErrors(sRatio);
       ratioGraph->SetMarkerColor(kBlue);
       ratioGraph->Draw("AP");
+      ratioGraph->GetXaxis()->SetRangeUser(data->GetXaxis()->GetXmin(),data->GetXaxis()->GetXmax());//To set limits correctly               
       ratioGraph->GetXaxis()->SetTitle(mc->GetXaxis()->GetTitle());
       ratioGraph->GetYaxis()->SetTitle("Data/MC");
       
       ratioGraph->GetYaxis()->SetTitleSize(sRatio->GetYaxis()->GetTitleSize()*yscale);
-      ratioGraph->GetYaxis()->SetTitleOffset(sRatio->GetYaxis()->GetTitleOffset()/yscale);
+      //ratioGraph->GetYaxis()->SetTitleOffset(sRatio->GetYaxis()->GetTitleOffset()/yscale);
+      ratioGraph->GetYaxis()->SetTitleOffset(0.3);
       ratioGraph->GetYaxis()->SetLabelSize(sRatio->GetYaxis()->GetLabelSize()*yscale);
       ratioGraph->GetYaxis()->SetLabelOffset(sRatio->GetYaxis()->GetLabelOffset()*yscale);
       ratioGraph->GetXaxis()->SetTitleSize(sRatio->GetYaxis()->GetTitleSize() *yscale   );
@@ -339,7 +337,7 @@ void PlotMeanHist(TString filename, TString energy="8TeV", TString lumi="", int 
   }
 
 
-  /*------------------------------ Plotto */
+  /*------------------------------ Plotting */
   TCanvas *c = new TCanvas("c","c");
 
   //    TPaveText *pv = new TPaveText(0.7,0.7,1, 0.8);    

@@ -291,15 +291,16 @@ void EnergyScaleCorrection_class::ReadSmearingFromFile(TString filename){
     }
 
     if(format==0){
+
       std::string line;
       std::getline(f_in, line);
       std::istringstream s_in(line);
       s_in >> category >> unused >> etaMin >> etaMax 
 	   >> r9Min >> r9Max >> runMin >> runMax 
 	   >> Emean >> err_Emean 
-	   >> rho >> err_rho >> phi >> err_phi;
+	   >> rho >> err_rho >> phi; //>> err_phi; //! err_phi must be commented out, otherwise parsing doesn't work properly
       if(s_in.eof()){ // this is not the globe format but the ECALELF format
-	std::cout << "[INFO] format=2" << std::endl;
+	std::cout << "[INFO] format=2: ECALELF" << std::endl;
 	format=2;
 	s_in >> category >> constTerm >> alpha;
 	AddSmearing(category, runMin, runMax, constTerm,  err_constTerm, alpha, err_alpha, Emean, err_Emean);

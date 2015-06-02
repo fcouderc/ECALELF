@@ -139,8 +139,13 @@ fi
 
 # saving the root files with the chains
 rm tmp/*_chain.root
+rm tmp/cuts.txt
 ./bin/ZFitter.exe --saveRootMacro -f ${configFile} --regionsFile=${regionsFile} ${noPU} ${addBranchList} ${corrEleFile} ${corrEleType} ${fitterOptions} || exit 1
 
+
+#my_comment(){
+
+# defining a bash function, which I don't call later. The effect is that of a comment of this block ;-)
 # adding all the chains in one file
 for file in tmp/s[0-9]*_selected_chain.root tmp/d_selected_chain.root tmp/s_selected_chain.root 
   do
@@ -156,7 +161,7 @@ done
 cat > tmp/load.C <<EOF
 {
   gROOT->ProcessLine(".L macro/PlotDataMC.C+");
-  gROOT->ProcessLine(".L src/setTDRStyle.C");
+  gROOT->ProcessLine(".L src/setTDRStyle.cc");
   gROOT->ProcessLine(".L macro/addChainWithFriends.C+");
 
   setTDRStyle();
@@ -187,3 +192,4 @@ echo "root -l $filelist tmp/load.C tmp/standardDataMC.C"
 #echo "root -l tmp/$filelist tmp/load.C tmp/standardDataMC.C" 
 echo "change the outputPath string in load.C to have the plots in the correct directory"
 
+#}

@@ -33,7 +33,7 @@ EoPDir:=../EOverPCalibration
 
 #################
 INCLUDE=-I$(INCLUDEDIR) -I$(INCLUDEEPDIR) -isystem$(ROOT_INCLUDE)   -I$(ROOFIT_INCLUDE) -I$(BOOST)/include
-LIB=-L$(BOOST)/lib -L/usr/lib64 # -L/usr/lib 
+LIB=-L$(BOOST)/lib -L/usr/lib64 # -L/usr/lib
 
 
 #### Make the list of modules from the list of .cc files in the SRC directory

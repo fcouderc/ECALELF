@@ -23,7 +23,7 @@ void haddTGraph(std::vector<TString> filenames, TString outFileName){
       TString className=currentKey->GetClassName();
       // se non e' un TGraph passa oltre
       //std::cout << i << " " << className << std::endl;
-      if (! className.CompareTo("TGraph")==0) continue;
+      if (! (className.CompareTo("TGraph")==0)) continue;
       TGraph *g = (TGraph *)currentKey->ReadObj(); 
       //TString objName = TGraph->GetName();
 

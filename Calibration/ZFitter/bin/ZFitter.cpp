@@ -1,17 +1,3 @@
-/// Zee Fit program
-
-/**\file 
-The aim of the program is to provide a common interface to all the Z
-fitting algorithms reading and combining in the proper way the
-configuration files.
-
-   \todo
-   - remove commonCut from category name and add it in the ZFit_class in order to not repeate the cut
-   - make alpha fitting more generic (look for alphaName)
-   - Implement the iterative Et dependent scale corrections
-
-*/
-
 #include <iostream> 
 #include <fstream> 
 #include <cstdio>
@@ -26,8 +12,6 @@ configuration files.
 #include <TH2F.h>
 #include <TFriendElement.h>
 
-/// @cond SHOW
-/// \code
 #include "../interface/ZFit_class.hh"
 #include "../interface/puWeights_class.hh"
 #include "../interface/r9Weights_class.hh"
@@ -45,22 +29,13 @@ configuration files.
 #include "../../EOverPCalibration/interface/CalibrationUtils.h"
 #include "../../EOverPCalibration/interface/FastCalibratorEB.h"
 #include "../../EOverPCalibration/interface/FastCalibratorEE.h"
-/// \endcode
-/// @endcond
 
 #include <RooMinuit.h>
-//#include <RooStats/UniformProposal.h>
-//#include <RooStats/PdfProposal.h>
-//#include <RooStats/SequentialProposal.h>
 #include <RooGaussian.h>
 #include <RooStats/MetropolisHastings.h>
 #include "RooBinning.h"
-//#include "../src/ShervinMinuit.cc"
-//#include <RooStats/ProposalHelper.h>
 #include <RooMultiVarGaussian.h>
-
 #include "Math/Minimizer.h"
-
 #include <TPRegexp.h>
 #include <RooFormulaVar.h>
 #include <RooPullVar.h>
@@ -71,31 +46,17 @@ configuration files.
 #include <queue>
 
 #define profile
-
-//#define DEBUG
 #define smooth
-
-//#include "../macro/loop.C" // a way to use compiled macros with ZFitter
 
 //using namespace std;
 using namespace RooStats;
 
-///\endcond
-
 
 /// map that associates the name of the tree and the pointer to the chain
-typedef std::map< TString, TChain* > chain_map_t;
- 
-/** \brief map that associates the name of the tag to the chain_map_t
- *
- * the logic is better described in \ref validationConfig
- */
+typedef std::map< TString, TChain* > chain_map_t; //syntax is s/d tree_name TChain
 typedef std::map< TString, chain_map_t > tag_chain_map_t;
 
 
-/** Function parsing the region files
- * \retval vector of strings, each string is the name of one region
- */
 std::vector<TString> ReadRegionsFromFile(TString fileName){
   ifstream file(fileName);
   std::vector<TString> regions;
@@ -131,7 +92,6 @@ std::vector<TString> ReadRegionsFromFile(TString fileName){
  * 
  */
 void UpdateFriends(tag_chain_map_t& tagChainMap, TString regionsFileNameTag){
-//void UpdateFriends(tag_chain_map_t& tagChainMap){
   // loop over all the tags
   for(tag_chain_map_t::const_iterator tag_chain_itr=tagChainMap.begin();
       tag_chain_itr!=tagChainMap.end();
@@ -278,8 +238,10 @@ int main(int argc, char **argv) {
   std::string corrEleFile, corrEleType;
   std::string smearEleFile, smearEleType;
   double smearingCBAlpha=1, smearingCBPower=5;
-  std::string invMass_var;
-  float invMass_min=0, invMass_max=0, invMass_binWidth=0.250;
+  std::string invMass_var;//! with this you choose the energy branch
+  std::string targetVariable="invMass";
+  std::string configuration="leading";
+  float targetVariable_min=0., targetVariable_max=0., targetVariable_binWidth=0.250;
   int fit_type_value=1;
   int signal_type_value=0;
   unsigned long long int nToys = 0;
@@ -330,10 +292,6 @@ int main(int argc, char **argv) {
   po::options_description toyOption("toyMC options");
   po::options_description EoverPOption("EoverP options");
 
-  //po::options_description cmd_line_options;
-  //cmd_line_options.add(desc).add(fitOption).add(smearOption);
-
-  //------------------------------ adding options' description
   desc.add_options()
     ("help,h","Help message")
     ("loop","")
@@ -367,33 +325,25 @@ int main(int argc, char **argv) {
     //
     ("selection", po::value<string>(&selection)->default_value("loose"),"")
     ("commonCut", po::value<string>(&commonCut)->default_value("Et_25-trigger-noPF"),"")
-    ("invMass_var", po::value<string>(&invMass_var)->default_value("invMass_SC_regrCorr_ele"),"")
-    ("invMass_min", po::value<float>(&invMass_min)->default_value(65.),"")
-    ("invMass_max", po::value<float>(&invMass_max)->default_value(115.),"")
-    ("invMass_binWidth", po::value<float>(&invMass_binWidth)->default_value(0.25),"Smearing binning")
+    ("invMass_var", po::value<string>(&invMass_var)->default_value("invMass_SC_regrCorr_ele"),"")//This is used to decide the energy
+    ("targetVariable", po::value<string>(&targetVariable)->default_value("invMass"),"Specify the target variable if not the invariant mass")
+    ("configuration", po::value<string>(&configuration)->default_value("leading"),"Specify the configuration of 1 and 2")
+    ("targetVariable_min", po::value<float>(&targetVariable_min)->default_value(65.),"")
+    ("targetVariable_max", po::value<float>(&targetVariable_max)->default_value(115.),"")
+    ("targetVariable_binWidth", po::value<float>(&targetVariable_binWidth)->default_value(0.25),"Smearing binning")
     ("isOddMC", "Activate if use only odd events in MC")
     ("isOddData", "Activate if use only odd events in data")    
     //
     ("readDirect","") //read correction directly from config file instead of passing as a command line arg
-    //("addPtBranches", "")  //add new pt branches ( 3 by default, fra, ele, pho)
     ("addBranch", po::value< std::vector<string> >(&branchList), "")
     ("saveAddBranchTree","")
-    //    ("signal,s", po::value< std::vector <string> >(&signalFiles), "Signal file (can be called multiple times putting the files in a chain")
-    //    ("bkg,b", po::value< std::vector <string> >(&bkgFiles), "Bkg file (can be called multiple times putting the files in a chain")
-    //    ("data,d", po::value< std::vector <string> >(&dataFiles), "Data file (can be called multiple times putting the files in a chain")
-    //("_ZFit_class", "call the Z fitter")
-    //;
-    //
-    //  po::options_description fitOption("Z Fit options");
-    //  po::options_description smearOption("Z smearing options");
-    //  smearOption.add_options()
     ;
   fitterOption.add_options()
     ("fit_type_value", po::value<int>(&fit_type_value)->default_value(1),"0=floating tails, 1=fixed tails")
     ("signal_type_value", po::value<int>(&signal_type_value)->default_value(0),"0=BW+CB, 1=Cruijff")
     ("forceNewFit", "refit MC also if fit exists")
     ("updateOnly",  "do not fit data if fit exists")
-    ;;
+    ;
   smearerOption.add_options()
     ("smearerFit",  "call the smearing")
     ("smearerType", po::value<string>(&minimType)->default_value("profile"), "minimization algo")
@@ -474,16 +424,13 @@ int main(int argc, char **argv) {
   desc.add(EoverPOption);
 
   po::variables_map vm;
-  //
-  // po::store(po::parse_command_line(argc, argv, smearOption), vm);
   po::store(po::parse_command_line(argc, argv, desc), vm);
   po::notify(vm);    
 
-
   //------------------------------ checking options
-  if(!vm.count("invMass_binWidth") && !vm.count("smearerFit")){
+  if(!vm.count("targetVariable_binWidth") && !vm.count("smearerFit")){
     std::cout << "[INFO] Bin Width=0.5" << std::endl;
-    invMass_binWidth=0.5;
+    targetVariable_binWidth=0.5;
   }
 
   if (vm.count("help")) {
@@ -507,15 +454,10 @@ int main(int argc, char **argv) {
   if(!vm.count("regionsFile") && 
      !vm.count("runDivide") && !vm.count("savePUTreeWeight") && 
      !vm.count("saveR9TreeWeight") && !vm.count("saveCorrEleTree") && !vm.count("EOverPCalib") 
-     //&& !vm.count("saveRootMacro")
      ){
     std::cerr << "[ERROR] Missing mandatory option \"regionsFile\"" << std::endl;
     return 1;
   }
-  //  if(!vm.count("runRangesFile")){
-  //    std::cerr << "[ERROR] Missing mandatory option \"runRangesFile\"" << std::endl;
-  //    return 1;
-  //  }
 
   if(vm.count("dataPU") != vm.count("mcPU")){
     std::cerr << "[ERROR] One PU distribution (data or mc) are not provided" << std::endl;
@@ -551,10 +493,7 @@ int main(int argc, char **argv) {
   if(!checkDirectories && !vm.count("EOverPCalib")){
     std::cerr << "[ERROR] Directory " << outDirImgData << " not found" << std::endl;
   }
-  //   checkDirectories=checkDirectories && !system("[ -d "+TString(outDirTable)+" ]");
-  //   if(!checkDirectories){
-  //     std::cerr << "[ERROR] Directory " << outDirTable << " not found" << std::endl;
-  //   }
+
   if(!checkDirectories 
      && !vm.count("runDivide") 
      && !vm.count("savePUTreeWeight") 
@@ -786,8 +725,6 @@ int main(int argc, char **argv) {
 
   //==============================
 
-  //  if(vm.count("dataPU")==0 && (tagChainMap["s"]).count("pileupHist")==0 && (tagChainMap["s"]).count("pileup")==0){
-
   if(vm.count("noPU")==0 && !vm.count("runToy")){
     if(dataPUFileNameVec.empty() && (tagChainMap.count("s")!=0) && (tagChainMap["s"]).count("pileup")==0){
       std::cerr << "[ERROR] Nor pileup mc tree configured in chain list file either dataPU histograms are not provided" << std::endl;
@@ -955,10 +892,13 @@ int main(int argc, char **argv) {
       newBrancher.scaler= new EnergyScaleCorrection_class("", smearEleFile);
     }
 
+    //! tagChainMap is a map<string, chain_map> ; chain_map is a map<string, TChain*>
+    //! The logic is map<mc/data, <tree name, TChain>>
     for(tag_chain_map_t::const_iterator tag_chain_itr=tagChainMap.begin();
 	tag_chain_itr!=tagChainMap.end();
 	tag_chain_itr++){
-      if((tag_chain_itr->first.CompareTo("s")==0 || tag_chain_itr->first.CompareTo("d")==0)) continue; //only data
+      //! Loop over samples in order to add a branch in a friend tree (I use this to categorize events)
+      if((tag_chain_itr->first.CompareTo("s")==0 || tag_chain_itr->first.CompareTo("d")==0)) continue; 
       if(tag_chain_itr->second.count(treeName)!=0) continue; //skip if already present
       if(t!="" && !tag_chain_itr->first.Contains(t)) continue;
       TChain *ch = (tag_chain_itr->second.find("selected"))->second;
@@ -1129,7 +1069,6 @@ int main(int argc, char **argv) {
   smearer._autoBin=vm.count("autoBin");
   smearer._autoNsmear=vm.count("autoNsmear");
   smearer.smearscan=vm.count("smearscan");
-  //smearer.nEventsMinDiag = nEventsMinDiag;
   smearer._deactive_minEventsOffDiag = nEventsMinOffDiag;
   smearer.SetSmearingEt(vm.count("smearingEt"));
   smearer.SetR9Weight(vm.count("useR9weight"));
@@ -1139,7 +1078,6 @@ int main(int argc, char **argv) {
   smearer.SetWeakWeight(vm.count("useWEAKweight"));
 
   if(nSmearToy>0) smearer._nSmearToy = nSmearToy;
-
 
   //------------------------------ Take the list of branches needed for the defined categories
   ElectronCategory_class cutter;
@@ -1634,7 +1572,7 @@ int main(int argc, char **argv) {
 
 
   ZFit_class fitter( data, mc, NULL, 
-		     invMass_var.c_str(), invMass_min, invMass_max, invMass_binWidth); 
+		     invMass_var.c_str(), targetVariable_min, targetVariable_max, targetVariable_binWidth); 
 
   fitter._oddMC=vm.count("isOddMC");
   fitter._oddData=vm.count("isOddData");
@@ -1682,18 +1620,29 @@ int main(int argc, char **argv) {
   }
 
   myClock.Reset();
+
+  std::cout<<"***********************************************"<<std::endl;
+  std::cout<<"***********************************************"<<std::endl;
+  std::cout<<"[INFO] Preliminary info:"<<std::endl;
+  std::cout<<"[INFO] targetVariable is: "<<targetVariable<<std::endl;
+  std::cout<<"[INFO] targetVariable_min is: "<<targetVariable_min<<std::endl;
+  std::cout<<"[INFO] targetVariable_max is: "<<targetVariable_max<<std::endl;
+  std::cout<<"[INFO] targetVariable_binWidth is: "<<targetVariable_binWidth<<std::endl;
+  std::cout<<"***********************************************"<<std::endl;
+  std::cout<<"***********************************************"<<std::endl;
+
   if(vm.count("smearerFit")){
-
-	smearer.SetHistBinning(80,100,invMass_binWidth); // to do before Init
-	if(vm.count("runToy")){
+    smearer.SetTargetVariable(targetVariable,configuration);//The smearing procedure is different for different targetVariables
+    smearer.SetHistBinning(targetVariable_min,targetVariable_max,targetVariable_binWidth);
+    if(vm.count("runToy")){
 	  smearer.SetPuWeight(false);
-
 	  smearer.SetToyScale(1, constTermToy);
-	  if(vm.count("initFile")) smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"), true,initFileName.c_str());
-	  //	  if(vm.count("initFile")) smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"), false,initFileName.c_str());
-	  else smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"));
+
+	  if(vm.count("initFile")) {smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"), true,initFileName.c_str());}
+	  else {smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"));}
+
 	  std::cout << "[DEBUG] " << constTermToy << std::endl;
-	} else{
+	} else{//not runToy
 	  if(vm.count("initFile")){
 	    std::cout << "[INFO] Reading init file: " << initFileName << std::endl;
 	    args.readFromFile(initFileName.c_str());
@@ -1701,34 +1650,28 @@ int main(int argc, char **argv) {
 	  args.writeToStream(std::cout, kFALSE);
 	  smearer.Init(commonCut.c_str(), eleID);
 	}
+
 	myClock.Start();
 	smearer.evaluate();
 	myClock.Stop();
 	myClock.Print();
 	smearer.DumpNLL();
-
-	//if(vm.count("plotOnly")) //smearer.SetNSmear(10);
 	RooMinuit m(smearer);
-	if(! vm.count("plotOnly") && ! vm.count("profileOnly")){
-	  //m.setStrategy(0);
-	  //m.setVerbose();
 
-	  //m.hesse(); // one turn of hess to guess the covariance matrix
-	  //RooFitResult *fitres = m.save();
+	std::cout<<"************************************************"<<std::endl;
+	std::cout<<"************************************************"<<std::endl;
+	std::cout<<"[INFO] minimType is "<<minimType<<std::endl;
+	std::cout<<"************************************************"<<std::endl;
+	std::cout<<"************************************************"<<std::endl;
+
+	if(! vm.count("plotOnly") && ! vm.count("profileOnly")){
+	  //! You are really minimizing the likelihood here
+	  std::cout <<"==================Lihelihood Minimization in bin/ZFitter.cpp=================="<<endl;
 	  ShervinMinuit sh(100, smearer);//(RooArgSet&)fitres->floatParsFinal());
 	  sh.SetMinuit(m);
-	  //ph.SetVariables();
-	  //ph.SetCovMatrix(fitres->covarianceMatrix());
-	  //ph.SetUpdateProposalParameters(kTRUE); // auto-create mean vars and add mappings
-	  //ph.SetCacheSize(100);
-	  //ProposalFunction* pf = ph.GetProposalFunction();
-	  
+
 	  if(minimType=="migrad"){
-	  
-	    //fitres = 
 	    m.fit("");
-	    //m.migrad();
-	    //m.hesse();
 	  } else if(minimType=="profile"){
 	    MinimizationProfile(smearer, args, nIter);
 	    args.writeToStream(std::cout, kFALSE);
@@ -1759,31 +1702,31 @@ int main(int argc, char **argv) {
 	    mcChain->SaveAs("tmp/newChain.root");
 	    delete mcChain;
 
+	  }//This closes "sampling" minimization
 	  }
-	}
 
-	std::cout << "[INFO] Minimization time: \t";
+	std::cout << "[INFO] Info from bin/ZFitter.cpp ==> Likelihood Minimization time: \t"<<std::endl;
 	myClock.Stop();
 	myClock.Print();
+
 	if(!vm.count("profileOnly") && !vm.count("plotOnly")){
-	  args.writeToFile(outDirFitResData+"/params-"+r+"-"+TString(commonCut.c_str())+".txt");
+	  args.writeToFile(outDirFitResData+"/params-"+targetVariable+"_"+configuration+"_"+r+"-"+TString(commonCut.c_str())+".txt");
 	  smearer._markov.SaveAs((outDirFitResData+"/markov-"+r+"-"+TString(commonCut.c_str())+".root"));
 	}
 
-	//RooDataSet *dSet = smearer.GetMarkovChainAsDataSet();
-	//dSet->SaveAs("tmp/dataset.root");
-	//save the smeared histograms
-
+	//USELESS??
+	/*
 	for(std::vector<ZeeCategory>::iterator itr= smearer.ZeeCategories.begin();
 		itr != smearer.ZeeCategories.end();
 		itr++){
 	  smearer.GetSmearedHisto(*itr, true, false);
 	  smearer.GetSmearedHisto(*itr, true, true);
 	  smearer.GetSmearedHisto(*itr, false, smearer._isDataSmeared);
-	} 
+	  } */
+	//
 
 	if(vm.count("plotOnly") || !vm.count("profileOnly")){
-	  TFile *f = new TFile(outDirFitResData+"/histos-"+r+"-"+TString(commonCut.c_str())+".root", "recreate");
+	  TFile *f = new TFile(outDirFitResData+"/histos_"+targetVariable+"_"+configuration+"_"+r+"_"+TString(commonCut.c_str()).ReplaceAll("-","_")+".root", "recreate");
 	  f->Print();
 	  f->cd();
 	  for(std::vector<ZeeCategory>::iterator itr= smearer.ZeeCategories.begin();
@@ -1793,7 +1736,7 @@ int main(int argc, char **argv) {
 	    TH1F *MC = smearer.GetSmearedHisto(*itr, true, false);
 	    TH1F *smearMC = smearer.GetSmearedHisto(*itr, true, true);
 	    TH1F *data = smearer.GetSmearedHisto(*itr, false, smearer._isDataSmeared);
-	  
+	    std::cout<<"[INFO] in bin/ZFitter.cpp: Saving the histograms"<<std::endl;
 	    MC->Write();
 	    smearMC->Write();
 	    data->Write();
@@ -1803,16 +1746,14 @@ int main(int argc, char **argv) {
 	}
 
 	if(vm.count("profileOnly") || !vm.count("plotOnly")){
-	  //if(vm.count("profileOnly") && !vm.count("runToy")) smearer.SetNSmear(10);
 
-	  std::cout <<"==================PROFILE=================="<<endl;
-	  //if(!vm.count("constTermFix")) smearer.SetNSmear(0,20);
+	  std::cout <<"==================Creating the profiles in bin/ZFitter.cpp (if you haven't minimized the likelihood, it doesn't do it for you. Minimization must be done before this point)=================="<<endl;
 	  //create profiles
 	  TString outFile=outDirFitResData.c_str();
-	  outFile+="/outProfile-";
-	  outFile+=r+"-"+TString(commonCut.c_str())+".root";
+	  outFile+="/outProfile_"+targetVariable+"_"+configuration+"_";
+	  outFile+=r+"_"+TString(commonCut.c_str())+".root";
+	  outFile.ReplaceAll("-","_");
 	  TFile *fOutProfile = new TFile(outFile,"recreate");
-	  //test/dato/fitres/Hgg_Et_v7/0.03//outProfile-data/regions/test.dat-Et_25-EB.root
 
 	  for (int ivar=0;ivar<args.getSize();++ivar)
 	    {
@@ -1822,8 +1763,6 @@ int main(int argc, char **argv) {
 		continue;
 
 	      TString name(var->GetName());
-	      //if(name.Contains("scale")) continue;
-	      //if(name.Contains("absEta_1_1.4442-gold") && vm.count("alphaGoldFix")) continue;
 	      // special part for alpha fitting 
 	      double min=0.;
 	      TString  alphaName=name; alphaName.ReplaceAll("constTerm","alpha");
@@ -1848,6 +1787,7 @@ int main(int argc, char **argv) {
 		var2->setVal(v2);
 		var->setVal(v1);
  		TString n="profileChi2_"+name2+"_"; n+=randomInt;
+		n.ReplaceAll("-","_");
 		profil->SetName(n);  
 		TCanvas c("c_"+name);
 		profil->Draw("AP*");
@@ -1862,6 +1802,7 @@ int main(int argc, char **argv) {
 		smearer.SetDataSet(name2,"phi");
 		profil = GetProfile(var, var2, smearer, true, rho, Emean);
 		n="profileChi2_"+name2+"_"; n+=randomInt;
+		n.ReplaceAll("-","_");
 		profil->SetName(n);  
 		profil->Draw("AP*");
 		fOutProfile->cd();
@@ -1874,37 +1815,13 @@ int main(int argc, char **argv) {
 		smearer.SetDataSet(name2,"rho_phi4");
 		profil = GetProfile(var, var2, smearer, true, 0, Emean, 0.785);
 		n="profileChi2_"+name2+"_"; n+=randomInt;
+		n.ReplaceAll("-","_");
 		profil->SetName(n);  
 		profil->Draw("AP*");
 		fOutProfile->cd();
 		profil->Write();
 		delete profil;
 		smearer.dataset->Write();
-
-// 		// rho profile with fixed phi!=pi/2
-// 		name2.ReplaceAll("rho_phi4", "rho_phi6");
-// 		smearer.SetDataSet(name2,"rho_phi6");
-// 		profil = GetProfile(var, var2, smearer, true, 0, Emean, 0.524);
-// 		n="profileChi2_"+name2+"_"; n+=randomInt;
-// 		profil->SetName(n);  
-// 		profil->Draw("AP*");
-// 		fOutProfile->cd();
-// 		profil->Write();
-// 		delete profil;
-// 		smearer.dataset->Write();
-
-// 		// rho profile with fixed phi!=pi/2
-// 		name2.ReplaceAll("rho_phi6", "rho_phi3");
-// 		smearer.SetDataSet(name2,"rho_phi3");
-// 		profil = GetProfile(var, var2, smearer, true, 0, Emean, 1.05);
-// 		n="profileChi2_"+name2+"_"; n+=randomInt;
-// 		profil->SetName(n);  
-// 		profil->Draw("AP*");
-// 		fOutProfile->cd();
-// 		profil->Write();
-// 		delete profil;
-// 		smearer.dataset->Write();
-
 
 	      }
 
@@ -1916,6 +1833,7 @@ int main(int argc, char **argv) {
 	      //}
 	      TGraph *profil = GetProfile(var, smearer,0);
 	      TString n="profileChi2_"+name+"_"; n+=randomInt;
+	      n.ReplaceAll("-","_");
 	      profil->SetName(n);  
 	      TCanvas c("c_"+name);
 	      profil->Draw("AP*");
@@ -1926,24 +1844,8 @@ int main(int argc, char **argv) {
 	      delete profil;
 	    }
 	  std::cout << "Cloning args" << std::endl;
-	  //	  RooArgSet *mu = (RooArgSet *)args.snapshot();
-	  //std::cout << "creating roomultivargaussian" << std::endl;
-	  //RooMultiVarGaussian g("multi","",args, *mu, *(smearer.GetMarkovChainAsDataSet()->covarianceMatrix()));
-	  //std::cout << "created" << std::endl;
 
-	  // 	  RooDataSet *dataset = g.generate(args,10);
-	  // 	  for(Long64_t iGen=0; iGen<1; iGen++){  
-	  // 	    RooArgList argList_(* dataset->get(iGen));
-	  // 	    TIterator *it_ = argList_.createIterator();
-	  // 	    for(RooRealVar *var = (RooRealVar*)it_->Next(); var != NULL; var = (RooRealVar*)it_->Next()){
-	  // 	      if (!var->isLValue()) continue;
-	  // 	      TString  name(var->GetName());
-	  // 	      //std::cout << name << var->getVal() << std::endl;
-	  // 	      var->Print();
-	  // 	      //args.setRealValue(name,var->getVal());
-// 	    }
-// 	    //smearer.evaluate();
-// 	  }
+
 	  fOutProfile->Close();
 	  
 	}

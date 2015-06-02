@@ -12,22 +12,17 @@
 
 #include "ZeeEvent.hh"
 #include "ElectronCategory_class.hh"
+
 // prende le TChain
-
-
 // definisce i branch da disabilitare
-
-
-
 // prende la lista delle regioni e fa una lista di tagli indicizzati secondo l'ordine delle regioni
-
-
 // applica i tagli in cascata, se nessun evento passa i tagli l'evento e' buttato, altrimenti viene importato
 // e gli viene assegnato l'indice del taglio/regione
 
 class SmearingImporter{
   typedef zee_events_t event_cache_t;
   typedef std::vector<event_cache_t> regions_cache_t;
+
 public:
   // constructor
   inline SmearingImporter(){};
@@ -51,14 +46,18 @@ public:
   inline void SetCommonCut(TString cut){_commonCut=cut;};
   inline void SetSmearingEt(bool value){_isSmearingEt=value;};
   inline void SetPdfSystWeight(int value){_pdfWeightIndex=value;};
+  inline void SetTargetVariable(TString targetVariable){_targetVariable=targetVariable;};
+  inline void SetConfiguration(TString configuration){_Configuration=configuration;};
+  inline TString GetTargetVariable(){return _targetVariable;};
+  inline TString GetConfiguration(){return _Configuration;};
 
   std::vector<TString> _regionList;
   float _scaleToy, _constTermToy;
 
 private:
-  //  regions_cache_t _cache; // one entry per region
-  //  TChain *_chain;
 
+  TString _targetVariable;
+  TString _Configuration;
   TString _energyBranchName;
   TString _commonCut;
   TString _eleID;

@@ -1,0 +1,6 @@
+scale_EE-invMass_100_200-ZPt_0_10-Et_25-trigger-noPF =  1.0021 +/- 0.0050000 L(0.95 - 1.05) // [GeV]
+scale_EB-invMass_100_200-ZPt_0_10-Et_25-trigger-noPF =  0.99910 +/- 0.0050000 L(0.95 - 1.05) // [GeV]
+constTerm_EE-invMass_100_200-ZPt_0_10-Et_25-trigger-noPF =  0.0095000 +/- 0.030000 L(0 - 0.05) 
+constTerm_EB-invMass_100_200-ZPt_0_10-Et_25-trigger-noPF =  0.0000 +/- 0.030000 L(0 - 0.05) 
+alpha_EE-invMass_100_200-ZPt_0_10-Et_25-trigger-noPF =  0.0000 +/- 0.010000 C L(0 - 0.2) 
+alpha_EB-invMass_100_200-ZPt_0_10-Et_25-trigger-noPF =  0.0000 +/- 0.010000 C L(0 - 0.2) 

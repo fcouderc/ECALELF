@@ -4,6 +4,7 @@
 #define GAP
 #include <TPRegexp.h>
 #include <stdlib.h>
+#include <fstream>
 
 ElectronCategory_class::~ElectronCategory_class(){
 
@@ -14,7 +15,9 @@ ElectronCategory_class::~ElectronCategory_class(){
 ElectronCategory_class::ElectronCategory_class(bool isRooFit_, bool roofitNameAsNtuple_):
   _isRooFit(isRooFit_),
   _roofitNameAsNtuple(roofitNameAsNtuple_),
-  energyBranchName("energySCEle_regrCorrSemiParV5_pho"),
+  //energyBranchName("energySCEle_regrCorrSemiParV5_pho"),
+  //energyBranchName("energySCEle"),
+  energyBranchName("energySCEle_regrCorrSemiParV5_ele"),
   _corrEle(false){
 
   return;
@@ -22,7 +25,7 @@ ElectronCategory_class::ElectronCategory_class(bool isRooFit_, bool roofitNameAs
 
 // nEle tells you if the cut is on electron 1 (nEle=1), electron 2 (nEle=2), both(nEle=0)
 TCut ElectronCategory_class::GetCut(TString region, bool isMC, int nEle, bool corrEle){
-
+  //This translates the cut string into the proper ROOT expression
 
   if(region.Sizeof()<=1){
     std::cerr << "[ERROR]: no region defined" << std::endl;
@@ -47,13 +50,28 @@ TCut ElectronCategory_class::GetCut(TString region, bool isMC, int nEle, bool co
     if(isMC && cut_string.Contains("lumiBlock")) continue;
     //      std::cout << "[DEBUG] Skipping runNumber cut for MC " << isMC << "\t" << string << std::endl;
 
-    if(isMC==false && (corrEle || _corrEle)){
-      //std::cerr << "[INFO] scaleEle for GetCut" << std::endl;
+    if(isMC==false && (corrEle || _corrEle)){//Data
       cut_string.ReplaceAll(energyBranchName+"_ele1",energyBranchName+"_ele1 * scaleEle_ele1");
       cut_string.ReplaceAll(energyBranchName+"_ele2",energyBranchName+"_ele2 * scaleEle_ele2");
+      //TString invMassName=energyBranchName; invMassName.ReplaceAll("energySCEle","invMass_SC");
+      //cut_string.ReplaceAll(invMassName,invMassName+"*sqrt(scaleEle_ele1 * scaleEle_ele2)");
+    }else if(isMC==true /*&& (smearEle || _smearEle)*/){//MC
+      cut_string.ReplaceAll(energyBranchName+"_ele1",energyBranchName+"_ele1 * smearEle_ele1");
+      cut_string.ReplaceAll(energyBranchName+"_ele2",energyBranchName+"_ele2 * smearEle_ele2");
+      //TString invMassName=energyBranchName; invMassName.ReplaceAll("energySCEle","invMass_SC");
+      //cut_string.ReplaceAll(invMassName,invMassName+"*sqrt(scaleEle_ele1 * scaleEle_ele2)");
+      }
+
+    if(cut_string.Contains("invMass_var")){
       TString invMassName=energyBranchName; invMassName.ReplaceAll("energySCEle","invMass_SC");
+      cut_string.ReplaceAll("invMass_var",invMassName);
+      if(isMC==false && (corrEle || _corrEle)){//Data
       cut_string.ReplaceAll(invMassName,invMassName+"*sqrt(scaleEle_ele1 * scaleEle_ele2)");
+      }else if(isMC==true /*&& (smearEle || _smearEle)*/){//MC
+	cut_string.ReplaceAll(invMassName,invMassName+"*sqrt(smearEle_ele1 * smearEle_ele2)");
+      }
     }
+
     // se contiene solo ele2 rimuovi, altrimenti sostituisci
     if(nEle!=0){
       if(nEle==1){
@@ -79,9 +97,14 @@ TCut ElectronCategory_class::GetCut(TString region, bool isMC, int nEle, bool co
     cut+=cut_string;
   }
 
-#ifdef DEBUG
-  std::cout << cut << std::endl;
-#endif
+  //std::ofstream cut_file("tmp/cuts.txt",std::ofstream::app);
+  //if(isMC==false){
+  // cut_file<<"[DATA]"<<std::endl;
+  //}else{
+  // cut_file<<"[MC]"<<std::endl;
+  //}
+  //cut_file<<"ElectronCategory_class::GetCut asks for "<<std::endl<< cut << std::endl<< std::endl;
+
   return cut; //full AND of cuts
 
 }
@@ -301,6 +324,54 @@ std::set<TString> ElectronCategory_class::GetCutSet(TString region){
     }
 
     //---------------
+    //Use this if you need a range for your variable
+    //------------------ZPt
+    if(string.Contains("ZPt")){
+      TObjArray *splitted = string.Tokenize("_");
+      if(splitted->GetEntries() < 3){
+	std::cerr << "ERROR: incomplete ZPt region definition" << std::endl;
+	continue;
+      } 
+      TObjString *Objstring1 = (TObjString *) splitted->At(1);
+      TObjString *Objstring2 = (TObjString *) splitted->At(2);
+      
+      TString string1 = Objstring1->GetString();
+      TString string2 = Objstring2->GetString();
+      
+      TCut min_cut("ZPta_"+energyBranchName+" >= "+string1);
+      TCut max_cut("ZPta_"+energyBranchName+" <  "+string2);
+
+      cut_string += min_cut && max_cut;
+      cutSet.insert(TString(min_cut));
+      cutSet.insert(TString(max_cut));
+
+      delete splitted;
+      continue;
+    }
+    //--------------- invMass
+    if(string.Contains("invMass")){
+      TObjArray *splitted = string.Tokenize("_");
+      if(splitted->GetEntries() < 3){
+	std::cerr << "ERROR: incomplete invMass region definition" << std::endl;
+	continue;
+      } 
+      TObjString *Objstring1 = (TObjString *) splitted->At(1);
+      TObjString *Objstring2 = (TObjString *) splitted->At(2);
+      
+      TString string1 = Objstring1->GetString();
+      TString string2 = Objstring2->GetString();
+      
+      TCut min_cut("invMass_var >= "+string1);
+      TCut max_cut("invMass_var <  "+string2);
+
+      cut_string += min_cut && max_cut;
+      cutSet.insert(TString(min_cut));
+      cutSet.insert(TString(max_cut));
+
+      delete splitted;
+      continue;
+    }
+
     //--------------- gain
     if(string.Contains("gainEle")){
       TObjArray *splitted = string.Tokenize("_");
@@ -1246,7 +1317,7 @@ std::set<TString> ElectronCategory_class::GetCutSet(TString region){
       continue;
     }      
 
-    std::cout << "[WARNING] Region " << string << " not found" << std::endl;
+    std::cout << "[WARNING] Region " << string << " not found. Check this, please!" << std::endl;
 
   }
 

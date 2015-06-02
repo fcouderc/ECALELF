@@ -3,7 +3,6 @@
 #include <TTreeFormula.h>
 #include <TLorentzVector.h>
 #include <iostream> 
-
 //#define DEBUG
 //#define NOFRIEND
 
@@ -30,7 +29,9 @@ TTree *addBranch_class::AddBranch(TChain* originalChain, TString treename, TStri
 
 TTree* addBranch_class::AddBranch_ZPt(TChain* originalChain, TString treename, TString energyBranchName, bool fastLoop){
   //sanity checks
-
+  //! run with addBranch=ZPt_energySCEle_X
+  std::cout<<"Adding branch ZPt "<<std::endl;
+  std::cout<<"energyBranchName is "<<energyBranchName<<std::endl;
   TTree* newtree = new TTree(treename, treename);
 
   //add pt branches
@@ -38,8 +39,10 @@ TTree* addBranch_class::AddBranch_ZPt(TChain* originalChain, TString treename, T
   Float_t         etaEle[2];
   Float_t         energyEle[2];
   Float_t         corrEle[2]={1.,1.};
-  Float_t         ZPt, ZPta;
-  TLorentzVector ele1,ele2;
+  Float_t         smearEle[2]={1.,1.};
+  Float_t         ZPt;
+  Float_t         ZPta;
+  TLorentzVector  ele1,ele2;
 
   originalChain->SetBranchAddress("etaEle", etaEle);
   originalChain->SetBranchAddress("phiEle", phiEle);
@@ -51,30 +54,35 @@ TTree* addBranch_class::AddBranch_ZPt(TChain* originalChain, TString treename, T
     originalChain->SetBranchStatus("phiEle",1);
     originalChain->SetBranchStatus(energyBranchName,1);
     if(originalChain->GetBranch("scaleEle")!=NULL){
-      std::cout << "[STATUS] Adding electron energy correction branch from friend " << originalChain->GetTitle() << std::endl;
+      std::cout << "[STATUS] In AddBranch_ZPt, adding electron energy correction branch from friend " << originalChain->GetTitle() << std::endl;
       originalChain->SetBranchAddress("scaleEle", corrEle);
+    }
+    if(originalChain->GetBranch("smearEle")!=NULL){
+      std::cout << "[STATUS] In AddBranch_ZPt, adding smearing electron energy correction branch from friend " << originalChain->GetTitle() << std::endl;
+      originalChain->SetBranchAddress("smearEle", smearEle);
     }
   }
 
   newtree->Branch("ZPt_"+energyBranchName, &ZPt, "ZPt/F");
+  newtree->Branch("ZPta_"+energyBranchName, &ZPta, "ZPta/F");
   //px = pt*cosphi; py = pt*sinphi; pz = pt*sinh(eta)
-  //p^2 = E^2 - m^2 = pt^2*(1+sinh^2(eta)) = pt^2*(cosh^2(eta))
+  //p^2 =( E^2 - m^2 )=px^2 + py^2 + pz^2= pt^2*(1+sinh^2(eta)) = pt^2*(cosh^2(eta))
+
   float mass = 0.; //0.000511;
   Long64_t nentries= originalChain->GetEntries();
   for(Long64_t ientry = 0; ientry< nentries; ientry++){
     originalChain->GetEntry(ientry);
-    float regrCorr_fra_pt0 = sqrt(((energyEle[0]*energyEle[0])-mass*mass)/(1+sinh(etaEle[0])*sinh(etaEle[0])));
-    float regrCorr_fra_pt1 = sqrt(((energyEle[1]*energyEle[1])-mass*mass)/(1+sinh(etaEle[1])*sinh(etaEle[1])));
-    ZPt = 
-      TMath::Sqrt(pow(regrCorr_fra_pt0*TMath::Sin(phiEle[0])+regrCorr_fra_pt1*TMath::Sin(phiEle[1]),2)+pow(regrCorr_fra_pt0*TMath::Cos(phiEle[0])+regrCorr_fra_pt1*TMath::Cos(phiEle[1]),2));
-
-    ele1.SetPtEtaPhiE(energyEle[0]/cosh(etaEle[0]), etaEle[0], phiEle[0], energyEle[0]);
-    ele2.SetPtEtaPhiE(energyEle[1]/cosh(etaEle[1]), etaEle[1], phiEle[1], energyEle[1]);
+    //float regrCorr_fra_pt0 = sqrt(((energyEle[0]*energyEle[0])-mass*mass)/(1+sinh(etaEle[0])*sinh(etaEle[0])));
+    //float regrCorr_fra_pt1 = sqrt(((energyEle[1]*energyEle[1])-mass*mass)/(1+sinh(etaEle[1])*sinh(etaEle[1])));
+    //ZPt = 
+    //TMath::Sqrt(pow(regrCorr_fra_pt0*TMath::Sin(phiEle[0])+regrCorr_fra_pt1*TMath::Sin(phiEle[1]),2)+pow(regrCorr_fra_pt0*TMath::Cos(phiEle[0])+regrCorr_fra_pt1*TMath::Cos(phiEle[1]),2));
+    ele1.SetPtEtaPhiE(energyEle[0]*corrEle[0]*smearEle[0]/cosh(etaEle[0]), etaEle[0], phiEle[0], energyEle[0]*corrEle[0]*smearEle[0]);
+    ele2.SetPtEtaPhiE(energyEle[1]*corrEle[0]*smearEle[0]/cosh(etaEle[1]), etaEle[1], phiEle[1], energyEle[1]*corrEle[0]*smearEle[0]);
     ZPta = (ele1+ele2).Pt();
-    if(fabs(ZPt - ZPta)>0.001){
-      std::cerr << "[ERROR] ZPt not well calculated" << ZPt << "\t" << ZPta << std::endl;
-      exit(1);
-    }
+    //if(fabs(ZPt - ZPta)>0.001){
+    //  std::cerr << "[ERROR] ZPt not well calculated" << ZPt << "\t" << ZPta << std::endl;
+    //  exit(1);
+    //}
 
     newtree->Fill();
   }
@@ -315,12 +323,14 @@ TTree* addBranch_class::AddBranch_iSM(TChain* originalChain, TString treename, T
 // branch with the smearing category index
 TTree* addBranch_class::AddBranch_smearerCat(TChain* originalChain, TString treename, bool isMC){
 
-  ElectronCategory_class cutter;
-  if(originalChain->GetBranch("scaleEle")!=NULL){
-    cutter._corrEle=true;
-    std::cout << "[INFO] Activating scaleEle for smearerCat" << std::endl;
-    
+  std::ofstream cut_file("tmp/cuts.txt",std::ofstream::app);
+  if(isMC==false){                                                                                                                                           
+    cut_file<<"[DATA]: "<<originalChain->GetTitle()<<std::endl;            
+  }else{                                                                                                                                                     
+  cut_file<<"[MC]: "<<originalChain->GetTitle()<<std::endl;                                                                                                                              
   }
+ 
+  ElectronCategory_class cutter;
   TString oddString="";
 
   //setting the new tree
@@ -334,7 +344,15 @@ TTree* addBranch_class::AddBranch_smearerCat(TChain* originalChain, TString tree
   
   /// \todo disable branches using cutter
   originalChain->SetBranchStatus("*",0);
-  
+  if(originalChain->GetBranch("scaleEle")!=NULL){
+    cutter._corrEle=true;
+    std::cout << "[INFO] Activating scaleEle for smearerCat" << std::endl;
+    originalChain->SetBranchStatus("scaleEle", 1);
+  }
+  if(originalChain->GetBranch("smearEle")!=NULL){
+    std::cout << "[INFO] Activating smearEle for smearerCat" << std::endl;
+    originalChain->SetBranchStatus("smearEle", 1);    
+  }
   std::vector< std::pair<TTreeFormula*, TTreeFormula*> > catSelectors;
   for(std::vector<TString>::const_iterator region_ele1_itr = _regionList.begin();
       region_ele1_itr != _regionList.end();
@@ -346,8 +364,7 @@ TTree* addBranch_class::AddBranch_smearerCat(TChain* originalChain, TString tree
 	itr != branchNames.end(); itr++){
       originalChain->SetBranchStatus(*itr, 1);
     }
-    if(    cutter._corrEle==true) originalChain->SetBranchStatus("scaleEle", 1);
-
+    //if(    cutter._corrEle==true) 
 
     for(std::vector<TString>::const_iterator region_ele2_itr = region_ele1_itr;
 	region_ele2_itr != _regionList.end();
@@ -355,11 +372,10 @@ TTree* addBranch_class::AddBranch_smearerCat(TChain* originalChain, TString tree
       
       if(region_ele2_itr==region_ele1_itr){
 	TString region=*region_ele1_itr;
-	region.ReplaceAll(_commonCut,""); //remove the common Cut!
+	region.ReplaceAll(_commonCut,""); //remove the common Cut! You want to categorize all the events
 	TTreeFormula *selector = new TTreeFormula("selector-"+(region), cutter.GetCut(region+oddString, isMC), originalChain);
 	catSelectors.push_back(std::pair<TTreeFormula*, TTreeFormula*>(selector,NULL));
-	//selector->Print();
-	//std::cout << cutter.GetCut(region+oddString, isMC) << std::endl;
+	cut_file << cutter.GetCut(region+oddString, isMC) << std::endl<<std::endl;
 	//exit(0);
       } else {
 	TString region1=*region_ele1_itr;
@@ -375,8 +391,11 @@ TTree* addBranch_class::AddBranch_smearerCat(TChain* originalChain, TString tree
 						   cutter.GetCut(region2+oddString, isMC, 1),
 						   originalChain);
 	catSelectors.push_back(std::pair<TTreeFormula*, TTreeFormula*>(selector1,selector2));
+	cut_file << cutter.GetCut(region1+oddString, isMC,1) << " && "<< cutter.GetCut(region2+oddString, isMC,2) << std::endl;
+	cut_file<<"OR"<<std::endl;
+	cut_file << cutter.GetCut(region1+oddString, isMC,2) << " && "<< cutter.GetCut(region2+oddString, isMC,1) << std::endl<<std::endl;
 	//selector1->Print();
-	//	selector2->Print();
+	//selector2->Print();
 	//exit(0);
       } 
 	

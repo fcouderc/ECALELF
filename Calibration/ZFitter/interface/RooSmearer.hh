@@ -15,12 +15,6 @@
 #include <RooSetProxy.h>
 #include <RooStats/MarkovChain.h>
 #include "SmearingImporter.hh"
-//#define DEBUG
-/*
-
-
-
-*/
 
 class ZeeCategory {
 public:
@@ -32,27 +26,19 @@ public:
   };
 
   inline ~ZeeCategory(){
-    //std::cout << "[STATUS] Destroy ZeeCategory: " << categoryName1 << "\t" << categoryName2 << std::endl;
-    // do not delete data_events;
-    // do not delete mc_events;
+
 #ifdef DEBUG
     if(hist_data!=NULL)      hist_data->Print();
-    //    if(smearHist_data!=NULL) smearHist_data->Print();
     if(hist_mc!=NULL)        hist_mc->Print();
     if(smearHist_mc!=NULL)   smearHist_mc->Print();
 #endif
-//     if(hist_data!=NULL) delete hist_data;
-//     //    if(smearHist_data!=NULL) delete smearHist_data;
-//     if(hist_mc!=NULL) delete hist_mc;
-//     if(smearHist_mc!=NULL) delete smearHist_mc;
     data_events=NULL;
     mc_events=NULL;
   };
 
 
-  //SetBinning(double min, double max, double nBins); // fixed
-
 public:
+  //! Members of ZeeCategory
   zee_events_t *data_events;
   zee_events_t *mc_events;
 
@@ -67,8 +53,8 @@ public:
   double scale2,constant2, alpha2;
 
   int nBins;
-  float invMass_min;
-  float invMass_max;
+  float targetVariable_min;
+  float targetVariable_max;
   
   TH1F *hist_data;
   TH1F *smearHist_data;
@@ -98,17 +84,9 @@ public:
    {
      return new RooSmearer(*this,newname);
    };
-//   virtual ~RooSmearer();
-//  inline double eval() const { std::cout << "##############################" << std::endl;return evaluate(); } ;
+
   Double_t evaluate(void) const;
 
-// inline  RooSmearer(const char *name,TChain *data_chain_, 
-// 	     TChain *signal_chain_,
-// 	     TChain *bkg_chain_, 
-// 	     std::vector<TString> regionList,
-// 	     std::vector<RooArgSet > params,
-// 	     TString energyBranchName="energySCEle_regrCorr_ele"
-// 		   ){};
   RooSmearer(const char *name, TChain *data_chain_, 
 	     TChain *signal_chain_,
 	     TChain *bkg_chain_, 
@@ -119,7 +97,7 @@ public:
 	     );
 
 
-  // Settting options
+  // Setting options
   void AutoNSmear(ZeeCategory& category);
   void AutoNBins(ZeeCategory& category);
 
@@ -143,27 +121,24 @@ public:
   inline void SetEleID(TString value){importer.SetEleID(value);};
   inline void SetCommonCut(TString cut){importer.SetCommonCut(cut);};
 
+  inline void SetTargetVariable(TString targetVariable,TString configuration){
+    targetVariable_=targetVariable;
+    importer.SetTargetVariable(targetVariable);
+    importer.SetConfiguration(configuration);//This sets if 1/2 are leading/subleading or random
+  }
+
   inline void SetHistBinning(double min, double max, double width){
-    invMass_min_=min;
-    invMass_max_=max;
-    invMass_bin_=width;
-    nBins_= (int) ((invMass_max_ - invMass_min_)/invMass_bin_);
+    //! Those are attributes of RooSmearer
+    targetVariable_min_=min;
+    targetVariable_max_=max;
+    targetVariable_bin_=width;
+    nBins_= 1 + (int) ((targetVariable_max_ - targetVariable_min_)/targetVariable_bin_);//because (int)3 =2
     return;
   }
 
   /// Initialize the categories: import from the tree
   void Init(TString commonCut, TString eleID, Long64_t nEvents=0, bool mcToy=false, bool externToy=true,TString initFile="");
-  //  TH1F *GetSmearedHisto(TString categoryName, 
-  //			bool smearEnergy=false, TString histoName="") const;
-  //  TH1F *GetSmearedHisto(int categoryIndex,
-  //			bool smearEnergy=false, TString histoName="") const;
 
-
-  // category manipulation
-  //  void EnableCategory(TString categoryName);
-  //  void EnableCategory(int categoryIndex);
-  //  void DisableCategory(TString categoryName);
-  //  void DisableCategory(int categoryIndex);
   inline RooDataSet *GetMarkovChainAsDataSet(){
     return _markov.GetAsDataSet();
   };
@@ -173,14 +148,16 @@ public:
       dataset->Print();
       delete dataset;
     }
-    //nllMin=nllMin_;
     dataset = new RooDataSet(name, title, RooArgSet(_paramSet,nllVar));
     return dataset;
   };
   inline RooDataSet *GetDataSet(void){
     return dataset;
   }
+
+
 private:
+  //! private members of RooSmearer
   TChain *_data_chain, *_signal_chain;
   SmearingImporter importer;
   std::vector<zee_events_t> mc_events_cache;
@@ -190,18 +167,19 @@ private:
   RooSetProxy _paramSet;
   RooArgSet *truthSet, pullArgs;
 
-  double invMass_min_;
-  double invMass_max_;
-  double invMass_bin_;
+  double targetVariable_min_;
+  double targetVariable_max_;
+  double targetVariable_bin_;
   int nBins_;
+  TString targetVariable_;
 
-  //  unsigned int _deactive_minEvents;
 public:
   float deltaNLLMaxSmearToy;
   unsigned int _deactive_minEventsDiag;
   unsigned int _deactive_minEventsOffDiag;
   double nllMin;
   unsigned int _nSmearToy;
+
 private:
 
   unsigned int _nLLtoy;
@@ -221,12 +199,11 @@ public:
   RooDataSet *dataset;
 
   RooStats::MarkovChain _markov;
+
 private:
   void SetCache(Long64_t nEvents=0, bool cacheToy=false, bool externToy=true);
   void InitCategories(bool mcToy=false);
 
-  //double smearedEnergy(float ene,float scale,float alpha,float
-  //constant) const;
   double smearedEnergy(double *smear, unsigned int nGen, float ene,float scale,float alpha,float constant, const float *fixedSmearings=NULL) const;
   void SetSmearedHisto(const zee_events_t& cache, 
 		       RooArgSet pars1, RooArgSet pars2, 
@@ -255,7 +232,6 @@ public:
   
   double getCompatibility(bool forceUpdate=false) const;
   void DumpNLL(void) const;
-  //  float getCompatibility(const RooSmearer *ptr);
   inline RooArgSet GetParams(void){return _paramSet;};
 
   inline double GetNllRMS(){return lastNLLrms;};
