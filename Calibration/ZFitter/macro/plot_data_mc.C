@@ -123,7 +123,7 @@ void Plot(TCanvas *c, TH1F *data, TH1F *mc, TH1F *mcSmeared=NULL, TLegend *legen
 
   float yscale=0.75/(pad1->GetYlowNDC() -pad2->GetYlowNDC());
   float xscale=1;
-
+  std::cout<<"Starting plotting. Method Plot of plot_data_mc.C"<<endl;
   if(ratio){
 
 
@@ -169,7 +169,7 @@ void Plot(TCanvas *c, TH1F *data, TH1F *mc, TH1F *mcSmeared=NULL, TLegend *legen
   }else if(mc->GetXaxis()->GetXmax()<150){
     mc->GetXaxis()->SetTitle("M_{ee} (GeV/c^{2})");
   }else if(mc->GetXaxis()->GetXmax()>150){
-    mc->GetXaxis()->SetTitle("ptSum (GeV/c^{2})");
+    mc->GetXaxis()->SetTitle("pt2Sum (GeV/c^{2})");
   }
 
   char ylabel[100];
@@ -253,6 +253,7 @@ void Plot(TCanvas *c, TH1F *data, TH1F *mc, TH1F *mcSmeared=NULL, TLegend *legen
       c->cd();
     }
 
+    std::cout<<"Saving the plots"<<std::endl;
     c->SaveAs(img_filename(filename, region, ".eps"));
     c->SaveAs(img_filename(filename, region, ".png"));
     c->SaveAs(img_filename(filename, region, ".C"));
@@ -268,7 +269,6 @@ void Plot(TCanvas *c, TH1F *data, TH1F *mc, TH1F *mcSmeared=NULL, TLegend *legen
 
 void PlotMeanHist(TString filename, TString energy="8TeV", TString lumi="", int rebin=0, TString myRegion=""){
   
-
   TH2F eventFraction("eventFraction", "", 10, 0, 9, 10, 0, 9);
   int index_max=0;
   double  region_array[20][20];
@@ -286,6 +286,10 @@ void PlotMeanHist(TString filename, TString energy="8TeV", TString lumi="", int 
   
   TList *KeyList = f_in.GetListOfKeys();
 
+  //std::map<TString, hist_t > dataHist;
+  //std::map<TString, hist_t > mcHist;
+  //std::map<TString, hist_t > mcSmearedHist;
+
   std::map<TString, hist_t > dataHist;
   std::map<TString, hist_t > mcHist;
   std::map<TString, hist_t > mcSmearedHist;
@@ -295,8 +299,6 @@ void PlotMeanHist(TString filename, TString energy="8TeV", TString lumi="", int 
   for(int i =0; i <  KeyList->GetEntries(); i++){
 
     TH1F *h = (TH1F *)((TKey *)KeyList->At(i))->ReadObj(); 
-    //    TString keyName = (KeyList->At(i))->GetName();
-   
     TString keyName = h->GetName();
     
     TString type=keyName;
@@ -304,12 +306,11 @@ void PlotMeanHist(TString filename, TString energy="8TeV", TString lumi="", int 
 
     TString region=keyName;
     region.Remove(region.Last('_'));
-    //std::cout << type << "\t" << keyName << "\t" << region << std::endl;
 
-    //    if(region.CompareTo("region_2_2")!=0) continue;
-    //    std::cout << "hist region = " << region << std::endl;
-    /*------------------------------ somma sugli istogrammi */
     std::cout << "Data Entries in " << keyName << "\t" << h->GetEntries() << std::endl;
+    std::cout <<"KeyName is "<<keyName<<std::endl;
+    std::cout <<"type is "<<type<<std::endl;
+    std::cout <<"region is "<<region<<std::endl;
 
     if(type.CompareTo("data")==0 || type.CompareTo("smeardata")==0){
       if(dataHist.find(region)==dataHist.end()){
@@ -339,8 +340,6 @@ void PlotMeanHist(TString filename, TString energy="8TeV", TString lumi="", int 
 
   /*------------------------------ Plotting */
   TCanvas *c = new TCanvas("c","c");
-
-  //    TPaveText *pv = new TPaveText(0.7,0.7,1, 0.8);    
   TLegend *legend = new TLegend(0.7,0.8,0.95,0.92);
   legend->SetFillStyle(3001);
   legend->SetFillColor(1);
@@ -351,24 +350,15 @@ void PlotMeanHist(TString filename, TString energy="8TeV", TString lumi="", int 
   //    SetLegendStyle(legend);
 
   TH1F *mc_all[3]={NULL}, *data_all[3]={NULL}, *mcSmeared_all[3]={NULL};
-  
+ 
+  std::cout<<"looping over histos to plot them"<<std::endl;
   for(std::map<TString, hist_t>::const_iterator itr = dataHist.begin();
       itr!= dataHist.end(); itr++){
     c->cd();
     TString region=itr->first;
     if(myRegion!="" && !region.Contains(myRegion)) continue;
-    //     for(int i_region=0; i_region < n_region -1; i_region++){
-    //       for(int j_region=i_region; j_region < n_region; j_region++){
-    // 	region="region_";
-    // 	region+=i_region;
-    // 	region+="_";
-    // 	region+=j_region;
-      
-    //    f_in.ls();
     TH1F *h_ref = (TH1F *)((TKey *)KeyList->At(0))->ReadObj();
     TH1F *mc=GetMeanHist(mcHist[region], h_ref, "mc_"+region);
-    //	std::cout << mc->GetEntries() << "\t" << mc->Integral() << std::endl;
-    //	return;;
     TH1F *data=GetMeanHist(dataHist[region], h_ref, "data_"+region, true);	
     TH1F *mcSmeared=GetMeanHist(mcSmearedHist[region], h_ref, "mcSmeared_"+region);
     f_out << pdfWeightIndex 
@@ -377,30 +367,6 @@ void PlotMeanHist(TString filename, TString energy="8TeV", TString lumi="", int 
 	  << "\t" << data->GetMean() << "\t" << data->GetMeanError() 
 	  << "\t" << data->GetRMS() << "\t" << data->GetRMSError() 
 	  << std::endl;
-//     if(region.Contains("EE")){
-//       if(mc_all[1] == NULL) mc_all[1]=(TH1F *) mc->Clone("EE_mc_hist");
-//       else mc_all[1]->Add(mc);
-//       if(data_all[1] == NULL) data_all[1]=(TH1F *) data->Clone("EE_data_hist");
-//       else data_all[1]->Add(data);
-//       if(mcSmeared_all[1] == NULL) mcSmeared_all[1]=(TH1F *) mcSmeared->Clone("EE_mcSmeared_hist");
-//       else mcSmeared_all[1]->Add(mcSmeared);
-//     }
-
-//     if(region.Contains("EB")){
-//       if(mc_all[0] == NULL) mc_all[0]=(TH1F *) mc->Clone("EB_mc_hist");
-//       else mc_all[0]->Add(mc);
-//       if(data_all[0] == NULL) data_all[0]=(TH1F *) data->Clone("EB_data_hist");
-//       else data_all[0]->Add(data);
-//       if(mcSmeared_all[0] == NULL) mcSmeared_all[0]=(TH1F *) mcSmeared->Clone("EB_mcSmeared_hist");
-//       else mcSmeared_all[0]->Add(mcSmeared);
-//     }
-    
-//     if(mc_all[2] == NULL) mc_all[2]=(TH1F *) mc->Clone("all_mc_hist");
-//     else mc_all[2]->Add(mc);
-//     if(data_all[2] == NULL) data_all[2]=(TH1F *) data->Clone("all_data_hist");
-//     else data_all[2]->Add(data);
-//     if(mcSmeared_all[2] == NULL) mcSmeared_all[2]=(TH1F *) mcSmeared->Clone("all_mcSmeared_hist");
-//     else mcSmeared_all[2]->Add(mcSmeared);
     
     if(rebin>0){
       data->Rebin(rebin);
@@ -411,63 +377,8 @@ void PlotMeanHist(TString filename, TString energy="8TeV", TString lumi="", int 
       Plot(c, data,mc,mcSmeared,legend, region, filename, energy, lumi);
   }
   
-  //    Plot(c, data_all[0],mc_all[0],mcSmeared_all[0],legend, "EBinclusive", filename, energy, lumi);
-  //  Plot(c, data_all[1],mc_all[1],mcSmeared_all[1],legend, "EEinclusive", filename, energy, lumi);
-  //  Plot(c, data_all[2],mc_all[2],mcSmeared_all[2],legend, "Allinclusive", filename, energy, lumi);
-  //    }
   delete c;
   f_in.Close();
-
-//   TCanvas c2("eventFraction_cavas", "");
-//   c2.cd();
-//   gStyle->SetPaintTextFormat(".1f %%");
-//   eventFraction.SetMarkerSize(2);
-//   int n_region=(sqrt(8*dataHist.size()+1)-1)/2-1;
-//   eventFraction.GetXaxis()->SetRangeUser(0,n_region);
-//   eventFraction.GetYaxis()->SetRangeUser(0,n_region);  
-//   eventFraction.GetXaxis()->CenterLabels(kTRUE);
-//   eventFraction.GetYaxis()->CenterLabels(kTRUE);
-//   eventFraction.GetXaxis()->SetNdivisions(n_region*2);
-//   eventFraction.GetYaxis()->SetNdivisions(n_region*2);
-
-//   int i;
-//   for(i=0; i < eventFraction.GetNbinsY() && eventFraction.GetBinContent(0,i) > 0; i++){
-//   }
-//   std::cout << i << std::endl;
-//   if(i < eventFraction.GetNbinsY()){
-//     std::cout << "Reduction" << std::endl;
-//         eventFraction.GetXaxis()->SetRangeUser(0,i);
-// 	eventFraction.GetYaxis()->SetRangeUser(0,i);
-//   }
-  //std::cout << "Entries: " << eventFraction.Integral() << std::endl;;
-  //eventFraction.Scale(100./eventFraction.Integral());
-  //  eventFraction.Draw("text00");
-  //  c2.SaveAs("eventFraction.eps");
-
-
-//   double integral=0;
-//   for(int i=0; i < index_max+1; i++){
-//       for(int j=i; j < index_max+1; j++){
-// 	std::cout << i << "\t" << j << "\t" << region_array[i][j] << std::endl;
-// 	integral+=region_array[i][j];
-//       }
-//   }
-//   std::cout << "Integral = " << integral << std::endl;
-
-//   std::cout << "\\begin{pmatrix}" << std::endl;
-//   for(int i=0; i < index_max+1; i++){
-//       for(int j=0; j < index_max+1; j++){
-// 	if(j<i) std::cout << "\t\t& ";
-// 	else {
-// 	  region_array[i][j]/=integral/100.; // in percentuale
-// 	  //std::cout << i << "\t" << j << "\t" << region_array[i][j] << " %" << std::endl;
-// 	  std::cout << std::setprecision(2) << region_array[i][j] << " \\%";
-// 	  if(j!=index_max) std::cout << "\t& "; 
-// 	}
-//       }
-//       std::cout << "\t\\\\" << std::endl;
-//   }
-//   std::cout << "\\end{pmatrix}" << std::endl;
   f_out.close();
   return;
 }
