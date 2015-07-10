@@ -107,11 +107,11 @@ void ZFit_class::Import(TString commonCut, TString eleID_, std::set<TString>& br
   commonCut+="-eleID_"+eleID_;
   TString mcCut, dataCut;
   if(l->GetN()>0){ // runDependent MC, treat it has data
-    std::cout << "[INFO] Importing run dependent MC" << std::endl;
+    std::cout << "[INFO] Inside ZFit_class::Import Importing run dependent MC" << std::endl;
     if(_oddMC) mcCut = cutter.GetCut(commonCut+"-odd", false);
     else mcCut = cutter.GetCut(commonCut, false);
   } else {
-    std::cout << "[INFO] Importing std MC" << std::endl;
+    std::cout << "[INFO] Inside ZFit_class::Import Importing std MC" << std::endl;
     if(_oddMC) mcCut = cutter.GetCut(commonCut+"-odd", true);
     else mcCut = cutter.GetCut(commonCut, true);
   }
@@ -120,7 +120,7 @@ void ZFit_class::Import(TString commonCut, TString eleID_, std::set<TString>& br
   if(_oddData) dataCut = cutter.GetCut(commonCut+"-odd", false);
   else dataCut = cutter.GetCut(commonCut, false);
   //std::cout << dataCut << std::endl;
-  std::cout << "------------------------------ IMPORT DATASETS" << std::endl;
+  std::cout << "------------------------------[INFO] Inside ZFit_class::Import IMPORT DATASETS" << std::endl;
   std::cout << "--------------- Importing signal mc: " <<signal_chain->GetEntries() <<std::endl;
   //if(signal!=NULL) delete signal;
   
@@ -145,6 +145,7 @@ void ZFit_class::Import(TString commonCut, TString eleID_, std::set<TString>& br
 
 TChain *ZFit_class::ImportTree(TChain *chain, TString commonCut, std::set<TString>& branchList){
 
+  std::cout<<"[INFO] Inside ZFit_class::ImportTree"<<std::endl;
   if(branchList.size() > 0){
     std::cout << "[STATUS] Disabling branches to fast import" << std::endl;
     chain->SetBranchStatus("*",0);
@@ -164,10 +165,13 @@ TChain *ZFit_class::ImportTree(TChain *chain, TString commonCut, std::set<TStrin
   if(chain->GetBranch("invMassSigma_SC_regrCorr_pho")) chain->SetBranchStatus("invMassSigma_SC_regrCorr_pho", 1);
   chain->SetBranchStatus("R9Ele",1);
   chain->SetBranchStatus("etaEle",1);
+  chain->SetBranchStatus("etaSCEle",1);
   chain->SetBranchStatus("recoFlagsEle", 1);
   chain->SetBranchStatus("eleID", 1);
   chain->SetBranchStatus("eventNumber", 1);
   chain->SetBranchStatus(invMass.GetName(), 1);
+  std::cout<<"[INFO] Inside ZFit_class.cc invMass is "<<invMass.GetName()<<std::endl;
+  chain->SetBranchStatus("energySCEle", 1);
   chain->AddBranchToCache("*",kTRUE);
   
   //std::cout << commonCut << std::endl;
@@ -718,8 +722,8 @@ void ZFit_class::Fit(TString region, bool doPlot){
       params->writeToFile(paramsMCFileName);		
       if(doPlot) SaveFitPlot(plotMCFileName,true);
     }else{
-      std::cerr << "[WARNING] MC fit for region: " << region << " not possible because nEvents < 100" << std::endl;
-      std::cout << "[WARNING] MC fit for region: " << region << " not possible because nEvents < 100" << std::endl;
+      std::cerr << "[WARNING] In src/ZFit_class.cc: MC fit for region: " << region << " not possible because nEvents < 100" << std::endl;
+      std::cout << "[WARNING] In src/ZFit_class.cc: MC fit for region: " << region << " not possible because nEvents < 100" << std::endl;
       return;
     }      
   } else {
