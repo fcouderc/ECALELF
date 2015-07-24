@@ -58,6 +58,8 @@ typedef std::map< TString, chain_map_t > tag_chain_map_t;
 
 
 std::vector<TString> ReadRegionsFromFile(TString fileName){
+  std::cout<<"Inside ReadRegionsFromFile (in ZFitter.cpp"<<std::endl;
+  std::cout<<"Reading file "<<fileName<<std::endl;
   ifstream file(fileName);
   std::vector<TString> regions;
   TString region;
@@ -75,9 +77,9 @@ std::vector<TString> ReadRegionsFromFile(TString fileName){
 
     file >> region;
     file.ignore(1000,10); // ignore the rest of the line until \n
-#ifdef DEBUG
+    #ifdef DEBUG
     std::cout << "[DEBUG] Reading region: " << region<< std::endl;
-#endif
+    #endif
     regions.push_back(region);
 
   }
@@ -239,9 +241,12 @@ int main(int argc, char **argv) {
   std::string smearEleFile, smearEleType;
   double smearingCBAlpha=1, smearingCBPower=5;
   std::string invMass_var;//! with this you choose the energy branch
-  std::string targetVariable="invMass";
+  std::string targetVariable_raw;  //It needs to be parsed
+  std::vector<TString> targetVariable;  //After the parsing you'll get a vector of string
   std::string configuration="leading";
-  float targetVariable_min=0., targetVariable_max=0., targetVariable_binWidth=0.250;
+  //float targetVariable_min=0., targetVariable_max=0., targetVariable_binWidth=0.250;
+  std::string targetVariable_min_raw="0.", targetVariable_max_raw="0.", targetVariable_binWidth_raw="0.250";
+  std::vector<float> targetVariable_min, targetVariable_max, targetVariable_binWidth;
   int fit_type_value=1;
   int signal_type_value=0;
   unsigned long long int nToys = 0;
@@ -326,11 +331,14 @@ int main(int argc, char **argv) {
     ("selection", po::value<string>(&selection)->default_value("loose"),"")
     ("commonCut", po::value<string>(&commonCut)->default_value("Et_25-trigger-noPF"),"")
     ("invMass_var", po::value<string>(&invMass_var)->default_value("invMass_SC_regrCorr_ele"),"")//This is used to decide the energy
-    ("targetVariable", po::value<string>(&targetVariable)->default_value("invMass"),"Specify the target variable if not the invariant mass")
+    ("targetVariable", po::value<string>(&targetVariable_raw)->default_value("invMass"),"Specify the target variable if not the invariant mass")//This needs to be parsed, in order to get a std::vector<string> targetVariable
     ("configuration", po::value<string>(&configuration)->default_value("leading"),"Specify the configuration of 1 and 2")
-    ("targetVariable_min", po::value<float>(&targetVariable_min)->default_value(65.),"")
-    ("targetVariable_max", po::value<float>(&targetVariable_max)->default_value(115.),"")
-    ("targetVariable_binWidth", po::value<float>(&targetVariable_binWidth)->default_value(0.25),"Smearing binning")
+    //("targetVariable_min", po::value<float>(&targetVariable_min)->default_value(65.),"")
+    //("targetVariable_max", po::value<float>(&targetVariable_max)->default_value(115.),"")
+    //("targetVariable_binWidth", po::value<float>(&targetVariable_binWidth)->default_value(0.25),"binning")
+    ("targetVariable_min", po::value<string>(&targetVariable_min_raw)->default_value("65."),"")
+    ("targetVariable_max", po::value<string>(&targetVariable_max_raw)->default_value("115."),"")
+    ("targetVariable_binWidth", po::value<string>(&targetVariable_binWidth_raw)->default_value("0.25"),"binning for the targetVariable")
     ("isOddMC", "Activate if use only odd events in MC")
     ("isOddData", "Activate if use only odd events in data")    
     //
@@ -428,10 +436,10 @@ int main(int argc, char **argv) {
   po::notify(vm);    
 
   //------------------------------ checking options
-  if(!vm.count("targetVariable_binWidth") && !vm.count("smearerFit")){
+  /*if(!vm.count("targetVariable_binWidth") && !vm.count("smearerFit")){
     std::cout << "[INFO] Bin Width=0.5" << std::endl;
-    targetVariable_binWidth=0.5;
-  }
+    targetVariable_binWidth.push_back(0.5);
+    }*/
 
   if (vm.count("help")) {
     cout << desc << "\n";
@@ -593,6 +601,7 @@ int main(int argc, char **argv) {
     runDivider.PrintRunRangeEvents();
     std::vector<TString> runRanges;
     if(runRangesFileName!="") runRanges = ReadRegionsFromFile(runRangesFileName);
+    std::cout<<"runRangesFileName "<<runRangesFileName<<std::endl;
     for(std::vector<TString>::const_iterator itr = runRanges.begin();
 	itr != runRanges.end();
 	itr++){
@@ -602,31 +611,56 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-
-
+  ////////////////////////////////////////////////////////////////////////
+  std::cout<<"In ZFitter.cpp, building names for your regions"<<std::endl;
   TString r(regionsFileName.c_str());
   r.Remove(0,r.Last('/')+1); r.ReplaceAll(".dat","");
 
   std::vector<TString> regions = ReadRegionsFromFile(regionsFileName);
   std::vector<TString> runRanges = ReadRegionsFromFile(runRangesFileName);
   std::vector<TString> categories;
-  for(std::vector<TString>::const_iterator region_itr = regions.begin();
-      region_itr != regions.end();
-      region_itr++){
+
+  for(std::vector<TString>::const_iterator cat_itr = regions.begin();
+      cat_itr != regions.end();
+      cat_itr++){
+    std::cout<<"Regions are "<<(*cat_itr)<<std::endl;
+  }
+
+  for(std::vector<TString>::const_iterator cat_itr = runRanges.begin();
+      cat_itr != runRanges.end();
+      cat_itr++){
+    std::cout<<"runRanges are "<<(*cat_itr)<<std::endl;
+  }
+
+  //Building the region full name
+  for(std::vector<TString>::const_iterator region_itr = regions.begin(); region_itr != regions.end(); region_itr++){
     if(runRanges.size()>0){
-      for(std::vector<TString>::const_iterator runRange_itr = runRanges.begin();
-	  runRange_itr!=runRanges.end();
-	  runRange_itr++){
+      for(std::vector<TString>::const_iterator runRange_itr = runRanges.begin();runRange_itr!=runRanges.end();runRange_itr++){
 	TString token1,token2; 
-	Ssiz_t ss=0;
-	runRange_itr->Tokenize(token1,ss,"-");
-	ss=runRange_itr->First('-');
-	runRange_itr->Tokenize(token2,ss,"-");
+	//Ssiz_t ss=0;
+	//std::cout<<"Io parto da questo "<<(*runRange_itr)<<std::endl;
+	//runRange_itr->Tokenize(token1,ss,"-");
+	//std::cout<<"Token 1 is "<<token1<<std::endl;
+	//ss=runRange_itr->First('-');
+	//runRange_itr->Tokenize(token2,ss,"-");
+	//std::cout<<"Token 2 is "<<token2<<std::endl;
+	TString x = (*runRange_itr);
+	TObjArray *tx = x.Tokenize("-");
+	tx->Print();
+	token1=((TObjString *)(tx->At(0)))->String();
+	token2=((TObjString *)(tx->At(1)))->String();
+	//for (Int_t i = 0; i < tx->GetEntries(); i++){std::cout << ((TObjString *)(tx->At(i)))->String() << std::endl;}
 	categories.push_back((*region_itr)+"-runNumber_"+token1+"_"+token2+"-"+commonCut.c_str());
       }
     }else categories.push_back((*region_itr)+"-"+commonCut.c_str());
   }
 
+  for(std::vector<TString>::const_iterator cat_itr = categories.begin();
+      cat_itr != categories.end();
+      cat_itr++){
+    std::cout<<"check this "<<(*cat_itr)<<std::endl;
+  }
+  //////////////////////////////////////////////////////////////////
   
 
   ///------------------------------ to obtain r9weights
@@ -1051,20 +1085,18 @@ int main(int argc, char **argv) {
 
   args.sort(kFALSE);
   if(vm.count("smearerFit")){
-    std::cout << "------------------------------ smearer parameters" << std::endl;
+    std::cout << "------------------------------ Initial parameters" << std::endl;
     args.writeToStream(std::cout, kFALSE);
   }
-
   TRandom3 g(0);
   Long64_t randomInt=g.Integer(1000000);
   TString filename="tmp/tmpFile-"; filename+=randomInt;filename+=".root";
   TFile *tmpFile = new TFile(filename,"recreate");
   tmpFile->cd();
-  RooSmearer smearer("smearer",(tagChainMap["d"])["selected"], (tagChainMap["s"])["selected"], NULL, 
-		     categories,
-		     args_vec, args, energyBranchName);
+  RooSmearer smearer("smearer",(tagChainMap["d"])["selected"], (tagChainMap["s"])["selected"], NULL, categories,args_vec, args, energyBranchName);
   smearer._isDataSmeared=vm.count("isDataSmeared");
   if(vm.count("runToy")) smearer.SetPuWeight(false);
+  if(vm.count("runToy")){std::cout<<"You are running toys"<<std::endl;}
   smearer.SetOnlyDiagonal(vm.count("onlyDiagonal"));
   smearer._autoBin=vm.count("autoBin");
   smearer._autoNsmear=vm.count("autoNsmear");
@@ -1082,6 +1114,7 @@ int main(int argc, char **argv) {
   //------------------------------ Take the list of branches needed for the defined categories
   ElectronCategory_class cutter;
   cutter.energyBranchName=energyBranchName;
+  std::cout<<"ElectronCategory_class energy is "<<  cutter.energyBranchName<<std::endl;
   std::set<TString> activeBranchList;
   for(std::vector<TString>::const_iterator region_itr = categories.begin();
       region_itr != categories.end();
@@ -1089,6 +1122,13 @@ int main(int argc, char **argv) {
     std::set<TString> tmpList = cutter.GetBranchNameNtuple(*region_itr);
     activeBranchList.insert(tmpList.begin(),tmpList.end());
     // add also the friend branches!
+  }
+
+  std::cout<<"In ZFitter.cpp this is the list of the activeBranchList"<<std::endl;
+  for(std::set<TString>::const_iterator itr = activeBranchList.begin();
+      itr != activeBranchList.end();
+      itr++){
+    std::cout << "[STATUS] This branch will be enabled: " << *itr << std::endl;
   }
 
   if(vm.count("loop")){
@@ -1104,7 +1144,6 @@ int main(int argc, char **argv) {
     data= (tagChainMap["d"])["selected"];
     mc  = (tagChainMap["s"])["selected"];
   }
-
   if(vm.count("EOverPCalib") && vm.count("doEB")) {	
 ///////// E/P calibration
 
@@ -1571,8 +1610,13 @@ int main(int argc, char **argv) {
   }
 
 
+  // I didn't want to take care of that: this is useful for the first step calibration
+  std::cout<<"[STATUS] Initializing fitter in bin/ZFitter.cpp"<<std::endl;
   ZFit_class fitter( data, mc, NULL, 
-		     invMass_var.c_str(), targetVariable_min, targetVariable_max, targetVariable_binWidth); 
+		     invMass_var.c_str(), 80, 100, 1); 
+  std::cout<<"After initializing ZFit_class"<<std::endl;
+  //std::cout<<"Min is "<<targetVariable_min[0]<<std::endl;
+  //std::cout<<"Max is "<<targetVariable_max[0]<<std::endl;
 
   fitter._oddMC=vm.count("isOddMC");
   fitter._oddData=vm.count("isOddData");
@@ -1599,7 +1643,7 @@ int main(int argc, char **argv) {
   //fitter.SetPDF_model(1,0); // cruijff, no_bkg
 
   if(!vm.count("smearerFit")){ 
-
+    std::cout<<"[INFO] fitter.Import"<<std::endl;
     fitter.Import(commonCut.c_str(), eleID, activeBranchList);
     for(std::vector<TString>::const_iterator category_itr=categories.begin();
 	category_itr != categories.end();
@@ -1620,25 +1664,75 @@ int main(int argc, char **argv) {
   }
 
   myClock.Reset();
+  //
 
-  std::cout<<"***********************************************"<<std::endl;
-  std::cout<<"***********************************************"<<std::endl;
-  std::cout<<"[INFO] Preliminary info:"<<std::endl;
-  std::cout<<"[INFO] targetVariable is: "<<targetVariable<<std::endl;
-  std::cout<<"[INFO] targetVariable_min is: "<<targetVariable_min<<std::endl;
-  std::cout<<"[INFO] targetVariable_max is: "<<targetVariable_max<<std::endl;
-  std::cout<<"[INFO] targetVariable_binWidth is: "<<targetVariable_binWidth<<std::endl;
-  std::cout<<"***********************************************"<<std::endl;
-  std::cout<<"***********************************************"<<std::endl;
 
   if(vm.count("smearerFit")){
+
+    std::cout<<"[STATUS] Parsing the arguments"<<std::endl;
+
+    //start with parsing targetVariable_raw and min, max, bin_width
+    ///////////////////////
+    std::string delimiter = "*";
+    size_t pos = 0;
+    std::string singleVariable;
+    while ((pos = targetVariable_raw.find(delimiter)) != std::string::npos) {
+      singleVariable = targetVariable_raw.substr(0, pos);
+      targetVariable_raw.erase(0, pos + delimiter.length());
+      targetVariable.push_back(singleVariable);
+    }
+    targetVariable.push_back(targetVariable_raw);//the last substring has no delimiter
+
+    pos = 0;
+    while ((pos = targetVariable_min_raw.find(delimiter)) != std::string::npos) {
+      singleVariable = targetVariable_min_raw.substr(0, pos);
+      targetVariable_min_raw.erase(0, pos + delimiter.length());
+      targetVariable_min.push_back(stof(singleVariable));
+    }
+    targetVariable_min.push_back(stof(targetVariable_min_raw));//the last substring has no delimiter
+
+    pos = 0;
+    while ((pos = targetVariable_max_raw.find(delimiter)) != std::string::npos) {
+      singleVariable = targetVariable_max_raw.substr(0, pos);
+      targetVariable_max_raw.erase(0, pos + delimiter.length());
+      targetVariable_max.push_back(stof(singleVariable));
+    }
+    targetVariable_max.push_back(stof(targetVariable_max_raw));//the last substring has no delimiter
+
+    pos = 0;
+    while ((pos = targetVariable_binWidth_raw.find(delimiter)) != std::string::npos) {
+      singleVariable = targetVariable_binWidth_raw.substr(0, pos);
+      targetVariable_binWidth_raw.erase(0, pos + delimiter.length());
+      targetVariable_binWidth.push_back(stof(singleVariable));
+    }
+    targetVariable_binWidth.push_back(stof(targetVariable_binWidth_raw));//the last substring has no delimiter
+
     smearer.SetTargetVariable(targetVariable,configuration);//The smearing procedure is different for different targetVariables
     smearer.SetHistBinning(targetVariable_min,targetVariable_max,targetVariable_binWidth);
+
+    ///////////////////////
+    std::cout<<"***********************************************"<<std::endl;
+    std::cout<<"***********************************************"<<std::endl;
+    std::cout<<"[INFO] Preliminary info:"<<std::endl;
+    std::cout<<"[INFO] # of variables for category: "<<targetVariable.size()<<std::endl;
+    for(int var=0;var<targetVariable.size();var++){
+      std::cout<<"[INFO] var "<<var<<std::endl;
+      std::cout<<"[INFO] targetVariable is: "<<targetVariable[var]<<std::endl;
+      std::cout<<"[INFO] targetVariable_min is: "<<targetVariable_min[var]<<std::endl;
+      std::cout<<"[INFO] targetVariable_max is: "<<targetVariable_max[var]<<std::endl;
+      std::cout<<"[INFO] targetVariable_binWidth is: "<<targetVariable_binWidth[var]<<std::endl;
+      std::cout<<"[INFO] Number of bins between min and max is: "<<(smearer.GetHistBinning())[var]<<std::endl;
+    }
+    std::cout<<"***********************************************"<<std::endl;
+    std::cout<<"***********************************************"<<std::endl;
+
     if(vm.count("runToy")){
 	  smearer.SetPuWeight(false);
 	  smearer.SetToyScale(1, constTermToy);
 
-	  if(vm.count("initFile")) {smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"), true,initFileName.c_str());}
+	  //if(vm.count("initFile")) {smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"), true,initFileName.c_str());}
+	  //else {smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"));}//ORIGINAL. That "true" is bool externToy (it doesn't make sense)
+	  if(vm.count("initFile")) {smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"), false,initFileName.c_str());}
 	  else {smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"));}
 
 	  std::cout << "[DEBUG] " << constTermToy << std::endl;
@@ -1709,37 +1803,37 @@ int main(int argc, char **argv) {
 	myClock.Stop();
 	myClock.Print();
 
-	if(!vm.count("profileOnly") && !vm.count("plotOnly")){
-	  args.writeToFile(outDirFitResData+"/params-"+targetVariable+"_"+configuration+"_"+r+"-"+TString(commonCut.c_str())+".txt");
-	  smearer._markov.SaveAs((outDirFitResData+"/markov-"+r+"-"+TString(commonCut.c_str())+".root"));
+	TString full_variable="";//This is used for the root files
+	for(int var=0;(unsigned) var< targetVariable.size();var++){
+	  full_variable+=targetVariable[var]+"_";
 	}
 
-	//USELESS??
-	/*
-	for(std::vector<ZeeCategory>::iterator itr= smearer.ZeeCategories.begin();
-		itr != smearer.ZeeCategories.end();
-		itr++){
-	  smearer.GetSmearedHisto(*itr, true, false);
-	  smearer.GetSmearedHisto(*itr, true, true);
-	  smearer.GetSmearedHisto(*itr, false, smearer._isDataSmeared);
-	  } */
-	//
+	if(!vm.count("profileOnly") && !vm.count("plotOnly")){
+	  args.writeToFile(outDirFitResData+"/params-"+full_variable+configuration+"_"+r+"-"+TString(commonCut.c_str())+".txt");
+	  smearer._markov.SaveAs((outDirFitResData+"/markov-"+full_variable+r+"-"+TString(commonCut.c_str())+".root"));
+	}
 
 	if(vm.count("plotOnly") || !vm.count("profileOnly")){
-	  TFile *f = new TFile(outDirFitResData+"/histos_"+targetVariable+"_"+configuration+"_"+r+"_"+TString(commonCut.c_str()).ReplaceAll("-","_")+".root", "recreate");
+	  //Saving histos plots
+	  std::cout<<"[INFO] in bin/ZFitter.cpp: Saving the histograms"<<std::endl;
+
+	  //TFile *f = new TFile(outDirFitResData+"/histos_"+full_variable+configuration+"_"+r+"_"+TString(commonCut.c_str()).ReplaceAll("-","_")+".root", "recreate");
+	  TFile *f = new TFile(outDirFitResData+"/histos_"+full_variable+configuration+"_"+r+"_"+TString(commonCut.c_str()).ReplaceAll("-","_")+".root", "RECREATE");
 	  f->Print();
 	  f->cd();
+
 	  for(std::vector<ZeeCategory>::iterator itr= smearer.ZeeCategories.begin();
 	      itr != smearer.ZeeCategories.end();
 	      itr++){
 	    //if(!itr->active) continue;
-	    TH1F *MC = smearer.GetSmearedHisto(*itr, true, false);
-	    TH1F *smearMC = smearer.GetSmearedHisto(*itr, true, true);
-	    TH1F *data = smearer.GetSmearedHisto(*itr, false, smearer._isDataSmeared);
-	    std::cout<<"[INFO] in bin/ZFitter.cpp: Saving the histograms"<<std::endl;
-	    MC->Write();
-	    smearMC->Write();
-	    data->Write();
+	    std::vector<TH1F *> MC = smearer.GetSmearedHisto(*itr, true, false);
+	    std::vector<TH1F *> smearMC = smearer.GetSmearedHisto(*itr, true, true);
+	    std::vector<TH1F *> data = smearer.GetSmearedHisto(*itr, false, smearer._isDataSmeared);
+	    for(int var=0; var<data.size();var++){
+	      MC[var]->Write();
+	      smearMC[var]->Write();
+	      data[var]->Write();
+	    }
 	    f->Write();    
 	  } 
 	  f->Close();
@@ -1750,10 +1844,11 @@ int main(int argc, char **argv) {
 	  std::cout <<"==================Creating the profiles in bin/ZFitter.cpp (if you haven't minimized the likelihood, it doesn't do it for you. Minimization must be done before this point)=================="<<endl;
 	  //create profiles
 	  TString outFile=outDirFitResData.c_str();
-	  outFile+="/outProfile_"+targetVariable+"_"+configuration+"_";
+	  outFile+="/outProfile_"+full_variable+configuration+"_";
 	  outFile+=r+"_"+TString(commonCut.c_str())+".root";
 	  outFile.ReplaceAll("-","_");
-	  TFile *fOutProfile = new TFile(outFile,"recreate");
+	  //TFile *fOutProfile = new TFile(outFile,"recreate");
+	  TFile *fOutProfile = new TFile(outFile,"RECREATE");
 
 	  for (int ivar=0;ivar<args.getSize();++ivar)
 	    {
