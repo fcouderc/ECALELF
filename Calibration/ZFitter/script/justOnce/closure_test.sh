@@ -1,72 +1,60 @@
 #!/bin/bash
+# usage ./script/justOnce/closure_test.sh 2nd
+# usage ./script/justOnce/closure_test.sh (if you want to do in local)
 # inspired from ZFitter/script/kustOnce/smearing.sh
 queue=$1
-nEventsPerToy=closure #I think it's just a name
-nSmearToy=30 #it quantifies the over-sampling
-commonCut=Et_25-trigger-noPF
+nSmearToy=1 #it quantifies the over-sampling
+commonCut=Et_25-trigger-noPF #used in the category names
 
 if [ -z "${queue}" ];then local=y; fi
 
-for regionsFile in scaleStep0
+regionsFile=scaleStep0
+
+regionDir=test/dato/fitres/toys/${regionsFile}
+
+for scale in  0.97 0.98  0.99 1.00 1.01 1.02 1.03
 do
-    dir=test/dato/fitres/toys/${regionsFile}
-
-    for scale in 1.00 #1.01 0.99 1.02 0.98 1.05 0.95
+    for constAlpha in  0.00-0.00 0.01-0.00 0.02-0.00
     do
-	for constAlpha in  0.00-0.00 #0.04-0.00 0.01-0.00 
-	do
-	    const=`echo $constAlpha | cut -d '-' -f 1`
-	    alpha=`echo $constAlpha | cut -d '-' -f 2`
-	    
-	    echo "[[[[[[[[[[[ const:alpha ]]]]]]]]]]] ${const}:${alpha}"
-	    baseDir=${dir}/${nEventsPerToy}/${const}-${alpha}-${scale}/
-	    mkdir -p $baseDir 
+	const=`echo $constAlpha | cut -d '-' -f 1`
+	alpha=`echo $constAlpha | cut -d '-' -f 2`
+	
+	echo "*********const:alpha:scale ${const}:${alpha}:${scale}"
+	workDir=${regionDir}/${const}_${alpha}_${scale}/
+	mkdir -p ${workDir} 
 
-            #mcToy.txt is the initFile passed to ZFitter
-	    cat > $baseDir/${alphaConst}/mcToy.txt <<EOF
-constTerm_EB_invMass_100_2000_${commonCut} = ${const} +/- 0.139700 L(0 - 0.2)
-constTerm_EE_invMass_100_2000_${commonCut} = ${const} +/- 0.218710 L(0 - 0.2)
-scale_EB_invMass_100_2000_${commonCut} = ${scale} +/- 0.000415 L(0.96 - 1.04)
-scale_EE_invMass_100_2000_${commonCut} = ${scale} +/- 0.000609 L(0.96 - 1.04)
+	cat > ${workDir}init_mcToy.txt <<EOF
+scale_EE-invMass_100_2000-Et_25-trigger-noPF =  ${scale} +/- 0.0050000 L(0.96 - 1.04) // [GeV]
+scale_EB-invMass_100_2000-Et_25-trigger-noPF =  ${scale} +/- 0.0050000 L(0.96 - 1.04) // [GeV]
+constTerm_EE-invMass_100_2000-Et_25-trigger-noPF =  ${const} +/- 0.030000 L(0 - 0.05)
+constTerm_EB-invMass_100_2000-Et_25-trigger-noPF =  ${const} +/- 0.030000 L(0 - 0.05)
 EOF
+	cat data/validation/closure.dat > ${regionDir}/toyMC_closure.dat
 
-
-	    cat data/validation/22Jan2012-runDepMCAll_checkMee.dat > ${baseDir}/toyMC.dat
-
-	    for nToys in `seq 1 100`; 
-	    do 
-		newDir=${baseDir}/${alphaConst}/${nSmearToy}/${nToys}/
-		mkdir -p $newDir 
-		ls $newDir
-      
-		if [ -z "${local}" ];then
-		    bsub -q ${queue} -oo ${newDir}/stdout.log -eo ${newDir}/stderr.log -J "$regionsFile-$const-$alpha" \
-			"cd /afs/cern.ch/user/g/gfasanel/new_version_ECALELF/CMSSW_7_5_0_pre4/src/Calibration/ZFitter; eval \`scramv1 runtime -sh\`; uname -a;  echo \$CMSSW_VERSION; ./bin/ZFitter.exe -f ${baseDir}/toyMC.dat \
-      --regionsFile=data/regions/${regionsFile}.dat \
-	--commonCut=${commonCut} --smearerFit --outDirFitResData=$newDir \
-        --constTermFix --alphaGoldFix --smearerType=profile --noPU --smearingEt \
-	--initFile=${baseDir}/${alphaConst}/mcToy.txt --profileOnly --plotOnly --runToy --nSmearToy=${nSmearToy} \
-        --autoBin        > ${newDir}/log2.log"
-		else
-		    echo "#============================================================ Toy = $nToys"
-		    ./bin/ZFitter.exe -f ${baseDir}/toyMC.dat \
-			--regionsFile=data/regions/${regionsFile}.dat \
-			--commonCut=${commonCut} --smearerFit --outDirFitResData=$newDir \
-			--constTermFix --smearerType=profile --noPU  --smearingEt \
-			--initFile=${baseDir}/${alphaConst}/mcToy.txt \
-			--plotOnly --profileOnly --runToy --eventsPerToy=0 --nSmearToy=${nSmearToy} --autoBin |tee ${newDir}/nSmearToy_${nSmearToy}.log
-		    exit 0
-		fi
-	    done
-	    wait 
-	done
+	for nToys in `seq 1 9`; 
+	do 
+	    toyDir=${workDir}${nToys}/
+	    mkdir -p $toyDir 
+	    ls $toyDir
+	    
+	    if [ -z "${local}" ];then
+		echo "#============================================================ submitting closure tests job: Toy = $nToys"
+		bsub -q ${queue} -oo ${toyDir}/stdout.log -eo ${toyDir}/stderr.log -J "$regionsFile-$const-$alpha-$scale" \
+		    "cd /afs/cern.ch/user/g/gfasanel/new_version_ECALELF/CMSSW_7_5_0_pre4/src/Calibration/ZFitter; eval \`scramv1 runtime -sh\`; uname -a;  echo \$CMSSW_VERSION; 		./bin/ZFitter.exe --invMass_var=invMass_SC_regrCorrSemiParV5_ele -f data/validation/closure.dat --regionsFile=data/regions/scaleStep0.dat --smearerFit --outDirFitResData=${toyDir} --noPU  --plotOnly --profileOnly --runToy --eventsPerToy=0 --nSmearToy=5 --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random --initFile=${workDir}init_mcToy.txt --autoBin > ${toyDir}debug.log"
+	    else
+		echo "#============================================================ Closure test in local: Toy = $nToys"
+		echo "
+		./bin/ZFitter.exe --invMass_var=invMass_SC_regrCorrSemiParV5_ele -f data/validation/closure.dat --regionsFile=data/regions/scaleStep0.dat --smearerFit --outDirFitResData=${toyDir} --noPU  --plotOnly --profileOnly --runToy --eventsPerToy=0 --nSmearToy=5 --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random --initFile=${workDir}init_mcToy.txt --autoBin > ${toyDir}debug.log"
+		./bin/ZFitter.exe --invMass_var=invMass_SC_regrCorrSemiParV5_ele -f data/validation/closure.dat --regionsFile=data/regions/scaleStep0.dat --smearerFit --outDirFitResData=${toyDir} --noPU  --plotOnly --profileOnly --runToy --eventsPerToy=0 --nSmearToy=5 --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random --initFile=${workDir}init_mcToy.txt --autoBin > ${toyDir}debug.log
+	    fi
+	done #toy for
 	wait
-    done
-done
+    done #constAlpha for
+    wait
+done #scale for
 
 
 exit 0
-
 #Qui sotto va capito cosa vuoi fare tu
 
 for file in  test/dato/fitres/Hgg_Et-toys/scaleStep2smearing_9/factorizedSherpaFixed_DataSeedFixed_smooth_cmscaf1nd/0.01-0.00/15/*/log2.log; do grep DUMP $file > `dirname $file`/dumpNLL.dat; done
