@@ -1,7 +1,7 @@
 #!/bin/bash
-# usage ./script/justOnce/closure_test.sh 2nd
+# usage ./script/justOnce/closure_test.sh 2nd (1nh)
 # usage ./script/justOnce/closure_test.sh (if you want to do in local)
-# inspired from ZFitter/script/kustOnce/smearing.sh
+# inspired from ZFitter/script/justOnce/smearing.sh
 queue=$1
 nSmearToy=1 #it quantifies the over-sampling
 commonCut=Et_25-trigger-noPF #used in the category names
@@ -31,7 +31,7 @@ constTerm_EB-invMass_100_2000-Et_25-trigger-noPF =  ${const} +/- 0.030000 L(0 - 
 EOF
 	cat data/validation/closure.dat > ${regionDir}/toyMC_closure.dat
 
-	for nToys in `seq 1 9`; 
+	for nToys in `seq 1 10`;
 	do 
 	    toyDir=${workDir}${nToys}/
 	    mkdir -p $toyDir 
@@ -46,6 +46,7 @@ EOF
 		echo "
 		./bin/ZFitter.exe --invMass_var=invMass_SC_regrCorrSemiParV5_ele -f data/validation/closure.dat --regionsFile=data/regions/scaleStep0.dat --smearerFit --outDirFitResData=${toyDir} --noPU  --plotOnly --profileOnly --runToy --eventsPerToy=0 --nSmearToy=5 --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random --initFile=${workDir}init_mcToy.txt --autoBin > ${toyDir}debug.log"
 		./bin/ZFitter.exe --invMass_var=invMass_SC_regrCorrSemiParV5_ele -f data/validation/closure.dat --regionsFile=data/regions/scaleStep0.dat --smearerFit --outDirFitResData=${toyDir} --noPU  --plotOnly --profileOnly --runToy --eventsPerToy=0 --nSmearToy=5 --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random --initFile=${workDir}init_mcToy.txt --autoBin > ${toyDir}debug.log
+
 	    fi
 	done #toy for
 	wait
@@ -53,14 +54,7 @@ EOF
     wait
 done #scale for
 
-
 exit 0
-#Qui sotto va capito cosa vuoi fare tu
 
-for file in  test/dato/fitres/Hgg_Et-toys/scaleStep2smearing_9/factorizedSherpaFixed_DataSeedFixed_smooth_cmscaf1nd/0.01-0.00/15/*/log2.log; do grep DUMP $file > `dirname $file`/dumpNLL.dat; done
 
-for index in `seq 2 50`; do sed -i "s|\[DUMP NLL\]|$index\t |" test/dato/fitres/Hgg_Et-toys/scaleStep2smearing_9/factorizedSherpaFixed_DataSeedFixed_smooth_cmscaf1nd/0.01-0.00/15/$index/dumpNLL.dat; done
 
-cat test/dato/fitres/Hgg_Et-toys/scaleStep2smearing_9/factorizedSherpaFixed_DataSeedFixed_smooth_cmscaf1nd/0.01-0.00/15/*/dumpNLL.dat > dumpNLL.dat
-
-cat  dumpNLL.dat  | awk -F '\t' '{cat[$2]+=$3;cat2[$2]+=$3*$3; n[$2]++;};END{for(i in cat){print i, n[i], cat[i]/n[i], cat2[i]/n[i]-cat[i]/n[i]*cat[i]/n[i]}}' | awk '($5 > 5){print $0}' 
