@@ -20,8 +20,8 @@ ROOT.gStyle.SetPadColor(ROOT.kWhite)
 ROOT.gStyle.SetStatColor(ROOT.kWhite)
 ROOT.gStyle.SetErrorX(0)
 
-regions=['EB']
-#regions=['EB','EE']
+#regions=['EB']
+regions=['EB','EE']
 
 true_scales           ={}
 true_sigmas           ={}
@@ -86,8 +86,8 @@ canvas_sigma_check={}
 
 path='/afs/cern.ch/user/g/gfasanel/new_version_ECALELF/CMSSW_7_5_0_pre4/src/Calibration/ZFitter/test/dato/fitres/toys/scaleStep0/'
 
-injected_sigmas=['0.00']
-injected_scales=['0.99']
+injected_sigmas=['0.00','0.005','0.01','0.0105','0.02'] #0.015!!
+injected_scales=['0.98','0.985','0.99','0.995','1.00','1.005','1.01','1.015','1.02']
 
 for region in regions:
     for injected_sigma in injected_sigmas:
@@ -123,17 +123,17 @@ for region in regions:
                             true_scales[region].append(float(injected_scale))
     #Ecco qui devi fare i plot per regione
     #At this point lists are full of points
-    #usage of array for TGraph, otherwise it doesn't work
-    for i in range(0,len(true_scales[region])):
-        print true_scales[region][i]
-        print fitted_scales[region][i]
-        print true_sigmas[region][i]
-        print fitted_sigmas[region][i]
-        print true_scales_check[region][i]
-        print fitted_scales_check[region][i]
-        print true_sigmas_check[region][i]
-        print fitted_sigmas_check[region][i]
+    #for i in range(0,len(true_scales[region])):
+    #    print true_scales[region][i]
+    #    print fitted_scales[region][i]
+    #    print true_sigmas[region][i]
+    #    print fitted_sigmas[region][i]
+    #    print true_scales_check[region][i]
+    #    print fitted_scales_check[region][i]
+    #    print true_sigmas_check[region][i]
+    #    print fitted_sigmas_check[region][i]
 
+    #usage of array for TGraph, otherwise it doesn't work
     true_scales_array[region]=np.asarray(true_scales[region])   
     true_sigmas_array                 [region]=np.asarray(true_sigmas           [region])   
     fitted_scales_array[region]=np.asarray(fitted_scales[region])   
@@ -188,3 +188,4 @@ for region in regions:
     canvas_sigma_check[region].SaveAs(str(path+region+"/check_sigma_"+region+".png"))
 
 os.system("cp -r /afs/cern.ch/user/g/gfasanel/new_version_ECALELF/CMSSW_7_5_0_pre4/src/Calibration/ZFitter/test/dato/fitres/toys/scaleStep0/EB/*.png ~/scratch1/www/Pt1Pt2/closure_test/EB/")
+os.system("cp -r /afs/cern.ch/user/g/gfasanel/new_version_ECALELF/CMSSW_7_5_0_pre4/src/Calibration/ZFitter/test/dato/fitres/toys/scaleStep0/EE/*.png ~/scratch1/www/Pt1Pt2/closure_test/EE/")
