@@ -1757,6 +1757,11 @@ int main(int argc, char **argv) {
 	std::cout<<"[INFO] minimType is "<<minimType<<std::endl;
 	std::cout<<"************************************************"<<std::endl;
 	std::cout<<"************************************************"<<std::endl;
+	int data_index=99999999;
+	std::string data_index_string;
+	if(data_index <1000){
+	  data_index_string=std::to_string(data_index);
+	}
 
 	if(! vm.count("plotOnly") && ! vm.count("profileOnly")){
 	  //! You are really minimizing the likelihood here
@@ -1818,7 +1823,7 @@ int main(int argc, char **argv) {
 	  std::cout<<"[INFO] in bin/ZFitter.cpp: Saving the histograms"<<std::endl;
 
 	  //TFile *f = new TFile(outDirFitResData+"/histos_"+full_variable+configuration+"_"+r+"_"+TString(commonCut.c_str()).ReplaceAll("-","_")+".root", "recreate");
-	  TFile *f = new TFile(outDirFitResData+"/histos_"+full_variable+configuration+"_"+r+"_"+TString(commonCut.c_str()).ReplaceAll("-","_")+".root", "RECREATE");
+	  TFile *f = new TFile(outDirFitResData+"/histos_"+full_variable+configuration+TString(data_index_string)+"_"+r+"_"+TString(commonCut.c_str()).ReplaceAll("-","_")+".root", "RECREATE");
 	  f->Print();
 	  f->cd();
 
@@ -1847,7 +1852,6 @@ int main(int argc, char **argv) {
 	  outFile+="/outProfile_"+full_variable+configuration+"_";
 	  outFile+=r+"_"+TString(commonCut.c_str())+".root";
 	  outFile.ReplaceAll("-","_");
-	  //TFile *fOutProfile = new TFile(outFile,"recreate");
 	  TFile *fOutProfile = new TFile(outFile,"RECREATE");
 
 	  for (int ivar=0;ivar<args.getSize();++ivar)
