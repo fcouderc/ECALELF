@@ -2,6 +2,7 @@
 *.exe
 *.root
 *.d
-*.s0
+*.o
+*.so
 *.pcm
 *#*
