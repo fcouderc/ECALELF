@@ -1,6 +1,23 @@
 #!/bin/bash
 source script/functions.sh
 
+if [[ $1 = "ptRatio*pt2Sum" ]]; then
+   validation_file=22Jan2012-runDepMCAll_checkMee.dat
+   region=scaleStep0
+   commonCut=Et_25-trigger-noPF
+   outDirData=test/dato
+   extension=ptRatio_pt2Sum
+   InitFile=""
+   Target=ptRatio*pt2Sum
+   Min=0.5*0
+   Max=2*200
+   BinWidth=0.05*2
+   Conf=random
+   echo ${validation_file}
+   echo ${region}
+   echo ${extension}
+fi
+
 if [[ $1 = "ptRatio" ]]; then
    validation_file=22Jan2012-runDepMCAll_checkMee.dat
    region=scaleStep0
@@ -86,7 +103,7 @@ echo ./bin/ZFitter.exe -f data/validation/${validation_file} --regionsFile=data/
 ./bin/ZFitter.exe -f data/validation/${validation_file} --regionsFile=data/regions/${region}.dat --invMass_var=invMass_SC_regrCorrSemiParV5_ele --autoBin --smearerFit --targetVariable=${Target} --targetVariable_min=${Min} --targetVariable_max=${Max} --targetVariable_binWidth=${BinWidth} --configuration=${Conf} --corrEleType=HggRunEtaR9Et --smearEleType=stochastic --outDirImgData=${outDirData}/${extension}/\$LSB_JOBINDEX/img/ --outDirFitResData=${outDirData}/${extension}/\$LSB_JOBINDEX/fitres/ ${InitFile} || exit 1";
 
 exit 0
-#At this point, job completed!
+#Now, wait the end of your jobs
 	
 while [ "`bjobs -J \"${region} ${extension}\" | grep -v JOBID | grep -v found | wc -l`" != "0" ]; do /bin/sleep 2m; done
 echo "job completed!"

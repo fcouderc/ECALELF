@@ -8,6 +8,7 @@
 #include <TH1F.h>
 #include <TProfile.h>
 #include <TH2F.h>
+#include <TGraph.h>
 #include <TLegend.h>
 #include <TPaveText.h>
 #include <TStopwatch.h>
@@ -140,6 +141,7 @@ TCanvas *PlotDataMC2D(TChain *data, TChain *mc, TString branchname, TString binn
 
 
   if(smear){
+    std::cout<<"Apply smear"<<std::endl;
     branchNameMC.ReplaceAll("invMass_SC_regrCorr_pho ","(invMass_SC_regrCorr_pho*sqrt(smearEle[0]*smearEle[1]))");
     branchNameMC.ReplaceAll("invMass_SC_regrCorrSemiParV5_pho","(invMass_SC_regrCorrSemiParV5_pho*sqrt(smearEle[0]*smearEle[1]))");
     branchNameMC.ReplaceAll("invMass_SC_regrCorrSemiParV5_ele","(invMass_SC_regrCorrSemiParV5_ele*sqrt(smearEle[0]*smearEle[1]))");
@@ -165,64 +167,50 @@ TCanvas *PlotDataMC2D(TChain *data, TChain *mc, TString branchname, TString binn
   }    
   
   // Draw histograms
-    cout<<"Filling Data and MC histos"<<endl;
-    cout<<"data "<<branchNameData<<" "<<selection_data<<endl;
-    cout<<"MC "<<branchNameMC<<" "<<selection_MC<<endl;
+  cout<<"Filling Data and MC 2D histo"<<endl;
+  //cout<<"data "<<branchNameData<<" "<<selection_data<<endl;
+  //cout<<"MC "<<branchNameMC<<" "<<selection_MC<<endl;
 
-    if(weightVar!="") selection+="*"+weightVar;
+  if(weightVar!="") selection+="*"+weightVar;
 
-    data->Draw(branchNameData+">>data_hist"+binning, selection_data,opt);
-    if(usePU)  mc->Draw(branchNameMC+">>mc_hist"+binning, selection_MC *"puWeight",opt);
-    else  mc->Draw(branchNameMC+">>mc_hist"+binning, selection_MC,opt);
+  data->Draw(branchNameData+">>data_hist"+binning, selection_data,opt);//original
 
+  if(usePU) mc->Draw(branchNameMC+">>mc_hist"+binning, selection_MC *"puWeight",opt);
+  else mc->Draw(branchNameMC+">>mc_hist"+binning, selection_MC,opt);
+  
+  //TH2D
+  c->cd();
   c->Clear();
   
   TH2F *d = (TH2F *) gROOT->FindObject("data_hist");
   TH2F *s = (TH2F *) gROOT->FindObject("mc_hist");
-
-  stringstream ss;
-  ss << ele_index;
-  string index = ss.str();
-  cout<<index<<endl;
-
-  d->SaveAs("tmp/Sanity_Plots/d_hist_"+name_root+"_"+index+".root");//You can hadd a string (index) to a TString (mcLabel) and this is a TString
-  s->SaveAs("tmp/Sanity_Plots/s_hist"+mcLabel+"_"+name_root+"_"+index+".root");
-
-  if(type==0) d->Draw(opt);
-  else if(type==1) s->Draw(opt);
+  
+  //stringstream ss;
+  //ss << ele_index;
+  //string index = ss.str();
+  //cout<<index<<endl;
+  //d->SaveAs("tmp/Sanity_Plots/d_hist_"+name_root+"_"+index+".root");//You can hadd a string (index) to a TString (mcLabel) and this is a TString
+  //s->SaveAs("tmp/Sanity_Plots/s_hist"+mcLabel+"_"+name_root+"_"+index+".root");
+  
+  if(type==0){ 
+    d->Draw(opt);
+    std::cout<<"correlation in the TH2 data is "<<d->GetCorrelationFactor()<<std::endl;   
+  } else if(type==1) s->Draw(opt);
   else if(type==3){
     s->Scale(d->Integral()/s->Integral());
     d->Divide(s);
     d->Draw(opt);
   }
-
+  
   d->GetXaxis()->SetTitle(xLabel);
   s->GetXaxis()->SetTitle(xLabel);
   d->GetYaxis()->SetTitle(yLabel);
   s->GetYaxis()->SetTitle(yLabel);
   c->SetRightMargin(0.2);
-
+  
   return c;
   
 }
-
-
-
-/*TCanvas *PlotDataMC2D(TChain *data, TChain *mc, 
-		      TString branchname, TString binning, 
-		      TString category, TString selection, 
-		      TString dataLabel, TString mcLabel, 
-		      TString xLabel, TString yLabel, 
-		      int type=2, TString opt="colz",
-		      bool usePU=true, bool smear=false, bool scale=false){
-  
-  TCut sel ="";
-  if(category.Sizeof()>1) sel= GetCut(category, 0);
-  sel+=selection;
-  return PlotDataMC2D(data, mc, branchname, binning, sel, dataLabel, mcLabel, xLabel, yLabel, type, opt,usePU, smear, scale);
-  } */
-
-
 
 TCanvas *PlotDataMC(TChain *data, TChain *mc, TString branchname, TString binning, 
 		    TString category, TString selection, 
@@ -763,7 +751,7 @@ TCanvas *PlotDataMCs(TChain *data, std::vector<TChain *> mc_vec, TString branchn
   string index = ss.str();
   cout<<index<<endl;
 
-  d->SaveAs("tmp/Sanity_Plots/d_hist_"+name_root+"_"+index+".root");
+  //d->SaveAs("tmp/Sanity_Plots/d_hist_"+name_root+"_"+index+".root");
  
   yLabel.Form("Events /(%.2f %s)", d->GetBinWidth(2), yLabelUnit.Data());
   
@@ -793,7 +781,7 @@ TCanvas *PlotDataMCs(TChain *data, std::vector<TChain *> mc_vec, TString branchn
       return NULL;
     }
 
-    s->SaveAs("tmp/Sanity_Plots/s_hist"+mcLabel_vec[i]+"_"+name_root+"_"+index+".root");//You can hadd a string (index) to a TString (mcLabel) and this is a TString
+    //s->SaveAs("tmp/Sanity_Plots/s_hist"+mcLabel_vec[i]+"_"+name_root+"_"+index+".root");//You can hadd a string (index) to a TString (mcLabel) and this is a TString
 
     if(logy){
       s->GetYaxis()->SetRangeUser(0.1,max);

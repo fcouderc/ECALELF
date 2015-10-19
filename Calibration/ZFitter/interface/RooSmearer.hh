@@ -4,6 +4,7 @@
 #include <iomanip>
 
 #include <TChain.h>
+#include <vector>
 #include <TH1F.h>
 #include <TString.h>
 #include <TRandom3.h>
@@ -17,21 +18,34 @@
 #include "SmearingImporter.hh"
 
 class ZeeCategory {
+  private:
+  int Variables_=-1;//How many variables per cat: default is -1 to force you to settle it correctly
+
 public:
-  inline  ZeeCategory(){
-    hist_data=NULL;
-    smearHist_data=NULL;
-    hist_mc=NULL;
-    smearHist_mc=NULL;
-  };
 
+  int GetNumberVariables(){
+    return Variables_;
+  }
+
+  void SetNumberVariables(int variables){
+    //Once you know the number of variables you are dealing with you can initialize your vector of histograms
+    //This is called by RooSmearer::InitCategories
+    Variables_=variables;
+    for(int var=0;(unsigned)var<GetNumberVariables();var++){
+      hist_data.push_back(NULL);
+      smearHist_data.push_back(NULL);
+      hist_mc.push_back(NULL);
+      smearHist_mc.push_back(NULL);
+    }
+    if(hist_data.size()!=GetNumberVariables()){
+      std::cout<<"[WARNING] ZeeCategory is not allocated correctly in its size. Have a look at interface/RooSmearer.hh, in which ZeeCategory is defined"<<std::endl;
+    }
+  }
+
+  inline  ZeeCategory(){};
+  
   inline ~ZeeCategory(){
-
-#ifdef DEBUG
-    if(hist_data!=NULL)      hist_data->Print();
-    if(hist_mc!=NULL)        hist_mc->Print();
-    if(smearHist_mc!=NULL)   smearHist_mc->Print();
-#endif
+    
     data_events=NULL;
     mc_events=NULL;
   };
@@ -52,15 +66,19 @@ public:
   double scale1,constant1, alpha1;
   double scale2,constant2, alpha2;
 
-  int nBins;
-  float targetVariable_min;
-  float targetVariable_max;
+  std::vector<int> nBins;
+  std::vector<float> targetVariable_min;
+  std::vector<float> targetVariable_max;
   
-  TH1F *hist_data;
-  TH1F *smearHist_data;
+  //TH1F * hist_data;
+  //TH1F * smearHist_data;
+  //TH1F *hist_mc;
+  //TH1F *smearHist_mc;
 
-  TH1F *hist_mc;
-  TH1F *smearHist_mc;
+  std::vector<TH1F *> hist_data;//(Variables,NULL);
+  std::vector<TH1F *> smearHist_data;//(Variables,NULL);
+  std::vector<TH1F *> hist_mc;//(Variables,NULL);
+  std::vector<TH1F *> smearHist_mc;//(Variables,NULL);
 
   bool active;
   unsigned int nSmearToy;
@@ -121,21 +139,25 @@ public:
   inline void SetEleID(TString value){importer.SetEleID(value);};
   inline void SetCommonCut(TString cut){importer.SetCommonCut(cut);};
 
-  inline void SetTargetVariable(TString targetVariable,TString configuration){
-    targetVariable_=targetVariable;
+  int GetNumberVariables(){return (int)targetVariable_.size();}  
+  inline void SetTargetVariable(std::vector<TString> targetVariable,TString configuration){
+    targetVariable_=targetVariable;//
     importer.SetTargetVariable(targetVariable);
     importer.SetConfiguration(configuration);//This sets if 1/2 are leading/subleading or random
   }
 
-  inline void SetHistBinning(double min, double max, double width){
+  inline void SetHistBinning(std::vector<float> min, std::vector<float> max, std::vector<float> width){
     //! Those are attributes of RooSmearer
     targetVariable_min_=min;
     targetVariable_max_=max;
     targetVariable_bin_=width;
-    nBins_= 1 + (int) ((targetVariable_max_ - targetVariable_min_)/targetVariable_bin_);//because (int)3 =2
+    for(int var=0;(unsigned)var < targetVariable_min_.size();var++){
+      nBins_.push_back((int) ((targetVariable_max_[var] - targetVariable_min_[var])/targetVariable_bin_[var]));//int(3)=2 (?)
+    }
     return;
   }
 
+  inline std::vector<int> GetHistBinning(){return nBins_;}
   /// Initialize the categories: import from the tree
   void Init(TString commonCut, TString eleID, Long64_t nEvents=0, bool mcToy=false, bool externToy=true,TString initFile="");
 
@@ -167,11 +189,11 @@ private:
   RooSetProxy _paramSet;
   RooArgSet *truthSet, pullArgs;
 
-  double targetVariable_min_;
-  double targetVariable_max_;
-  double targetVariable_bin_;
-  int nBins_;
-  TString targetVariable_;
+  std::vector<float> targetVariable_min_;
+  std::vector<float> targetVariable_max_;
+  std::vector<float> targetVariable_bin_;
+  std::vector<int> nBins_;
+  std::vector<TString> targetVariable_;
 
 public:
   float deltaNLLMaxSmearToy;
@@ -208,15 +230,15 @@ private:
   void SetSmearedHisto(const zee_events_t& cache, 
 		       RooArgSet pars1, RooArgSet pars2, 
 		       TString categoryName1, TString categoryName2, unsigned int nSmearToy,
-		       TH1F *hist) const;
+		       std::vector<TH1F *> hist) const;
 
-  void SetHisto(const zee_events_t& cache, TH1F *hist) const;
-  void SetAutoBin(ZeeCategory& category, double min, double max); // set using statistics
+  void SetHisto(const zee_events_t& cache, std::vector<TH1F *> hist) const;
+  //void SetAutoBin(ZeeCategory& category, double min, double max); // set using statistics
   void ResetBinning(ZeeCategory& category);
   bool isCategoryChanged(ZeeCategory& category, bool updateVar=true) const;
   
 
-  double getLogLikelihood(TH1F* data, TH1F* prob) const;
+  double getLogLikelihood(std::vector<TH1F*> data, std::vector<TH1F*> prob) const;
   void UpdateCategoryNLL(ZeeCategory& cat, unsigned int nLLtoy, bool multiSmearToy=true);
   
 
@@ -226,7 +248,7 @@ public:
   std::vector<ZeeCategory> ZeeCategories;
   typedef std::vector<ZeeCategory> ZeeCategoryCollection;
 
-  TH1F *GetSmearedHisto(ZeeCategory& category, bool isMC,
+  std::vector<TH1F *> GetSmearedHisto(ZeeCategory& category, bool isMC,
 			bool smearEnergy, bool forceNew=false, bool multiSmearToy=true);
 
   

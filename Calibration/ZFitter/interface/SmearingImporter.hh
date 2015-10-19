@@ -46,9 +46,9 @@ public:
   inline void SetCommonCut(TString cut){_commonCut=cut;};
   inline void SetSmearingEt(bool value){_isSmearingEt=value;};
   inline void SetPdfSystWeight(int value){_pdfWeightIndex=value;};
-  inline void SetTargetVariable(TString targetVariable){_targetVariable=targetVariable;};
+  inline void SetTargetVariable(std::vector<TString> targetVariable){_targetVariable=targetVariable;};
+  inline std::vector<TString> GetTargetVariable(){return _targetVariable;};
   inline void SetConfiguration(TString configuration){_Configuration=configuration;};
-  inline TString GetTargetVariable(){return _targetVariable;};
   inline TString GetConfiguration(){return _Configuration;};
 
   std::vector<TString> _regionList;
@@ -56,7 +56,7 @@ public:
 
 private:
 
-  TString _targetVariable;
+  std::vector<TString> _targetVariable;
   TString _Configuration;
   TString _energyBranchName;
   TString _commonCut;

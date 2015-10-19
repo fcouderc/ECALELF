@@ -19,7 +19,7 @@ ElectronCategory_class::ElectronCategory_class(bool isRooFit_, bool roofitNameAs
   //energyBranchName("energySCEle"),
   energyBranchName("energySCEle_regrCorrSemiParV5_ele"),
   _corrEle(false){
-
+  //std::cout<<"Default energy branch name in ElectronCategory_class is "<<energyBranchName<<std::endl;
   return;
 }
 
@@ -55,19 +55,19 @@ TCut ElectronCategory_class::GetCut(TString region, bool isMC, int nEle, bool co
       cut_string.ReplaceAll(energyBranchName+"_ele2",energyBranchName+"_ele2 * scaleEle_ele2");
       //TString invMassName=energyBranchName; invMassName.ReplaceAll("energySCEle","invMass_SC");
       //cut_string.ReplaceAll(invMassName,invMassName+"*sqrt(scaleEle_ele1 * scaleEle_ele2)");
-    }else if(isMC==true /*&& (smearEle || _smearEle)*/){//MC
+    }/*else if(isMC==true){ //&& (smearEle || _smearEle)){//MC
       cut_string.ReplaceAll(energyBranchName+"_ele1",energyBranchName+"_ele1 * smearEle_ele1");
       cut_string.ReplaceAll(energyBranchName+"_ele2",energyBranchName+"_ele2 * smearEle_ele2");
       //TString invMassName=energyBranchName; invMassName.ReplaceAll("energySCEle","invMass_SC");
       //cut_string.ReplaceAll(invMassName,invMassName+"*sqrt(scaleEle_ele1 * scaleEle_ele2)");
-      }
+      }*/
 
     if(cut_string.Contains("invMass_var")){
       TString invMassName=energyBranchName; invMassName.ReplaceAll("energySCEle","invMass_SC");
       cut_string.ReplaceAll("invMass_var",invMassName);
       if(isMC==false && (corrEle || _corrEle)){//Data
       cut_string.ReplaceAll(invMassName,invMassName+"*sqrt(scaleEle_ele1 * scaleEle_ele2)");
-      }else if(isMC==true /*&& (smearEle || _smearEle)*/){//MC
+      }else if(isMC==true /*(smearEle || _smearEle)*/){//MC
 	cut_string.ReplaceAll(invMassName,invMassName+"*sqrt(smearEle_ele1 * smearEle_ele2)");
       }
     }
@@ -111,6 +111,8 @@ TCut ElectronCategory_class::GetCut(TString region, bool isMC, int nEle, bool co
 
 
 std::set<TString> ElectronCategory_class::GetCutSet(TString region){
+  std::cout<<"Inside ElectronCategory_class::GetCutSet"<<std::endl;
+  std::cout<<"Region is "<<region<<std::endl;
   TCut cut_string;
   cut_string.Clear();
 
@@ -617,6 +619,8 @@ std::set<TString> ElectronCategory_class::GetCutSet(TString region){
 
     //--------------- runNumber
     if(string.Contains("runNumber")){
+      std::cout<<"In ElectronCategory_class dealing with runNumber cuts"<<std::endl;
+      std::cout<<"full string is "<<string<<std::endl;
       TObjArray *splitted = string.Tokenize("_");
       if(splitted->GetEntries() < 3){
 	std::cerr << "ERROR: incomplete runNumber region definition" << std::endl;
@@ -627,7 +631,8 @@ std::set<TString> ElectronCategory_class::GetCutSet(TString region){
       
       TString string1 = Objstring1->GetString();
       TString string2 = Objstring2->GetString();
-      
+      std::cout<<"string1 is "<<string1<<std::endl;
+      std::cout<<"string2 is "<<string2<<std::endl;
       TCut cut1("runNumber >= "+string1);
       TCut cut2("runNumber <=  "+string2);
       
@@ -1349,7 +1354,7 @@ TString ElectronCategory_class::GetBranchNameRooFit(TString region){
 }
 
 std::set<TString> ElectronCategory_class::GetBranchNameNtuple(TString region){
-  
+  std::cout<<"Inside ElectronCategory_class::GetBranchNameNtuple"<<std::endl;
   std::set<TString> branchNames;
 
   TString cut(GetCut(region,false, 1, false));

@@ -40,7 +40,7 @@ TTree* addBranch_class::AddBranch_ZPt(TChain* originalChain, TString treename, T
   Float_t         energyEle[2];
   Float_t         corrEle[2]={1.,1.};
   Float_t         smearEle[2]={1.,1.};
-  Float_t         ZPt;
+  //Float_t         ZPt;
   Float_t         ZPta;
   TLorentzVector  ele1,ele2;
 
@@ -63,12 +63,12 @@ TTree* addBranch_class::AddBranch_ZPt(TChain* originalChain, TString treename, T
     }
   }
 
-  newtree->Branch("ZPt_"+energyBranchName, &ZPt, "ZPt/F");
+  //newtree->Branch("ZPt_"+energyBranchName, &ZPt, "ZPt/F");
   newtree->Branch("ZPta_"+energyBranchName, &ZPta, "ZPta/F");
   //px = pt*cosphi; py = pt*sinphi; pz = pt*sinh(eta)
   //p^2 =( E^2 - m^2 )=px^2 + py^2 + pz^2= pt^2*(1+sinh^2(eta)) = pt^2*(cosh^2(eta))
 
-  float mass = 0.; //0.000511;
+  //float mass = 0.; //0.000511;
   Long64_t nentries= originalChain->GetEntries();
   for(Long64_t ientry = 0; ientry< nentries; ientry++){
     originalChain->GetEntry(ientry);
@@ -77,7 +77,7 @@ TTree* addBranch_class::AddBranch_ZPt(TChain* originalChain, TString treename, T
     //ZPt = 
     //TMath::Sqrt(pow(regrCorr_fra_pt0*TMath::Sin(phiEle[0])+regrCorr_fra_pt1*TMath::Sin(phiEle[1]),2)+pow(regrCorr_fra_pt0*TMath::Cos(phiEle[0])+regrCorr_fra_pt1*TMath::Cos(phiEle[1]),2));
     ele1.SetPtEtaPhiE(energyEle[0]*corrEle[0]*smearEle[0]/cosh(etaEle[0]), etaEle[0], phiEle[0], energyEle[0]*corrEle[0]*smearEle[0]);
-    ele2.SetPtEtaPhiE(energyEle[1]*corrEle[0]*smearEle[0]/cosh(etaEle[1]), etaEle[1], phiEle[1], energyEle[1]*corrEle[0]*smearEle[0]);
+    ele2.SetPtEtaPhiE(energyEle[1]*corrEle[1]*smearEle[1]/cosh(etaEle[1]), etaEle[1], phiEle[1], energyEle[1]*corrEle[1]*smearEle[1]);
     ZPta = (ele1+ele2).Pt();
     //if(fabs(ZPt - ZPta)>0.001){
     //  std::cerr << "[ERROR] ZPt not well calculated" << ZPt << "\t" << ZPta << std::endl;

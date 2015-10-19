@@ -1,3 +1,6 @@
+##Qui non fai haddTGraph per avere un .root file con tutti i vari profili che hai fatto
+##Vuoi fittare un preciso .root file
+
 echo "[STATUS] Fitting NLL"
 echo "{" > tmp/my_fitProfile.C
 echo "gROOT->ProcessLine(\".include $ROOFITSYS/include\");" >> tmp/my_fitProfile.C

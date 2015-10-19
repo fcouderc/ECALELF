@@ -1,6 +1,23 @@
 #!/bin/bash
 source script/functions.sh
 
+if [[ $1 = "ptRatio*pt2Sum" ]]; then
+   validation_file=22Jan2012-runDepMCAll_checkMee.dat
+   region=scaleStep0
+   commonCut=Et_25-trigger-noPF
+   outDirData=test/dato
+   extension=ptRatio_pt2Sum
+   InitFile=""
+   Target=ptRatio*pt2Sum
+   Min=0.5*0
+   Max=2*200
+   BinWidth=0.05*2
+   Conf=random
+   echo ${validation_file}
+   echo ${region}
+   echo ${extension}
+fi
+
 if [[ $1 = "ptRatio" ]]; then
    validation_file=22Jan2012-runDepMCAll_checkMee.dat
    region=scaleStep0
@@ -74,7 +91,7 @@ echo "}" >> tmp/fitProfiles_${Target}_${Conf}.C
 root -l -b -q tmp/fitProfiles_${Target}_${Conf}.C
 
 
-#CAMBIARE Questo serve solo ad avere i plot carini                                                                                                                              
+#CAMBIARE ==>Questo serve solo ad avere i plot carini nel punto di minimo della likelihood                                                                                                                             
 #     ./bin/ZFitter.exe -f $outDirData/${extension}/`basename $configFile` --regionsFile ${regionFileEB} $isOdd $updateOnly --selection=${newSelection}  --invMass_var ${invMas\
 #s_var} --commonCut ${commonCut} --outDirFitResMC=${outDirMC}/${extension}/fitres --outDirImgMC=${outDirMC}/${extension}/img --outDirImgData=${outDirData}/${extension}/img/ --o\
 #utDirFitResData=${outDirData}/${extension}/fitres --constTermFix  --smearerFit  --smearingEt --autoNsmear --autoBin --initFile=${outFile} --corrEleType=HggRunEtaR9Et --plotOnl\

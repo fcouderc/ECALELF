@@ -101,17 +101,18 @@ ZFit_class::ZFit_class(TChain *data_chain_,
 
 
 void ZFit_class::Import(TString commonCut, TString eleID_, std::set<TString>& branchList){
+  std::cout<<"[INFO] In ZFit_class::Import"<<std::endl;
   signal_chain->Draw(">>list","runNumber>1","entrylist",10);
   TEntryList *l = (TEntryList*) gROOT->FindObject("list");
 
   commonCut+="-eleID_"+eleID_;
   TString mcCut, dataCut;
   if(l->GetN()>0){ // runDependent MC, treat it has data
-    std::cout << "[INFO] Inside ZFit_class::Import Importing run dependent MC" << std::endl;
+    std::cout << "[INFO] (Inside ZFit_class::Import) You are using run dependent MC" << std::endl;
     if(_oddMC) mcCut = cutter.GetCut(commonCut+"-odd", false);
     else mcCut = cutter.GetCut(commonCut, false);
   } else {
-    std::cout << "[INFO] Inside ZFit_class::Import Importing std MC" << std::endl;
+    std::cout << "[INFO] (Inside ZFit_class::Import) You are using std MC" << std::endl;
     if(_oddMC) mcCut = cutter.GetCut(commonCut+"-odd", true);
     else mcCut = cutter.GetCut(commonCut, true);
   }
@@ -121,14 +122,13 @@ void ZFit_class::Import(TString commonCut, TString eleID_, std::set<TString>& br
   else dataCut = cutter.GetCut(commonCut, false);
   //std::cout << dataCut << std::endl;
   std::cout << "------------------------------[INFO] Inside ZFit_class::Import IMPORT DATASETS" << std::endl;
-  std::cout << "--------------- Importing signal mc: " <<signal_chain->GetEntries() <<std::endl;
+  std::cout << "--------------- Importing signal mc starting from : " <<signal_chain->GetEntries() <<" entries"<<std::endl;
   //if(signal!=NULL) delete signal;
-  
   signal = ImportTree(signal_chain, mcCut, branchList);
   commonMC = new TEntryList(*(signal->GetEntryList()));
   //signal->Print();
   //exit(0);
-  std::cout << "--------------- Importing data: " << data_chain->GetEntries() << std::endl;
+  std::cout << "--------------- Importing data starting from : " << data_chain->GetEntries() <<" entries"<< std::endl;
   //if(data!=NULL) delete data;
   data = ImportTree(data_chain, dataCut, branchList);
   commonData = new TEntryList(*(data->GetEntryList()));
@@ -158,6 +158,7 @@ TChain *ZFit_class::ImportTree(TChain *chain, TString commonCut, std::set<TStrin
     chain->SetBranchStatus(*itr, 1);
   }
   // abilitare la lista dei friend branch
+  std::cout<<"[INFO] Inside ZFit_class::ImporTree additional branches are enabled"<<std::endl;
   if(chain->GetBranch("scaleEle"))  chain->SetBranchStatus("scaleEle", 1);
   if(chain->GetBranch("smearEle")) chain->SetBranchStatus("smearEle", 1);
   if(chain->GetBranch("puWeight")) chain->SetBranchStatus("puWeight", 1);
@@ -170,7 +171,6 @@ TChain *ZFit_class::ImportTree(TChain *chain, TString commonCut, std::set<TStrin
   chain->SetBranchStatus("eleID", 1);
   chain->SetBranchStatus("eventNumber", 1);
   chain->SetBranchStatus(invMass.GetName(), 1);
-  std::cout<<"[INFO] Inside ZFit_class.cc invMass is "<<invMass.GetName()<<std::endl;
   chain->SetBranchStatus("energySCEle", 1);
   chain->AddBranchToCache("*",kTRUE);
   
@@ -205,7 +205,7 @@ RooDataHist *ZFit_class::ImportHist(TH1F *hist){
 
 
 RooDataSet *ZFit_class::TreeToRooDataSet(TChain *chain, TEntryList *entryList){
-  
+  std::cout<<"Inside src/ZFit_class::TreeToRooDataSet"<<std::endl;
 
   Float_t invMass_;
 
@@ -247,12 +247,14 @@ RooDataSet *ZFit_class::TreeToRooDataSet(TChain *chain, TEntryList *entryList){
   //chain->GetEntry(0);
   std::cout << "___ ENTRIES: " << entries << std::endl;
   for(Long64_t jentry=0; jentry < entries; jentry++){
+    std::cout<<"Get entries"<<std::endl;
     //Int_t treenum=0;
     //Long64_t treeEntry = entryList->GetEntryAndTree(jentry,treenum);
     //Long64_t chainEntry = treeEntry+chain->GetTreeOffset()[treenum];  
     //chain->LoadTree(chainEntry); // this also returns treeEntry
     //    chain->GetEntry(chainEntry);
     chain->GetEntry(chain->GetEntryNumber(jentry));
+    std::cout<<"Get entries2"<<std::endl;
 //     Long64_t ientry = entryList->GetEntry(jentry);
 //     //std::cerr << "ientry = " << ientry << std::endl;
 //     if(chain->LoadTree(ientry)<=0) exit(1);
@@ -268,12 +270,14 @@ RooDataSet *ZFit_class::TreeToRooDataSet(TChain *chain, TEntryList *entryList){
 
     if(jentry<1)  std::cout << "[DEBUG] r9weight[0]: " << r9weight_[0] << std::endl;    
     if(jentry<1)  std::cout << "[DEBUG] r9weight[1]: " << r9weight_[1] << std::endl;
-
+    std::cout<<"before invMass"<<std::endl;
     invMass_*=sqrt(corrEle_[0] * corrEle_[1] *(smearEle_[0]) * (smearEle_[1]));
     invMass.setVal(invMass_ );
+    std::cout<<"after invMass"<<std::endl;
     weight.setVal(weight_*pileupWeight_ * r9weight_[0]*r9weight_[1]); 
     if(invMass_ > invMass.getMin() && invMass_ < invMass.getMax()) data->add(Vars);
   }
+  std::cout<<"After loop"<<std::endl;
   data->Print();
   chain->ResetBranchAddresses();
   return data;
@@ -319,8 +323,9 @@ RooDataSet *ZFit_class::TreeToRooDataSet(TChain *chain, TCut cut){
   Long64_t entries = chain->GetEntryList()->GetN();
   chain->LoadTree(chain->GetEntryNumber(0));
   Long64_t treenumber=-1;
-  TTreeFormula *selector = new TTreeFormula("selector", cut, chain);
-
+  TTreeFormula *selector = new TTreeFormula("selector", cut, chain);//Tcut cut 
+  std::cout << "Inside ZFit_class::TreeToRooDataSet"<< std::endl;
+  std::cout<<"cut is "<<cut<<std::endl;
   std::cout << "___ ENTRIES: " << entries << std::endl;
   for(Long64_t jentry=0; jentry < entries; jentry++){
     Long64_t entryNumber= chain->GetEntryNumber(jentry);
@@ -329,8 +334,13 @@ RooDataSet *ZFit_class::TreeToRooDataSet(TChain *chain, TCut cut){
       treenumber = chain->GetTreeNumber();
       selector->UpdateFormulaLeaves();
     }
+    if(jentry<10){
+      std::cout<<"invMass_ is"<<invMass_<<std::endl;
+    }
     if(selector->EvalInstance()==false) continue;
-
+    if(jentry<10){
+      std::cout<<"After selector"<<std::endl;
+    }
     if(jentry<1)  std::cout << "[DEBUG] PU: " << pileupWeight_ 
 			    << std::endl;
     if(jentry<1)  std::cout << "[DEBUG] corrEle[0]: " << corrEle_[0] << std::endl;
@@ -342,15 +352,19 @@ RooDataSet *ZFit_class::TreeToRooDataSet(TChain *chain, TCut cut){
     if(jentry<1)  std::cout << "[DEBUG] r9weight[0]: " << r9weight_[0] << std::endl;    
     if(jentry<1)  std::cout << "[DEBUG] r9weight[1]: " << r9weight_[1] << std::endl;
 
+    if(jentry<10){//for debugging
+    std::cout<<"invMass_ is"<<invMass_<<std::endl;
+    std::cout<<"factor is "<<sqrt(corrEle_[0] * corrEle_[1] *(smearEle_[0]) * (smearEle_[1]))<<std::endl;
+    }
     invMass_*=sqrt(corrEle_[0] * corrEle_[1] *(smearEle_[0]) * (smearEle_[1]));
     invMass.setVal(invMass_ );
     weight.setVal(weight_*pileupWeight_ * r9weight_[0]*r9weight_[1]); 
     if(invMass_ > invMass.getMin() && invMass_ < invMass.getMax()) data->add(Vars);
   }
   delete selector;
+  std::cout<<"Printing the RooDataSet"<<std::endl;
   data->Print();
   chain->ResetBranchAddresses();
-
   return data;
 }
 
@@ -362,7 +376,6 @@ RooAbsData *ZFit_class::ReduceDataset(TChain *data, TString region, bool isMC, b
   else std::cout << " - removing trakerDriven electrons" << std::endl;
 
   // reduce the tree to the selected events
-  
   //std::cout << cutter.GetCut(region,isMC) << std::endl;
   TStopwatch myClock;
   myClock.Start();
@@ -676,7 +689,7 @@ RooFitResult *ZFit_class::FitMC(TString region, bool doPlot){
 
 void ZFit_class::Fit(TString region, bool doPlot){
 
-  std::cout << "============================== ";
+  std::cout << "============= In ZFit_class::Fit ";
   std::cout << "[STATUS] Fitting region: " << region << std::endl;
   RooFitResult *fitres_MC=NULL;
 

@@ -6,7 +6,7 @@
 
 TGraph *GetProfile(RooRealVar *var1, RooRealVar *var2, RooSmearer& smearer, bool trueEval, double rho, double Emean, float phi){
   if(var2==NULL) return GetProfile(var1, smearer, -1, false, trueEval, rho, Emean);
-
+  //std::cout<<" GetProfile (first version) in src/nllProfile"<<std::endl;
   Double_t v1 = var1->getVal();
   Double_t v2 = var2->getVal();
 
@@ -39,6 +39,7 @@ TGraph *GetProfile(RooRealVar *var1, RooRealVar *var2, RooSmearer& smearer, bool
 }
 
 TGraph *GetProfile(RooRealVar *var, RooSmearer& compatibility, int level, bool warningEnable, bool trueEval, float rho, float Emean, float phi){
+  //std::cout<<" GetProfile (version 2) in src/nllProfile"<<std::endl;
   if(var==NULL) trueEval=false;
   TString name(var == NULL ? "phi" : var->GetName());
   //if(trueEval) 
@@ -215,7 +216,8 @@ TGraph *GetProfile(RooRealVar *var, RooSmearer& compatibility, int level, bool w
       xValues[iVal]=value;
       if(trueEval){
 	var->setVal(value);
-	chi2[iVal]=compatibility.evaluate(); //-minYvalue;
+	//std::cout<<"** var (scanning) is "<<var->getVal()<<std::endl;
+	chi2[iVal]=compatibility.evaluate(); //evaluate calls RooSmearer::getCompatibility (actually evaluate IS getCompatibility + writes the markovChain)
       } else chi2[iVal]=0;
 #ifdef DEBUG
       if(trueEval) std::cout << "value is " << chi2[iVal] << std::endl;

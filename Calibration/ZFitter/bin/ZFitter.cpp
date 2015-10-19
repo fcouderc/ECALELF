@@ -1757,7 +1757,7 @@ int main(int argc, char **argv) {
 	std::cout<<"[INFO] minimType is "<<minimType<<std::endl;
 	std::cout<<"************************************************"<<std::endl;
 	std::cout<<"************************************************"<<std::endl;
-	int data_index=99999999;
+	int data_index=1;
 	std::string data_index_string;
 	if(data_index <1000){
 	  data_index_string=std::to_string(data_index);
@@ -1849,7 +1849,7 @@ int main(int argc, char **argv) {
 	  std::cout <<"==================Creating the profiles in bin/ZFitter.cpp (if you haven't minimized the likelihood, it doesn't do it for you. Minimization must be done before this point)=================="<<endl;
 	  //create profiles
 	  TString outFile=outDirFitResData.c_str();
-	  outFile+="/outProfile_"+full_variable+configuration+"_";
+	  outFile+="/outProfile_"+full_variable+configuration+TString(data_index_string)+"_";
 	  outFile+=r+"_"+TString(commonCut.c_str())+".root";
 	  outFile.ReplaceAll("-","_");
 	  TFile *fOutProfile = new TFile(outFile,"RECREATE");

@@ -4,7 +4,7 @@ puName(){
     if [ -z "$puName" ];then
 	puCount=`grep -v '#' $1  | grep  'pileupHist' | grep '^d' | cut -f 3 |wc -l`
 	if [ "${puCount}" == "0" ];then
-	    echo "[ERROR] No or too mani pileupHist files for data"
+	    echo "[ERROR] No or too many pileupHist files for data"
 	    exit 1
 	fi
 	puFiles=`grep -v '#' $1  | grep  'pileupHist' | grep '^d' | cut -f 3`
@@ -52,7 +52,7 @@ mcName(){
 
 
 mkSmearerCatSignal(){
-
+    echo "Inside functions.sh mkSmearerCatSignal"
     if [ ! -e "data/smearerCat/smearerCat_`basename $1 .dat`_s1-`basename $configFile .dat`.root" -o  ! -e "data/smearerCat/smearerCat_`basename $1 .dat`_s2-`basename $configFile .dat`.root" -o  ! -e "data/smearerCat/smearerCat_`basename $1 .dat`_s3-`basename $configFile .dat`.root" ];then
 	echo "[STATUS] Creating smearerCat for signal: `basename $configFile .dat` `basename $1 .dat`"
  	./bin/ZFitter.exe -f ${configFile} --regionsFile=$1  \
@@ -62,42 +62,17 @@ mkSmearerCatSignal(){
 	  do
 	  
 	  tag=`echo $file | sed "s|tmp/smearerCat_${basenameConfig}_s\([0-9]\)-.*|s\1|"`
-	  
-	  mv $file data/smearerCat/ || exit 1
-	  echo -e "$tag\tsmearerCat_${basenameConfig}\tdata/smearerCat/`echo $file | sed 's|tmp/||'`" >> $configFile
+	  echo "mv $file friends/smearerCat/"
+	  mv $file friends/smearerCat/ || exit 1
+	  echo -e "$tag\tsmearerCat_${basenameConfig}\tfriends/smearerCat/`echo $file | sed 's|tmp/||'`" >> $configFile
 	done
     fi
     
-#     tags=`grep -v '#' $configFile | sed -r 's|[ ]+|\t|g; s|[\t]+|\t|g' | cut -f 1  | sort | uniq | grep [s,d][1-9]`
-#     for tag in $tags
-#       do
-#       case ${tag} in
-# 	  s*)
-# 	      if [  "`grep -v '#' $configFile | grep \"^$tag\" | cut -f 2 | grep -c smearerCat`" == "0" ];then
-# 		  ./bin/ZFitter.exe -f ${configFile} --regionsFile=$1  \
-# 		      --saveRootMacro \
-# 		      --addBranch=smearerCat_s  --smearerFit
-# 		  break;
-# 	      fi
-# 	      ;;
-#       esac
-#     done
-
-#     for tag in $tags
-#       do
-#       case ${tag} in
-# 	  s*)
-# 	      if [  "`grep -v '#' $configFile | grep \"^$tag\" | cut -f 2 | grep -c smearerCat`" == "0" ];then
-# 		  mv tmp/smearerCat_`basename $1 .dat`_${tag}-`basename $configFile .dat`.root data/smearerCat/smearerCat_`basename $1 .dat`_${tag}-`basename $configFile .dat`.root #|| exit 1
-# 		  echo -e "$tag\tsmearerCat_${basenameEB}\tdata/smearerCat/smearerCat_`basename $1 .dat`_${tag}-`basename $configFile .dat`.root" >> $configFile
-# 	      fi
-# 	      ;;
-#       esac
-#     done
 }
 
 
 mkSmearerCatData(){
+    echo "Inside functions.sh mkSmearerCatData"
     #$1: regionFile
     #$2: outDirData/step...
     #$3: configFile
@@ -116,14 +91,11 @@ mkSmearerCatData(){
       sed -i "\#$line# d" $3.tmp
     done
     cat $3.tmp
-    echo 
-    echo
-    echo
+    echo "$3.tmp >> $3"
     cat $3.tmp >> $3
     rm $3.tmp $3.tmp2
 }
 	
-
 
 checkStepDep(){
     for step in $@

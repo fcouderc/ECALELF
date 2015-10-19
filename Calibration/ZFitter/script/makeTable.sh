@@ -74,35 +74,33 @@ case $TYPE in
 	exit 1
 	;;
 esac
-
 regions=`cat $regionsFile | grep -v '#'`
 if [ -n "${runRangesFile}" ];then
+#if [ -s "${runRangesFile}" ];then # -s means "size not zero"
     runRanges=`cat $runRangesFile | grep -v '#' | awk '{print $1}'`
     if [ -n "$JSON" ];then
 	./script/selEff.sh --runRangesFile=$runRangesFile --json=$JSON
     fi
-for region in $regions
-  do
-  for runRange in $runRanges
+    for region in $regions
     do
-    runRange=`echo $runRange | sed 's|-|_|'`
-    category=${region}"-runNumber_"${runRange}"-"$commonCut
-    categories="${categories} $category"
-  done
-done
+	for runRange in $runRanges
+	do
+	    runRange=`echo $runRange | sed 's|-|_|'`
+	    category=${region}"-runNumber_"${runRange}"-"$commonCut
+	    categories="${categories} $category"
+	done
+    done
 else
-for region in $regions
-  do
-  category=${region}"-"$commonCut
-  categories="${categories} $category"
-  
-done
+    for region in $regions
+    do
+	category=${region}"-"$commonCut
+	categories="${categories} $category"
+    done
 fi
 
 echo "#category & events & DeltaM_data & DeltaM_MC & DeltaP & width_data & width_MC & rescaledWidth_data & rescaledWidth_MC & additionalSmearing & chi2data & chi2mc & events/lumi"
 for category in $categories
   do
-#  echo $category
   case $category in 
       *runNumber*)
 	  runrange=`echo $category | sed 's|.*runNumber|runNumber|;s|.*runNumber_\([0-9]*\)_\([0-9]*\).*|\1_\2|'`
@@ -124,12 +122,14 @@ for category in $categories
   fi
   categoryMC=`echo $category | sed "s|-runNumber_[0-9]*_[0-9]*|${runrange}|"`
   fileMC="${outDirFitResMC}/$categoryMC.tex"
+  ##echo "###File MC is ${outDirFitResMC}/$categoryMC.tex"
   if [ ! -r "${fileMC}" ];then
       echo "[ERROR] ${fileMC} not found" >> /dev/stderr
       exit 1
   fi
 
   fileData="${outDirFitResData}/$category.tex"
+  ##echo "###File Data is ${outDirFitResData}/$category.tex"
   if [ ! -r "${fileData}" ];then
       echo "[WARNING] ${fileData} not found: skipping this category"  >> /dev/stderr
       echo "%$category & not fitted \\\\"

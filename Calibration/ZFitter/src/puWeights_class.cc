@@ -159,7 +159,7 @@ void puWeights_class::ReadFromFiles(std::string mcPUFile, std::string dataPUFile
   // they should have the same binning otherwise PU weights until the max between them
   int nBins = MAX_PU_REWEIGHT;
   if(puData_hist->GetNbinsX() != puMC_hist->GetNbinsX()){
-    std::cerr << "[WARNING] Different binning between data and mc pileup distributions:" << puData_hist->GetNbinsX() << "\t" << puMC_hist->GetNbinsX() << std::endl;
+    std::cerr << "[WARNING] (In src/puWeights_class.cc) Different binning between data and mc pileup distributions:" << puData_hist->GetNbinsX() << "\t" << puMC_hist->GetNbinsX() << std::endl;
     nBins=std::min(puData_hist->GetNbinsX(),puMC_hist->GetNbinsX());
     //std::cerr << "Pileup reweighted until nPU max = " << nBins;
   } 

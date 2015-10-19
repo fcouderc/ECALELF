@@ -3,8 +3,14 @@
 #EB-absEta_1_1.4442
 #EE-absEta_1.566_2
 #EE-absEta_2_2.5
+
 #absEta_0_3-gold
 #absEta_0_3-bad
 #absEta_0_3
-EB-invMass_100_2000-ZPt_0_10
-EE-invMass_100_2000-ZPt_0_10
+
+#EB-invMass_100_2000-ZPt_0_10
+#EE-invMass_100_2000-ZPt_0_10
+# Pt is handled inside the code
+EB-invMass_100_2000
+EE-invMass_100_2000
+

@@ -1,9 +1,10 @@
 #! /usr/bin/python
 import math
-from array import array
 import ROOT
 import numpy as np
 import os
+ROOT.gSystem.Load("~/rootlogon_C.so")
+ROOT.rootlogon()
 
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 ROOT.gStyle.SetOptStat(0)
@@ -23,64 +24,64 @@ ROOT.gStyle.SetErrorX(0)
 #regions=['EB']
 regions=['EB','EE']
 
-true_scales           ={}
-true_sigmas           ={}
-fitted_scales         ={}
-fitted_sigmas         ={}
-fitted_scales_err_down={}
-fitted_scales_err_up  ={}
-fitted_sigmas_err_down    ={}
-fitted_sigmas_err_up      ={}
+true_scales                 ={}
+true_sigmas                 ={}
+fitted_scales               ={}
+fitted_sigmas               ={}
+fitted_scales_err_down      ={}
+fitted_scales_err_up        ={}
+fitted_sigmas_err_down      ={}
+fitted_sigmas_err_up        ={}
 true_scales_check           ={}
 true_sigmas_check           ={}
 fitted_scales_check         ={}
 fitted_sigmas_check         ={}
 fitted_scales_err_down_check={}
 fitted_scales_err_up_check  ={}
-fitted_sigmas_err_down_check    ={}
-fitted_sigmas_err_up_check      ={}
+fitted_sigmas_err_down_check={}
+fitted_sigmas_err_up_check  ={}
 
 for region in regions:
-    true_scales           [region]=[]   
-    true_sigmas           [region]=[]   
-    fitted_scales         [region]=[]   
-    fitted_sigmas         [region]=[]   
-    fitted_scales_err_down[region]=[]   
-    fitted_scales_err_up  [region]=[]   
-    fitted_sigmas_err_down    [region]=[]   
-    fitted_sigmas_err_up      [region]=[]   
+    true_scales                 [region]=[]   
+    true_sigmas                 [region]=[]   
+    fitted_scales               [region]=[]   
+    fitted_sigmas               [region]=[]   
+    fitted_scales_err_down      [region]=[]   
+    fitted_scales_err_up        [region]=[]   
+    fitted_sigmas_err_down      [region]=[]   
+    fitted_sigmas_err_up        [region]=[]   
     true_scales_check           [region]=[]
     true_sigmas_check           [region]=[]
     fitted_scales_check         [region]=[]
     fitted_sigmas_check         [region]=[]
     fitted_scales_err_down_check[region]=[]
     fitted_scales_err_up_check  [region]=[]
-    fitted_sigmas_err_down_check    [region]=[]
-    fitted_sigmas_err_up_check      [region]=[]
+    fitted_sigmas_err_down_check[region]=[]
+    fitted_sigmas_err_up_check  [region]=[]
 
-true_scales_array           ={}   
-true_sigmas_array           ={}   
-fitted_scales_array         ={}   
-fitted_sigmas_array         ={}   
-fitted_scales_err_down_array={}   
-fitted_scales_err_up_array  ={}   
-fitted_sigmas_err_down_array    ={}   
-fitted_sigmas_err_up_array      ={}   
+true_scales_array                 ={}   
+true_sigmas_array                 ={}   
+fitted_scales_array               ={}   
+fitted_sigmas_array               ={}   
+fitted_scales_err_down_array      ={}   
+fitted_scales_err_up_array        ={}   
+fitted_sigmas_err_down_array      ={}   
+fitted_sigmas_err_up_array        ={}   
 true_scales_check_array           ={}
 true_sigmas_check_array           ={}
 fitted_scales_check_array         ={}
 fitted_sigmas_check_array         ={}
 fitted_scales_err_down_check_array={}
 fitted_scales_err_up_check_array  ={}
-fitted_sigmas_err_down_check_array    ={}
-fitted_sigmas_err_up_check_array      ={}
+fitted_sigmas_err_down_check_array={}
+fitted_sigmas_err_up_check_array  ={}
 
-scale_graph={}
-sigma_graph={}
-scale_check_graph={}
-sigma_check_graph={}
-canvas_scale={}
-canvas_sigma={}
+scale_graph       ={}
+sigma_graph       ={}
+scale_check_graph ={}
+sigma_check_graph ={}
+canvas_scale      ={}
+canvas_sigma      ={}
 canvas_scale_check={}
 canvas_sigma_check={}
 
@@ -108,7 +109,8 @@ for region in regions:
                         elif "scale" in numbers_str[0]:
                             fitted_scales_check[region].append(numbers_float[0])
                             fitted_scales_err_down_check[region].append(numbers_float[1])
-                            fitted_scales_err_up_check[region].append(numbers_float[2])
+                            #fitted_scales_err_up_check[region].append(numbers_float[2])
+                            fitted_scales_err_up_check[region].append(0.)
                             true_scales_check[region].append(1.)
                     else:
                         if "constTerm" in numbers_str[0]:                    
@@ -121,69 +123,91 @@ for region in regions:
                             fitted_scales_err_down[region].append(numbers_float[1])
                             fitted_scales_err_up[region].append(numbers_float[2])
                             true_scales[region].append(float(injected_scale))
-    #Ecco qui devi fare i plot per regione
     #At this point lists are full of points
-    #for i in range(0,len(true_scales[region])):
-    #    print true_scales[region][i]
-    #    print fitted_scales[region][i]
-    #    print true_sigmas[region][i]
-    #    print fitted_sigmas[region][i]
-    #    print true_scales_check[region][i]
-    #    print fitted_scales_check[region][i]
-    #    print true_sigmas_check[region][i]
-    #    print fitted_sigmas_check[region][i]
-
     #usage of array for TGraph, otherwise it doesn't work
-    true_scales_array[region]=np.asarray(true_scales[region])   
-    true_sigmas_array                 [region]=np.asarray(true_sigmas           [region])   
-    fitted_scales_array[region]=np.asarray(fitted_scales[region])   
-    fitted_sigmas_array               [region]=np.asarray(fitted_sigmas         [region])   
-    fitted_scales_err_down_array      [region]=np.asarray(fitted_scales_err_down[region])   
-    fitted_scales_err_up_array        [region]=np.asarray(fitted_scales_err_up  [region])   
-    fitted_sigmas_err_down_array          [region]=np.asarray(fitted_sigmas_err_down    [region])   
-    fitted_sigmas_err_up_array            [region]=np.asarray(fitted_sigmas_err_up      [region])
+    true_scales_array                 [region]=np.asarray(true_scales                 [region])   
+    true_sigmas_array                 [region]=np.asarray(true_sigmas                 [region])   
+    fitted_scales_array               [region]=np.asarray(fitted_scales               [region])   
+    fitted_sigmas_array               [region]=np.asarray(fitted_sigmas               [region])   
+    fitted_scales_err_down_array      [region]=np.asarray(fitted_scales_err_down      [region])   
+    fitted_scales_err_up_array        [region]=np.asarray(fitted_scales_err_up        [region])   
+    fitted_sigmas_err_down_array      [region]=np.asarray(fitted_sigmas_err_down      [region])   
+    fitted_sigmas_err_up_array        [region]=np.asarray(fitted_sigmas_err_up        [region])
     true_scales_check_array           [region]=np.asarray(true_scales_check           [region])
     true_sigmas_check_array           [region]=np.asarray(true_sigmas_check           [region])
     fitted_scales_check_array         [region]=np.asarray(fitted_scales_check         [region])
     fitted_sigmas_check_array         [region]=np.asarray(fitted_sigmas_check         [region])
     fitted_scales_err_down_check_array[region]=np.asarray(fitted_scales_err_down_check[region])
     fitted_scales_err_up_check_array  [region]=np.asarray(fitted_scales_err_up_check  [region])
-    fitted_sigmas_err_down_check_array    [region]=np.asarray(fitted_sigmas_err_down_check    [region])
-    fitted_sigmas_err_up_check_array      [region]=np.asarray(fitted_sigmas_err_up_check      [region])
+    fitted_sigmas_err_down_check_array[region]=np.asarray(fitted_sigmas_err_down_check[region])
+    fitted_sigmas_err_up_check_array  [region]=np.asarray(fitted_sigmas_err_up_check  [region])
 
-    scale_graph[region]=ROOT.TGraph(len(true_scales_array[region]),true_scales_array[region],fitted_scales_array[region])
-    sigma_graph[region]=ROOT.TGraph(len(true_sigmas_array[region]),true_sigmas_array[region],fitted_sigmas_array[region])
-    scale_check_graph[region]=ROOT.TGraph(len(true_scales_check_array[region]),true_scales_check_array[region],fitted_scales_check_array[region])
-    sigma_check_graph[region]=ROOT.TGraph(len(true_sigmas_check_array[region]),true_sigmas_check_array[region],fitted_sigmas_check_array[region])
+    #scale_graph[region]=ROOT.TGraph(len(true_scales_array[region]),true_scales_array[region],fitted_scales_array[region])
+    #sigma_graph[region]=ROOT.TGraph(len(true_sigmas_array[region]),true_sigmas_array[region],fitted_sigmas_array[region])
+    #scale_check_graph[region]=ROOT.TGraph(len(true_scales_check_array[region]),true_scales_check_array[region],fitted_scales_check_array[region])
+    #sigma_check_graph[region]=ROOT.TGraph(len(true_sigmas_check_array[region]),true_sigmas_check_array[region],fitted_sigmas_check_array[region])
+    #True scales and sigmas have no errors
+    dummy_scale=[]
+    dummy_sigma=[]
+    for i in range(0,len(true_scales_array[region])):
+        dummy_scale.append(0.)
+    for i in range(0,len(true_sigmas_array[region])):
+        dummy_sigma.append(0.)
+
+    scale_graph[region]=ROOT.TGraphAsymmErrors(len(true_scales_array[region]),true_scales_array[region],fitted_scales_array[region],np.asarray(dummy_scale),np.asarray(dummy_sigma),fitted_scales_err_down_array[region],fitted_scales_err_up_array[region])
+    sigma_graph[region]=ROOT.TGraphAsymmErrors(len(true_sigmas_array[region]),true_sigmas_array[region],fitted_sigmas_array[region],np.asarray(dummy_sigma),np.asarray(dummy_sigma),fitted_sigmas_err_down_array[region],fitted_sigmas_err_up_array[region])
+    scale_check_graph[region]=ROOT.TGraphAsymmErrors(len(true_scales_check_array[region]),true_scales_check_array[region],fitted_scales_check_array[region],np.asarray(dummy_scale),np.asarray(dummy_scale),fitted_scales_err_down_check_array[region],fitted_scales_err_up_check_array[region])
+    sigma_check_graph[region]=ROOT.TGraphAsymmErrors(len(true_sigmas_check_array[region]),true_sigmas_check_array[region],fitted_sigmas_check_array[region],np.asarray(dummy_sigma),np.asarray(dummy_sigma),fitted_sigmas_err_down_check_array[region],fitted_sigmas_err_up_check_array[region])
 
     #Plot everything
     canvas_scale[region]=ROOT.TCanvas(str("fitted_scale_"+region),str("fitted_scale_"+region))
-    scale_graph[region].Draw("AP*")
+    scale_graph[region].Draw("AP")
     scale_graph[region].GetXaxis().SetRangeUser(0.97, 1.03)
     scale_graph[region].GetYaxis().SetRangeUser(0.97, 1.03)
-    scale_graph[region].Draw("AP*")
+    scale_graph[region].SetMarkerStyle(21)
+    scale_graph[region].SetMarkerColor(4)
+    scale_graph[region].SetLineColor(4)
+    scale_graph[region].GetXaxis().SetTitle("true scale")
+    scale_graph[region].GetYaxis().SetTitle("fitted scale")
+    scale_graph[region].Draw("AP")
     canvas_scale[region].Update();
     canvas_scale[region].SaveAs(str(path+region+"/fitted_scale_"+region+".png"))
+
     canvas_sigma[region]=ROOT.TCanvas(str("fitted_sigma_"+region),str("fitted_sigma_"+region))
-    sigma_graph[region].Draw("AP*")
+    sigma_graph[region].Draw("AP")
     sigma_graph[region].GetXaxis().SetRangeUser(0.00, 0.03)
     sigma_graph[region].GetYaxis().SetRangeUser(0.00, 0.03)
-    sigma_graph[region].Draw("AP*")
+    sigma_graph[region].SetMarkerStyle(21)
+    sigma_graph[region].SetMarkerColor(ROOT.kRed)
+    sigma_graph[region].SetLineColor(ROOT.kRed)
+    sigma_graph[region].GetXaxis().SetTitle("true sigma")
+    sigma_graph[region].GetYaxis().SetTitle("fitted sigma")
+    sigma_graph[region].Draw("AP")
     canvas_sigma[region].Update();
     canvas_sigma[region].SaveAs(str(path+region+"/fitted_sigma_"+region+".png"))
     #check
     canvas_scale_check[region]=ROOT.TCanvas(str("fitted_scale_"+region),str("fitted_scale_"+region))
-    scale_check_graph[region].Draw("AP*")
+    scale_check_graph[region].Draw("AP")
     scale_check_graph[region].GetXaxis().SetRangeUser(0.97, 1.03)
     scale_check_graph[region].GetYaxis().SetRangeUser(0.97, 1.03)
-    scale_check_graph[region].Draw("AP*")
+    scale_check_graph[region].SetMarkerStyle(21)
+    scale_check_graph[region].SetMarkerColor(4)
+    scale_check_graph[region].SetLineColor(4)
+    scale_check_graph[region].GetXaxis().SetTitle("true scale")
+    scale_check_graph[region].GetYaxis().SetTitle("fitted scale")
+    scale_check_graph[region].Draw("AP")
     canvas_scale_check[region].Update();
     canvas_scale_check[region].SaveAs(str(path+region+"/check_scale_"+region+".png"))
     canvas_sigma_check[region]=ROOT.TCanvas(str("fitted_sigma_"+region),str("fitted_sigma_"+region))
-    sigma_check_graph[region].Draw("AP*")
-    sigma_check_graph[region].GetXaxis().SetRangeUser(0.00, 0.03)
+    sigma_check_graph[region].Draw("AP")
+    sigma_check_graph[region].GetXaxis().SetRangeUser(0.00, 0.002)
     sigma_check_graph[region].GetYaxis().SetRangeUser(0.00, 0.03)
-    sigma_check_graph[region].Draw("AP*")
+    sigma_check_graph[region].SetMarkerStyle(21)
+    sigma_check_graph[region].SetMarkerColor(ROOT.kRed)
+    sigma_check_graph[region].SetLineColor(ROOT.kRed)
+    sigma_check_graph[region].GetXaxis().SetTitle("true sigma")
+    sigma_check_graph[region].GetYaxis().SetTitle("fitted sigma")
+    sigma_check_graph[region].Draw("AP")
     canvas_sigma_check[region].Update();
     canvas_sigma_check[region].SaveAs(str(path+region+"/check_sigma_"+region+".png"))
 
