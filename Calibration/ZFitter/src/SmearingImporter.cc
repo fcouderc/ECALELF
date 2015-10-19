@@ -1,8 +1,9 @@
 #include "../interface/SmearingImporter.hh"
 #include "../interface/BW_CB_pdf_class.hh"
-
+#include <fstream>
 #include <TTreeFormula.h>
 #include <TRandom3.h>
+#include <TLorentzVector.h>
 #include <TDirectory.h>
 //#define DEBUG
 #include <TStopwatch.h>
@@ -34,6 +35,7 @@ SmearingImporter::SmearingImporter(std::vector<TString> regionList, TString ener
 
 
 SmearingImporter::regions_cache_t SmearingImporter::GetCacheToy(Long64_t nEvents, bool isMC){
+  std::cout<<"You are calling SmearingImporter::GetCacheToy. I didn't fix it with the general targetVariable. Be Careful"<<std::endl;
   regions_cache_t cache;
   TStopwatch myClock;
   myClock.Start();
@@ -56,8 +58,7 @@ SmearingImporter::regions_cache_t SmearingImporter::GetCacheToy(Long64_t nEvents
 }
 
 void SmearingImporter::ImportToy(Long64_t nEvents, event_cache_t& eventCache, bool isMC){
-
-  std::cout<<"You are calling ImportToy. I didn't test it with the general targetVariable. Be Careful"<<std::endl;
+  std::cout<<"You are calling SmearingImporter::ImportToy. I didn't fix it with the general targetVariable. Be Careful"<<std::endl;
   TRandom3 gen(12345);
   if(isMC) nEvents*=2;
   //std::cout << "[DEBUG] constTermToy = " << _constTermToy << std::endl;
@@ -67,9 +68,9 @@ void SmearingImporter::ImportToy(Long64_t nEvents, event_cache_t& eventCache, bo
     event.energy_ele1=45;
     event.energy_ele2=45;
     //event.invMass = gen.BreitWigner(91.188,2.48);
-    event.targetVariable = gen.BreitWigner(91.188,2.48);
-    //if(isMC==false) event.invMass*= sqrt(gen.Gaus(_scaleToy, _constTermToy) * gen.Gaus(_scaleToy, _constTermToy));//gen.Gaus(_scaleToy, _constTermToy); //
-    if(isMC==false) event.targetVariable*= sqrt(gen.Gaus(_scaleToy, _constTermToy) * gen.Gaus(_scaleToy, _constTermToy));//gen.Gaus(_scaleToy, _constTermToy); //
+
+    //event.targetVariable = gen.BreitWigner(91.188,2.48);
+    //if(isMC==false) event.targetVariable*= sqrt(gen.Gaus(_scaleToy, _constTermToy) * gen.Gaus(_scaleToy, _constTermToy));//gen.Gaus(_scaleToy, _constTermToy); //
     eventCache.push_back(event);
   }
   return;
@@ -79,6 +80,12 @@ void SmearingImporter::ImportToy(Long64_t nEvents, event_cache_t& eventCache, bo
 
 void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddString, bool isMC, Long64_t nEvents, bool isToy, bool externToy){
   std::cout<<"[STATUS] Importing the events in SmearingImporter::Import"<<std::endl;
+
+  std::ofstream ofs   ("global.txt", std::ofstream::app);
+  std::ofstream ofs_0 ("BB.txt", std::ofstream::app);//BB
+  std::ofstream ofs_1 ("BE.txt", std::ofstream::app);//BE
+  std::ofstream ofs_2 ("EE.txt", std::ofstream::app);//EE
+
   TRandom3 gen(0);
   if(!isMC) gen.SetSeed(12345);
   TRandom3 excludeGen(12345);
@@ -90,6 +97,7 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
   Float_t         smearEle_[2]={1,1};
   bool hasSmearEle=false;
 
+  TLorentzVector Ele1,Ele2;
   // for the angle calculation
   Float_t         etaEle[2];
   Float_t         phiEle[2];
@@ -110,12 +118,16 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
   // for toy repartition
   ULong64_t eventNumber;
 
+  //
+  Float_t ZPta;//check this
+
   //------------------------------
   chain->SetBranchAddress("eventNumber", &eventNumber);
   chain->SetBranchAddress("etaEle", etaEle);
   chain->SetBranchAddress("phiEle", phiEle);
 
   chain->SetBranchAddress(_energyBranchName, energyEle);
+  std::cout<<"_energyBranchName in SmearingImporter is "<<_energyBranchName<<std::endl;
   if(chain->GetBranch("scaleEle")!=NULL){
     if(isToy==false || (externToy==true && isToy==true && isMC==false)){
     std::cout << "[STATUS] Adding electron energy correction branch from friend" << std::endl;
@@ -127,12 +139,15 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
   if(chain->GetBranch("smearEle")!=NULL){
     if(isToy==false || (externToy==true && isToy==true && isMC==false)){
       std::cout << "[STATUS] Adding electron energy smearing branch from friend" << std::endl;
-      if(isMC) chain->SetBranchAddress("smearSigmaEle", smearEle_);
-      else chain->SetBranchAddress("smearEle", smearEle_);
+      if(isMC) chain->SetBranchAddress("smearSigmaEle", smearEle_);//e' la sigma della gaussiana
+      else chain->SetBranchAddress("smearEle", smearEle_);//e' il numero gaussiana
       hasSmearEle=true;
     } 
   }
 
+  if(chain->GetBranch("ZPta_energySCEle_regrCorrSemiParV5_ele")!=NULL){
+    chain->SetBranchAddress("ZPta_energySCEle_regrCorrSemiParV5_ele",&ZPta);
+  }
   if(!isMC && chain->GetBranch("pdfWeights_cteq66")!=NULL && _pdfWeightIndex>0){
     std::cout << "[STATUS] Adding pdfWeight_ctec66 branch from friend" << std::endl;
     chain->SetBranchAddress("pdfWeights_cteq66", &pdfWeights);
@@ -234,21 +249,38 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 
   TRandom3 rand(0);//Use a seed generated using machine clock (different every second)
   double rn;
+  int test_entries=1000;
   for(Long64_t jentry=0; jentry < entries; jentry++){
+  //for(Long64_t jentry=0; jentry < test_entries; jentry++){std::cout<<"WARNING!! you are running on test_entries in SmearingImporter::Import()"<<std::endl;
     Long64_t entryNumber= chain->GetEntryNumber(jentry);
     chain->GetEntry(entryNumber);
     if(isToy){
-      int modulo=eventNumber%5;
+      int divider=20;
+      int modulo=eventNumber%divider;
       if(jentry<10){
+	std::cout<<"[toyMC INFO] In SmearingImporter::Import samples splitted % "<<divider<<std::endl;
 	std::cout << "Dividing toyMC events: " << isMC << "\t" << eventNumber << "\t" << modulo
 		  << "\t" << mcGenWeight 
 		  << std::endl;
 	
       }
 
-      if(isMC && modulo<2) continue;
-      if(!isMC && modulo>=2) continue;
-    }
+      int data_index=1;
+
+      if(data_index > 1000){
+	//closure tests
+	//data --> 0,1 /5 //perche' c'e' continue
+	//MC   --> 2,3,4/5
+	if(isMC && modulo<2) continue;
+	if(!isMC && modulo>=2) continue;
+      }else{
+	//Stat_check study
+	//data are identified by this data_index, the rest is MC
+	if(isMC && modulo==data_index) continue; //MC
+	if(!isMC && modulo!=data_index) continue; //dati
+      }
+
+    }//isToy
 
     // reject events:
     if(weight>3) continue;
@@ -290,18 +322,22 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 
     ZeeEvent event;
 
-    
     float t1=TMath::Exp(-etaEle[0]);
     float t2=TMath::Exp(-etaEle[1]);
     float t1q = t1*t1;
     float t2q = t2*t2;
     
-    if(isMC && hasSmearEle){
+    if(isMC && hasSmearEle){//MC is smeared with a Gaussian factor
+      //std::cout<<"isMC and hasSmearEle"<<std::endl;//It happens
       smearEle_[0]=gen.Gaus(1,smearEle_[0]);
       smearEle_[1]=gen.Gaus(1,smearEle_[1]);
     }
 
     //------------------------------
+    Ele1.SetPtEtaPhiE(event.energy_ele1/cosh(etaEle[0]),etaEle[0],phiEle[0],event.energy_ele1);
+    Ele2.SetPtEtaPhiE(event.energy_ele2/cosh(etaEle[1]),etaEle[1],phiEle[1],event.energy_ele2);
+    float ZPt=(Ele1+Ele2).Pt();
+
     if(_swap){
       event.energy_ele2 = energyEle[0] * corrEle_[0] * smearEle_[0];
       event.energy_ele1 = energyEle[1] * corrEle_[1] * smearEle_[1];
@@ -310,15 +346,104 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
       event.energy_ele2 = energyEle[1] * corrEle_[1] * smearEle_[1];
     }
 
-    event.targetVariable=-999;
-    if(GetTargetVariable()=="invMass"){
+    Ele1.SetPtEtaPhiE(event.energy_ele1/cosh(etaEle[0]),etaEle[0],phiEle[0],event.energy_ele1);
+    Ele2.SetPtEtaPhiE(event.energy_ele2/cosh(etaEle[1]),etaEle[1],phiEle[1],event.energy_ele2);
+    float ZPt_after=(Ele1+Ele2).Pt();//corrections applied
+
+    if(ZPt_after > 10) continue; //only events with Pt < 10 GeV
+    //Different pt scenarios
+    //if((ZPt_after < 10) || (ZPt_after>20)) continue;
+    //if((ZPt_after < 20) || (ZPt_after>40)) continue;
+    //if((ZPt_after < 40) || (ZPt_after>100)) continue;
+    //if((ZPt_after < 100) || (ZPt_after>200)) continue;
+
+    //ZPta doesn't match ZPt_after!! Check this
+    /*if(ZPt_after>10 && evIndex>0){//Useful for the future
+      //check also event.energy_ele1
+    std::cout<<"ZPt before correction is "<<ZPt<<std::endl;//invariant under swap
+    std::cout<<"ZPt after correction is "<<ZPt_after<<std::endl;//invariant under swap
+    std::cout<<"ZPta is "<<ZPta<<std::endl;//invariant under swap
+    std::cout<<"evIndex is "<<evIndex<<std::endl;
+    std::cout<<"corrEle[0] is "<<corrEle_[0]<<std::endl;
+    std::cout<<"corrEle[1] is "<<corrEle_[1]<<std::endl;
+    std::cout<<"smearEle[0] is "<<smearEle_[0]<<std::endl;
+    std::cout<<"smearEle[1] is "<<smearEle_[0]<<std::endl;
+    }*/
+    //loop to fill targetVariable (it's a vector now)
+    std::vector<TString> targets=GetTargetVariable();
+    for(int var=0;((unsigned)var)<targets.size();var++){
+      (event.targetVariable).push_back(0.);
+    }
+
+    for(int var=0;((unsigned)var)<targets.size();var++){
+      event.targetVariable[var]=-999;
+    if(targets[var]=="invMass"){
       // to calculate the invMass: invMass = sqrt(2 * energy_ele1 * energy_ele2 * angle_eta_ele1_ele2)
       //if(event.invMass < 70 || event.invMass > 110) continue;
       //event.angle_eta_ele1_ele2=  (1-((1-t1q)*(1-t2q)+4*t1*t2*cos(phiEle[0]-phiEle[1]))/((1+t1q)*(1+t2q)));
-      event.targetVariable= sqrt(2 * event.energy_ele1 * event.energy_ele2 *
+      event.targetVariable[var]= sqrt(2 * event.energy_ele1 * event.energy_ele2 *
 				  (1-((1-t1q)*(1-t2q)+4*t1*t2*cos(phiEle[0]-phiEle[1]))/((1+t1q)*(1+t2q)))
 				  );
-    }else if(GetTargetVariable()=="ptRatio"){
+    }else if(targets[var]=="pt2Sum"){
+      double pt1=event.energy_ele1/cosh(etaEle[0]);
+      double pt2=event.energy_ele2/cosh(etaEle[1]);
+
+      if(GetConfiguration()=="leading"){
+	if(pt1 > pt2){
+	  event.pt1=pt1;
+	  event.pt2=pt2;
+	  event.isSwapped=false;
+	}else{
+	  event.pt1=pt2;
+	  event.pt2=pt1;
+	  event.isSwapped=true;
+	}
+      }else if(GetConfiguration()=="random"){
+	rn=rand.Uniform(0,1);
+	if(rn<0.5){
+	  event.pt1=pt1;
+	  event.pt2=pt2;
+	  event.isSwapped=false;
+	}else{
+	  event.pt1=pt2;
+	  event.pt2=pt1;
+	  event.isSwapped=true;
+	}
+      }
+
+      event.targetVariable[var]=sqrt(pow(event.pt1,2)+pow(event.pt2,2));
+
+      if(event.isSwapped){
+	ofs<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[1]<<" "<<etaEle[0]<<std::endl;
+      }else{
+	ofs<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[0]<<" "<<etaEle[1]<<std::endl;
+      }
+      
+      if(evIndex==0){
+	if(event.isSwapped){
+	  ofs_0<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[1]<<" "<<etaEle[0]<<std::endl;
+	}else{
+	  ofs_0<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[0]<<" "<<etaEle[1]<<std::endl;
+	}
+      }else if(evIndex==1){
+	if(event.isSwapped){
+	  ofs_1<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[1]<<" "<<etaEle[0]<<std::endl;
+	}else{
+	  ofs_1<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[0]<<" "<<etaEle[1]<<std::endl;
+	}
+      }else if(evIndex==2){
+	if(event.isSwapped){
+	  ofs_2<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[1]<<" "<<etaEle[0]<<std::endl;
+	}else{
+	  ofs_2<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[0]<<" "<<etaEle[1]<<std::endl;
+	}
+      }
+
+    }else if(targets[var]=="ptRatio"){
+      //if(ZPt_after>10){
+      //event.targetVariable[var]=-999;Checked: it works because Integral() avoids underflows and overflows
+      //}else{
+
       //Decide which is 1 and which is 2, in this case
       //Option 1: 1 is the leading and 2 is the subleading
       double pt1=event.energy_ele1/cosh(etaEle[0]);
@@ -326,30 +451,69 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 
       if(GetConfiguration()=="leading"){
 	if(pt1 > pt2){
-	  event.targetVariable=(pt1/pt2);
+	  event.pt1=pt1;
+	  event.pt2=pt2;
 	  event.isSwapped=false;
 	}else{
-	  event.targetVariable=(pt2/pt1);
+	  event.pt1=pt2;
+	  event.pt2=pt1;
 	  event.isSwapped=true;
 	}
       }else if(GetConfiguration()=="random"){
 	rn=rand.Uniform(0,1);
 	if(rn<0.5){
-	  event.targetVariable=(pt1/pt2);
+	  event.pt1=pt1;
+	  event.pt2=pt2;
 	  event.isSwapped=false;
 	}else{
-	  event.targetVariable=(pt2/pt1);
+	  event.pt1=pt2;
+	  event.pt2=pt1;
 	  event.isSwapped=true;
 	}
       }
 
-    }else if(GetTargetVariable()=="ptSum"){
+      event.targetVariable[var]=(event.pt1/event.pt2);
+      ofs<<event.targetVariable[var]<<std::endl;
+      if(evIndex==0){
+	ofs_0<<event.targetVariable[var]<<" ";
+      }else if(evIndex==1){
+	ofs_1<<event.targetVariable[var]<<" ";
+      }else if(evIndex==2){
+	ofs_2<<event.targetVariable[var]<<" ";
+      }
+    }else if(targets[var]=="ptSum"){
       double pt1=event.energy_ele1/cosh(etaEle[0]);
       double pt2=event.energy_ele2/cosh(etaEle[1]);
-      event.targetVariable=(pt1 + pt2);
-      event.pt1=pt1;//Needed for RooSmearer::SetSmearedHisto
-      event.pt2=pt2;
+      if(GetConfiguration()=="leading"){
+	if(pt1 > pt2){
+	  event.pt1=pt1;
+	  event.pt2=pt2;
+	  event.isSwapped=false;
+	}else{
+	  event.pt1=pt2;
+	  event.pt2=pt1;
+	  event.isSwapped=true;
+	}
+      }else if(GetConfiguration()=="random"){
+	rn=rand.Uniform(0,1);
+	if(rn<0.5){
+	  event.pt1=pt1;
+	  event.pt2=pt2;
+	  event.isSwapped=false;
+	}else{
+	  event.pt1=pt2;
+	  event.pt2=pt1;
+	  event.isSwapped=true;
+	}
+      }
+
+      event.targetVariable[var]=(event.pt1 + event.pt2);
+
+      //event.targetVariable[var]=(pt1 + pt2);
+      //event.pt1=pt1;//Needed for RooSmearer::SetSmearedHisto
+      //event.pt2=pt2;
     }
+    }//loop over targetVariables
 
     if(_isSmearingEt){
       if(_swap){
@@ -405,7 +569,8 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 	} // else event.weight=1;
       }
     }
-    //#ifdef DEBUG      
+
+#ifdef DEBUG      
       if(jentry<10 || event.weight!=event.weight || event.weight>2){
 	std::cout << "jentry = " << jentry 
 		  << "\tevent.weight = " << event.weight 
@@ -416,7 +581,7 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 		  << "\t" << WEAKweight << "\t" << FSRweight
 		  << std::endl;
       }
-      //#endif
+#endif
 
     if(event.weight<=0 || event.weight!=event.weight || event.weight>10) continue;
 
@@ -450,6 +615,8 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 
 SmearingImporter::regions_cache_t SmearingImporter::GetCache(TChain *_chain, bool isMC, bool odd, Long64_t nEvents, bool isToy, bool externToy){
   std::cout<<"[STATUS] Preparing the cache and activating branches in SmearingImporter::GetCache"<<std::endl;
+  //std::cout << "[STATUS] --- Setting toy cache for data" << std::endl;
+  //data_events_cache = importer.GetCache(_signal_chain, false, false, nEvents, true, externToy); //importer.GetCacheToy(nEvents, false);
   TString eleID_="eleID_"+_eleID;
 
   TString oddString;
