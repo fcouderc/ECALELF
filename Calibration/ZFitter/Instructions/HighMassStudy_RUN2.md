@@ -46,11 +46,13 @@ root -l tmp/d_chain.root tmp/load_singleFile.C
 data->Draw("invMass_SC_corr","smearerCat[0]>0") 
 
 root -l tmp/s_chain.root tmp/load_singleFile.C
-data->Draw("invMass_SC_corr","smearerCat[0]>0")	
+data->Draw("invMass_SC_corr","smearerCat[0]>0")
+```
+* Se ti soddisfa la categorizzazione, aggiungi i branch di categoria nel config file 
+
+```	
 mv tmp/smearerCat_scaleStep0* friends/smearerCat/ 
 ```
-
-* Se ti soddisfa la categorizzazione, aggiungi i branch di categoria nel config file 
 
 ### Qui sei pronto a riempire gli istogrammi con la target variable e minimizzare la likelihod
 * In minimizer.sh c'e' tutta la storia
