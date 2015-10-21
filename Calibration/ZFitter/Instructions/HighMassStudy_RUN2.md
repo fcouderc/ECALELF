@@ -41,8 +41,9 @@ Devi associare i friend trees con tmp/load.C. A questo punto puoi fare plot in q
 
 ```
 root -l tmp/d_chain.root tmp/load_singleFile.C 
-data->Draw("ZPta_energySCEle_regrCorrSemiParV5_ele","smearerCat[0]>0") 
-data->Draw("invMass_SC_regrCorrSemiParV5_ele","smearerCat[0]>0") 
+#data->Draw("ZPta_energySCEle_regrCorrSemiParV5_ele","smearerCat[0]>0") 
+data->Draw("invMass_SC_corr","smearerCat[0]>0") 
+signalA->Draw("invMass_SC_corr","smearerCat[0]>0")	
 mv tmp/smearerCat_scaleStep0* friends/smearerCat/ 
 ```
 
