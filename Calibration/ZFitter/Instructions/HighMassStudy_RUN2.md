@@ -64,8 +64,8 @@ echo "d1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0
 ###Fai delle prove rapide prima di mandare i job
 * Riempire solo gli istogrammi
 ```
-./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_regrCorrSemiParV5_ele --autoBin --smearerFit --plotOnly --targetVariable=ptRatio --targetVariable_min=0.5 --targetVariable_max=2 --targetVariable_binWidth=0.05 --configuration=leading --corrEleType=HggRunEtaR9Et --smearEleType=stochastic &> tmp/debug.txt 
-root -l test/dato/fitres/histos_scaleStep0_Et_25_trigger_noPF.root 
+./bin/ZFitter.exe -f data/validation/run2_first.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_corr --autoBin --smearerFit --plotOnly --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random&> tmp/debug.txt #--corrEleType=HggRunEtaR9Et --smearEleType=stochastic 
+root -l test/dato/fitres/histos_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root 
 ```
 
 * Prova a fare un rapido scan della likelihood, senza la vera minimizzazione
