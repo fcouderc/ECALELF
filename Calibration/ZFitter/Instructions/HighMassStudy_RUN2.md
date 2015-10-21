@@ -94,6 +94,9 @@ A questo punto rigiri con quell'initFile e cerchi di imboccarlo
 ```
 * Plottare 1 solo profile della likelihood
 ```
+./script/fit.sh path_to_profile (senza .root)
+
+//Questo e' ormai obsoleto
 root -l -b
 .L tmp/fitOneProfile.C
 fitOneProfile("profile.root","outDir")
