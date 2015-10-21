@@ -28,10 +28,10 @@ mv tmp/ZPt_energySCEle_* friends/other/
 * Ti ricordo che l'energia giusta va specificata A MANO in src/ElectronCategory_class.cc
 * RICOMPILA e LANCIA
 
-./script/GenRootChain.sh non accetta gli smearing e allore:
+./script/GenRootChain.sh non accetta gli smearing e allora:
 
 ```
-./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --addBranch=smearerCat --corrEleType=HggRunEtaR9Et --smearEleType=stochastic invMass_var=invMass_SC_regrCorrSemiParV5_ele --saveRootMacro
+./bin/ZFitter.exe -f data/validation/run2_first.dat --regionsFile=data/regions/scaleStep0.dat --addBranch=smearerCat invMass_var=invMass_SC_corr --saveRootMacro
 ./script/hadder.sh
 ```
 
