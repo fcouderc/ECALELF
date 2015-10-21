@@ -52,11 +52,40 @@ data->Draw("invMass_SC_corr","smearerCat[0]>0")
 
 ```	
 mv tmp/smearerCat_scaleStep0* friends/smearerCat/ 
+echo "s1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_s1-run2_first.root" >> data/validation/run2_first.dat
+echo "d1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_d1-run2_first.root" >> data/validation/run2_first.dat
 ```
 
 ### Qui sei pronto a riempire gli istogrammi con la target variable e minimizzare la likelihod
-* In minimizer.sh c'e' tutta la storia
-* Attento che in RooSmearer::SetSmearedHisto ho eliminato lo smoothing artificiale smearedHisto->Smooth() 
+* Ti ricordo che in RooSmearer::SetSmearedHisto ho eliminato lo smoothing artificiale smearedHisto->Smooth() 
+
+###Fai delle prove rapide prima di mandare i job
+* Riempire solo gli istogrammi
+```
+./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_regrCorrSemiParV5_ele --autoBin --smearerFit --plotOnly --targetVariable=ptRatio --targetVariable_min=0.5 --targetVariable_max=2 --targetVariable_binWidth=0.05 --configuration=leading --corrEleType=HggRunEtaR9Et --smearEleType=stochastic &> tmp/debug.txt 
+root -l test/dato/fitres/histos_scaleStep0_Et_25_trigger_noPF.root 
+```
+
+* Prova a fare un rapido scan della likelihood, senza la vera minimizzazione
+```
+./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_regrCorrSemiParV5_ele --autoBin --smearerFit --plotOnly --profileOnly --targetVariable=ptRatio --targetVariable_min=0.5 --targetVariable_max=2 --targetVariable_binWidth=0.05 --corrEleType=HggRunEtaR9Et --smearEleType=stochastic &> tmp/debug.txt 
+root -l test/dato/fitres/outProfile_scaleStep0_Et_25_trigger_noPF.root 
+```
+* Prova a vedere se riesce a trovare il minimo della likelihood da solo
+```
+./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_regrCorrSemiParV5_ele --autoBin --smearerFit --targetVariable=ptRatio --targetVariable_min=0.5 --targetVariable_max=2 --targetVariable_binWidth=0.05 --configuration=leading --corrEleType=HggRunEtaR9Et --smearEleType=stochastic &> tmp/debug_ptRatio_leading.txt 
+```
+*Se non trova da solo il minimo, guarda il profilo e passagli un initFile con parametri vicini al minimo, cosi' da imbeccarlo
+```
+cp test/dato/fitres/params-scaleStep0-Et_25-noPF.txt init_pt12.txt 
+e modifichi init_pt12.dat per avvicinare i parametri iniziali a quelli veri (allarghi i range se necessario) 
+A questo punto rigiri con quell'initFile e cerchi di imboccarlo 
+--initFile=
+```
+### Plottare 1 solo profile della likelihood
+root -l -b
+.L tmp/fitOneProfile.C
+fitOneProfile("profile.root","outDir")
 
 ### Minimizzare la likelihood (manda 50 job e fitta la likelihood media)
 ```
@@ -64,38 +93,16 @@ mv tmp/smearerCat_scaleStep0* friends/smearerCat/
 ./script/Likelihodd_fitter.sh ptRatio
 ```
 
-### Riempire solo gli istogrammi 
-./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_regrCorrSemiParV5_ele --autoBin --smearerFit --plotOnly --targetVariable=ptRatio --targetVariable_min=0.5 --targetVariable_max=2 --targetVariable_binWidth=0.05 --configuration=leading --corrEleType=HggRunEtaR9Et --smearEleType=stochastic &> tmp/debug.txt 
-
-root -l test/dato/fitres/histos_scaleStep0_Et_25_trigger_noPF.root 
-
-### FARE UN RAPIDO PROFILO DELLA LIKELIHOOD (Prende i profili attorno ai valori iniziali dei parametri, non fa LA vera minimizzazione) 
-./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_regrCorrSemiParV5_ele --autoBin --smearerFit --plotOnly --profileOnly --targetVariable=ptRatio --targetVariable_min=0.5 --targetVariable_max=2 --targetVariable_binWidth=0.05 --corrEleType=HggRunEtaR9Et --smearEleType=stochastic &> tmp/debug.txt 
-
-root -l test/dato/fitres/outProfile_scaleStep0_Et_25_trigger_noPF.root 
-
-### MINIMIZZA la likelihood (ci mette 30 minuti circa)! 
-./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_regrCorrSemiParV5_ele --autoBin --smearerFit --targetVariable=ptRatio --targetVariable_min=0.5 --targetVariable_max=2 --targetVariable_binWidth=0.05 --configuration=leading --corrEleType=HggRunEtaR9Et --smearEleType=stochastic &> tmp/debug_ptRatio_leading.txt 
-
-### PLOT DATA MC FINALI per vedere se la minimizzazione della likelihood ha avuto successo e ficcare questi plot nelle slide 
+### Plot Data/MC finali per vedere se la minimizzazione ha senso
+```
 cp test/dato/fitres/params-scaleStep0-Et_25-trigger-noPF.txt output_pt12.txt 
 rm test/dato/fitres/histos_ptRatio_leading_scaleStep0_Et_25_trigger_noPF.root 
-./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC --autoBin --smearerFi
+--plotOnly --profileOnly
 root -l -b 
 .L macro/plot_data_mc.C+ 
 PlotMeanHist("test/dato/fitres/histos_ptRatio_leading_scaleStep0_Et_25_trigger_noPF.root") 
 .q 
-
-### Plottare 1 solo profile della likelihood
-root -l -b
-.L tmp/fitOneProfile.C
-fitOneProfile("profile.root","outDir")
+```
 
 
-### DRITTE
-DRITTE PER AIUTARE LA MINIMIZZAZIONE SE DOVESSE FALLIRE AL PRIMO COLPO 
-cp test/dato/fitres/params-scaleStep0-Et_25-noPF.txt init_pt12.txt 
-e modifichi init_pt12.dat per avvicinare i parametri iniziali a quelli veri (allarghi i range se necessario) 
 
-A questo punto rigiri con quell'initFile e cerchi di imboccarlo 
-./bin/ZFitter.exe -f data/validation/monitoring_2012_53X.dat --regionsFile=data/regions/scaleStep0.dat --autoBin --smearerFit --plotOnly --profileOnly --noPU --commonCut=Et_25-noPF --targetVariable=ptRatio --targetVariable_min=0 --targetVariable_max=
