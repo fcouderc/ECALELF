@@ -46,7 +46,7 @@ root -l tmp/d_chain.root tmp/load_singleFile.C
 data->Draw("invMass_SC_corr","smearerCat[0]>0") 
 
 root -l tmp/s_chain.root tmp/load_singleFile.C
-signalA->Draw("invMass_SC_corr","smearerCat[0]>0")	
+data->Draw("invMass_SC_corr","smearerCat[0]>0")	
 mv tmp/smearerCat_scaleStep0* friends/smearerCat/ 
 ```
 
