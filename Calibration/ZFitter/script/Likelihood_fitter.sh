@@ -18,6 +18,23 @@ if [[ $1 = "ptRatio*pt2Sum" ]]; then
    echo ${extension}
 fi
 
+if [[ $1 = "ptRatio*pt2Sum*noCorr" ]]; then
+   validation_file=22Jan2012-runDepMCAll_checkMee.dat
+   region=scaleStep0
+   commonCut=Et_25-trigger-noPF
+   outDirData=test/dato
+   extension=ptRatio_pt2Sum_withoutCorr
+   InitFile=""
+   Target=ptRatio*pt2Sum
+   Min=0.5*0
+   Max=2*200
+   BinWidth=0.05*2
+   Conf=random
+   echo ${validation_file}
+   echo ${region}
+   echo ${extension}
+fi
+
 if [[ $1 = "ptRatio" ]]; then
    validation_file=22Jan2012-runDepMCAll_checkMee.dat
    region=scaleStep0
@@ -74,6 +91,8 @@ if [[ $1 = "" ]]; then
     exit 0
 fi
 
+rm -r tmp/tmpFile-*.root
+
 common_cuts="Et_25_trigger_noPF"
 
 ./script/haddTGraph.sh -o ${outDirData}/${extension}/fitres/outProfile_${Target}_${Conf}_${region}_${common_cuts}.root ${outDirData}/${extension}/*/fitres/outProfile_${Target}_${Conf}_${region}_${common_cuts}.root
@@ -90,6 +109,7 @@ echo "FitProfile2(\"${outDirData}/${extension}/fitres/outProfile_${Target}_${Con
 echo "}" >> tmp/fitProfiles_${Target}_${Conf}.C
 root -l -b -q tmp/fitProfiles_${Target}_${Conf}.C
 
+echo "your plot is in test/dato/${extension}/img/"
 
 #CAMBIARE ==>Questo serve solo ad avere i plot carini nel punto di minimo della likelihood                                                                                                                             
 #     ./bin/ZFitter.exe -f $outDirData/${extension}/`basename $configFile` --regionsFile ${regionFileEB} $isOdd $updateOnly --selection=${newSelection}  --invMass_var ${invMas\
