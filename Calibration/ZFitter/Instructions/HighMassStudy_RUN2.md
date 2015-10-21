@@ -42,7 +42,6 @@ mv tmp/ZPt_energySCEle_* friends/other/
 Devi associare i friend trees con tmp/load.C. A questo punto puoi fare plot in questo modo, chiedendo branch da tree diversi 
 
 ```
-./script/hadder.sh
 root -l tmp/d_chain.root tmp/load_singleFile.C 
 #data->Draw("ZPta_energySCEle_regrCorrSemiParV5_ele","smearerCat[0]>0") 
 data->Draw("invMass_SC_corr","smearerCat[0]>0") 
@@ -57,6 +56,15 @@ mv tmp/smearerCat_scaleStep0* friends/smearerCat/
 echo "s1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_s1-run2_first.root" >> data/validation/run2_first.dat
 echo "d1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_d1-run2_first.root" >> data/validation/run2_first.dat
 ```
+
+In generale se vuoi fare un plot dei tree associati ad un certo .dat file
+```
+./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --corrEleType=HggRunEtaR9Et --smearEleType=stochastic --saveR
+ootMacro
+./script/hadder.sh
+```
+
+Fai il load.C e plotta
 
 ### Qui sei pronto a riempire gli istogrammi con la target variable e minimizzare la likelihod
 * Ti ricordo che in RooSmearer::SetSmearedHisto ho eliminato lo smoothing artificiale smearedHisto->Smooth() 
