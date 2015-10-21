@@ -40,9 +40,12 @@ mv tmp/ZPt_energySCEle_* friends/other/
 Devi associare i friend trees con tmp/load.C. A questo punto puoi fare plot in questo modo, chiedendo branch da tree diversi 
 
 ```
+./script/hadder.sh
 root -l tmp/d_chain.root tmp/load_singleFile.C 
 #data->Draw("ZPta_energySCEle_regrCorrSemiParV5_ele","smearerCat[0]>0") 
 data->Draw("invMass_SC_corr","smearerCat[0]>0") 
+
+root -l tmp/s_chain.root tmp/load_singleFile.C
 signalA->Draw("invMass_SC_corr","smearerCat[0]>0")	
 mv tmp/smearerCat_scaleStep0* friends/smearerCat/ 
 ```
