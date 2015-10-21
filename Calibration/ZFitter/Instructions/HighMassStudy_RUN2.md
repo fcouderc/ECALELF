@@ -3,8 +3,10 @@
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/afs/cern.ch/cms/slc5_amd64_gcc434/external/boost/1.47.0/lib
 ```
 
-### Da ZFitter: (cd ECALELF_run2) 
- 
+### Da ZFitter: 
+```
+cd new_version_ECALELF/CMSSW_7_5_0_pre4/src/Calibration/ZFitter/
+```
 * Prima di incominciare proprio, chiarisci a te stesso quale variabile di energia vuoi utilizzare 
 
 ```
@@ -82,11 +84,12 @@ e modifichi init_pt12.dat per avvicinare i parametri iniziali a quelli veri (all
 A questo punto rigiri con quell'initFile e cerchi di imboccarlo 
 --initFile=
 ```
-### Plottare 1 solo profile della likelihood
+* Plottare 1 solo profile della likelihood
+```
 root -l -b
 .L tmp/fitOneProfile.C
 fitOneProfile("profile.root","outDir")
-
+```
 ### Minimizzare la likelihood (manda 50 job e fitta la likelihood media)
 ```
 ./script/run50Minimization.sh ptRatio (opp ptRatio_ranom opp ptSum)
