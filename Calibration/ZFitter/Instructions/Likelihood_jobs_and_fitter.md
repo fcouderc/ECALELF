@@ -8,4 +8,6 @@ Quando i job sono finiti
 
 ./script/Likelihood_fitter.sh ptRatio*pt2Sum
 
-Cosi' fitti la media, ma puoi anche fittarne uno solo
+Cosi' fitti la media, ma puoi anche fittare un solo profile con
+
+./script/fit.sh outProfile.....(senza .root alla fine)
