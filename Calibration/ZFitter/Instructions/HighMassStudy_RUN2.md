@@ -1,25 +1,36 @@
 * per lanciare i boost ho inserito in .bashrc 
-* export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/afs/cern.ch/cms/slc5_amd64_gcc434/external/boost/1.47.0/lib
+```
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/afs/cern.ch/cms/slc5_amd64_gcc434/external/boost/1.47.0/lib
+```
 
-# Da ZFitter: (cd ECALELF_run2) 
+### Da ZFitter: (cd ECALELF_run2) 
  
 * Prima di incominciare proprio, chiarisci a te stesso quale variabile di energia vuoi utilizzare 
-# invMass_var=invMass_SC_regrCorrSemiParV5_ele 
 
-# L'energia giusta va specificata A MANO in src/ElectronCategory_class.cc 
+```
+invMass_var=invMass_SC_regrCorrSemiParV5_ele 
+```
+
+* L'energia giusta va specificata A MANO in src/ElectronCategory_class.cc 
+
 (FALLO, altrimenti categorizzi con l'energia sbagliata) 
 
-# Aggiungere il branch ZPt (mi serve perche' ci categorizzo sopra) 
+* Aggiungere il branch ZPt (mi serve perche' ci categorizzo sopra) 
+```
 ./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --addBranch=ZPt_energySCEle_regrCorrSemiParV5_ele --corrEleType=HggRunEtaR9Et --smearEleType=stochastic --saveRootMacro &> debug.txt
 ./script/hadder.sh
-mv tmp/ZPt_energySCEle_* friends/other/ 
+mv tmp/ZPt_energySCEle_* friends/other/
+``` 
 * Aggiungi i branch di ZPt nel config file 
 
-# Categorizza 
-./script/GenRootChain.sh doesn't accept smearing??
+*Categorizza* 
 
+./script/GenRootChain.sh non accetta gli smearing e allore:
+
+```
 ./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --addBranch=smearerCat --corrEleType=HggRunEtaR9Et --smearEleType=stochastic invMass_var=invMass_SC_regrCorrSemiParV5_ele --saveRootMacro
 ./script/hadder.sh
+```
 
 * Controllare che la categorizzazione sia fatta bene: 
 Devi associare i friend trees con tmp/load.C. A questo punto puoi fare plot in questo modo, chiedendo branch da tree diversi 
