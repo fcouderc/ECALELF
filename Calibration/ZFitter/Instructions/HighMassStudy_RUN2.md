@@ -25,6 +25,9 @@ mv tmp/ZPt_energySCEle_* friends/other/
 
 *Categorizza* 
 
+* Ti ricordo che l'energia giusta va specificata A MANO in src/ElectronCategory_class.cc
+* RICOMPILA e LANCIA
+
 ./script/GenRootChain.sh non accetta gli smearing e allore:
 
 ```
