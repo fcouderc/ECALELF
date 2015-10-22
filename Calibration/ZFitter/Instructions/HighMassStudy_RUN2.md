@@ -33,7 +33,7 @@ mv tmp/ZPt_energySCEle_* friends/other/
 ./script/GenRootChain.sh non accetta gli smearing e allora:
 
 ```
-./bin/ZFitter.exe -f data/validation/run2_first.dat --regionsFile=data/regions/scaleStep0.dat --addBranch=smearerCat invMass_var=invMass_SC_corr --saveRootMacro
+./bin/ZFitter.exe -f data/validation/reference_25nsReco.dat --regionsFile=data/regions/scaleStep0.dat --addBranch=smearerCat invMass_var=invMass_SC_corr --saveRootMacro
 ./script/hadder.sh
 ```
 
@@ -53,8 +53,8 @@ data->Draw("invMass_SC_corr","smearerCat[0]>0")
 
 ```	
 mv tmp/smearerCat_scaleStep0* friends/smearerCat/ 
-echo "s1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_s1-run2_first.root" >> data/validation/run2_first.dat
-echo "d1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_d1-run2_first.root" >> data/validation/run2_first.dat
+echo "s1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_s1-run2_first.root" >> data/validation/reference_25nsReco.dat
+echo "d1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_d1-run2_first.root" >> data/validation/reference_25nsReco.dat
 ```
 
 In generale se vuoi fare un plot dei tree associati ad un certo .dat file
@@ -72,7 +72,7 @@ Fai il load.C e plotta
 ###Fai delle prove rapide prima di mandare i job
 * Riempire solo gli istogrammi
 ```
-./bin/ZFitter.exe -f data/validation/run2_first.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_corr --autoBin --smearerFit --plotOnly --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random&> tmp/debug.txt #--corrEleType=HggRunEtaR9Et --smearEleType=stochastic 
+./bin/ZFitter.exe -f data/validation/reference_25nsReco.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_corr --autoBin --smearerFit --plotOnly --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random&> tmp/debug.txt #--corrEleType=HggRunEtaR9Et --smearEleType=stochastic 
 root -l test/dato/fitres/histos_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root 
 ```
 
