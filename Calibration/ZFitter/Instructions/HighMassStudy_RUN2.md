@@ -17,6 +17,8 @@ invMass_var=invMass_SC_regrCorrSemiParV5_ele
 
 (FALLO, altrimenti categorizzi con l'energia sbagliata) 
 
+* A mano devi anche dire in src/ElectronCategory_class.cc se smearEle(true) o smearEle(false)
+
 * Aggiungere il branch ZPt (mi serve perche' ci categorizzo sopra) 
 ```
 ./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --addBranch=ZPt_energySCEle_regrCorrSemiParV5_ele --corrEleType=HggRunEtaR9Et --smearEleType=stochastic --saveRootMacro &> debug.txt
@@ -53,8 +55,10 @@ data->Draw("invMass_SC_corr","smearerCat[0]>0")
 
 ```	
 mv tmp/smearerCat_scaleStep0* friends/smearerCat/ 
-echo "s1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_s1-run2_first.root" >> data/validation/reference_25nsReco.dat
-echo "d1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_d1-run2_first.root" >> data/validation/reference_25nsReco.dat
+echo "s1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_s1-reference_25nsReco.dat.root" >> data/validation/reference_25nsReco.dat
+echo "d1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_d1-reference_25nsReco.dat.root" >> data/validation/reference_25nsReco.dat
+echo "d2      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_d2-reference_25nsReco.dat.root" >> data/validation/reference_25nsReco.dat
+echo "d3      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_d3-reference_25nsReco.dat.root" >> data/validation/reference_25nsReco.dat
 ```
 
 In generale se vuoi fare un plot dei tree associati ad un certo .dat file
