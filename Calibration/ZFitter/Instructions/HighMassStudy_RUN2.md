@@ -66,9 +66,10 @@ In generale se vuoi fare un plot dei tree associati ad un certo .dat file
 ./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --corrEleType=HggRunEtaR9Et --smearEleType=stochastic --saveR
 ootMacro
 ./script/hadder.sh
+#Fai ora il load dei friend trees e plotta
+root -l tmp/d_chain.root tmp/load_singleFile.C 
+data->Draw("invMass_SC_corr","smearerCat[0]>0")
 ```
-
-Fai il load.C e plotta
 
 ### Qui sei pronto a riempire gli istogrammi con la target variable e minimizzare la likelihod
 * Ti ricordo che in RooSmearer::SetSmearedHisto ho eliminato lo smoothing artificiale smearedHisto->Smooth() 
