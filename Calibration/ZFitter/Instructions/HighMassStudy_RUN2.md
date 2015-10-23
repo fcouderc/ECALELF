@@ -81,7 +81,8 @@ data->Draw("HLTfire");
 ###Fai delle prove rapide prima di mandare i job
 * Riempire solo gli istogrammi
 ```
-./bin/ZFitter.exe -f data/validation/reference_25nsReco.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_corr --autoBin --smearerFit --plotOnly --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random&> tmp/debug.txt #--corrEleType=HggRunEtaR9Et --smearEleType=stochastic 
+#--corrEleType=HggRunEtaR9Et --smearEleType=stochastic 
+./bin/ZFitter.exe -f data/validation/reference_25nsReco.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_corr --commonCut=Et_25-noPF --autoBin --smearerFit --plotOnly --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random&> tmp/debug.txt  
 root -l test/dato/fitres/histos_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root 
 ```
 
