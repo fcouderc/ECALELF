@@ -61,9 +61,9 @@ echo "d2      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0
 echo "d3      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_d3-reference_25nsReco.root" >> data/validation/reference_25nsReco.dat
 ```
 
-In generale se vuoi fare un plot dei tree associati ad un certo .dat file
+In generale se vuoi fare un plot dei tree associati ad un certo .dat file, ad esempio reference_25nsReco.dat
 ```
-./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --corrEleType=HggRunEtaR9Et --smearEleType=stochastic --saveR
+./bin/ZFitter.exe -f data/validation/reference_25nsReco.dat --regionsFile=data/regions/scaleStep0.dat --corrEleType=HggRunEtaR9Et --smearEleType=stochastic --saveR
 ootMacro
 ./script/hadder.sh
 #Fai ora il load dei friend trees e plotta
