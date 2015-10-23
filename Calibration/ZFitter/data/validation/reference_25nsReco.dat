@@ -1,0 +1,24 @@
+# list of files to run on
+# type	treeName	fileName
+# files are added to the same chain if they have the same treeName and the same type
+# chain with the same type are added as friends
+# only three type are admitted: s (signal), b (bkg), d (data)
+# all treeName are admitted, but some are mandatory:
+# selected
+# some are special: pileup, scaleEleHggRunEta, scaleEleHggRunEtaR9
+# RUN2015C-25ns
+d1 selected root://eoscms//eos/cms/store/group/dpg_ecal/alca_ecalcalib/ecalelf/ntuples/13TeV/ALCARERECO/phiSym_materialCorrection_ref/DoubleEG-ZSkim-Run2015C-Prompt-v1-25nsReco/253620-255031/246908-258159-Prompt_25ns-v3-bis/unmerged-allRange.root
+#RUN2015D-25ns
+d2 selected root://eoscms//eos/cms/store/group/dpg_ecal/alca_ecalcalib/ecalelf/ntuples/13TeV/ALCARERECO/phiSym_materialCorrection_ref/DoubleEG-ZSkim-Run2015D-Prompt-v3-25nsReco/256584-257611/246908-258159-Prompt_25ns-v3-bis/unmerged-allRange.root
+d3 selected root://eoscms//eos/cms/store/group/dpg_ecal/alca_ecalcalib/ecalelf/ntuples/13TeV/ALCARERECO/phiSym_materialCorrection_ref/DoubleEG-ZSkim-Run2015D-Prompt-v3-25nsReco/257612-258158/246908-258159-Prompt_25ns-v3-bis/unmerged-allRange.root
+d	pileupHist	data/pu/ref/pufile_tot.root
+#d	pileupHist	data/pu/ref/pufile_D1.root
+#d	pileupHist	data/pu/ref/pufile_D2.root
+#d	pileupHist	data/pu/ref/pufile_C.root
+s	pileupHist	data/pu/mc/puMadgraph-25ns.root
+s1 selected root://eoscms.cern.ch//eos/cms/store/group/dpg_ecal/alca_ecalcalib/ecalelf/ntuples/13TeV/ALCARECOSIM/DYJets_madgraph-RunIISpring15DR74-Asym25ns/allRange/DYJets_madgraph-RunIISpring15DR74-Asym25ns-allRange.root
+#s2  selected root://eoscms.cern.ch//eos/cms/store/group/dpg_ecal/alca_ecalcalib/ecalelf/ntuples/13TeV/ALCARECOSIM/DYJets_amctnlo-RunIISpring15DR74-Asym25ns/allRange/DYJets_amctnlo-RunIISpring15DR74-Asym25ns-allRange.root
+s1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_s1-reference_25nsReco.root
+d1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_d1-reference_25nsReco.root
+d2      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_d2-reference_25nsReco.root
+d3      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_d3-reference_25nsReco.root
