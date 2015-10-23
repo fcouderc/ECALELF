@@ -69,7 +69,10 @@ In generale se vuoi fare un plot dei tree associati ad un certo .dat file, ad es
 ./script/hadder.sh
 #Fai ora il load dei friend trees e plotta
 root -l tmp/d_chain.root tmp/load_singleFile.C 
-data->Draw("invMass_SC_corr","smearerCat[0]>0")
+TString commonCut="(((((eleID[0] & 2)==2)&&((eleID[1] & 2)==2))&&((energySCEle_corr[0]/cosh(etaSCEle[0]) >= 25)&&(energySCEle_corr[1]/cosh(etaSCEle[1]) >= 25)))&&(HLTfire==1))&&(recoFlagsEle[0] > 1 && recoFlagsEle[1] > 1)";
+TString commonCut="((((eleID[0] & 2)==2)&&((eleID[1] & 2)==2))&&((energySCEle_corr[0]/cosh(etaSCEle[0]) >= 25)&&(energySCEle_corr[1]/cosh(etaSCEle[1]) >= 25)))&&(recoFlagsEle[0] > 1 && recoFlagsEle[1] > 1)";
+data->Draw("invMass_SC_corr","(smearerCat[0]>0)&&"+commonCut);
+data->Draw("HLTfire");
 ```
 
 ### Qui sei pronto a riempire gli istogrammi con la target variable e minimizzare la likelihod
