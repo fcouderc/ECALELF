@@ -88,7 +88,8 @@ root -l test/dato/fitres/histos_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_n
 
 * Prova a fare un rapido scan della likelihood, senza la vera minimizzazione
 ```
-./bin/ZFitter.exe -f data/validation/22Jan2012-runDepMCAll_checkMee.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_regrCorrSemiParV5_ele --autoBin --smearerFit --plotOnly --profileOnly --targetVariable=ptRatio --targetVariable_min=0.5 --targetVariable_max=2 --targetVariable_binWidth=0.05 --corrEleType=HggRunEtaR9Et --smearEleType=stochastic &> tmp/debug.txt 
+#--corrEleType=HggRunEtaR9Et --smearEleType=stochastic
+./bin/ZFitter.exe -f data/validation/reference_25nsReco.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_corr --autoBin --smearerFit --plotOnly --profileOnly --targetVariable=ptRatio --targetVariable_min=0.5 --targetVariable_max=2 --targetVariable_binWidth=0.05  &> tmp/debug.txt 
 root -l test/dato/fitres/outProfile_scaleStep0_Et_25_trigger_noPF.root 
 ```
 * Prova a vedere se riesce a trovare il minimo della likelihood da solo
