@@ -86,16 +86,16 @@ data->Draw("HLTfire");
 root -l test/dato/fitres/histos_ptRatio_pt2Sum_random_scaleStep0_Et_25_noPF.root 
 ```
 
-* Prova a fare un rapido scan della likelihood, senza la vera minimizzazione
+* Prova a fare un *rapido scan della likelihood*, senza la vera minimizzazione
 ```
 #--corrEleType=HggRunEtaR9Et --smearEleType=stochastic
 #--commonCut=Et_25-noPF
 ./bin/ZFitter.exe -f data/validation/reference_25nsReco.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_corr --commonCut=Et_25-noPF --autoBin --smearerFit --plotOnly --profileOnly --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random &> tmp/debug.txt  
 root -l test/dato/fitres/outProfile_scaleStep0_Et_25_noPF.root 
 ```
-* Prova a vedere se riesce a trovare il minimo della likelihood da solo
+* Prova a vedere se riesce a trovare il *minimo della likelihood* da solo, senza dargli nessun initFile
 ```
-./bin/ZFitter.exe -f data/validation/reference_25nsReco.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_corr --commonCut=Et_25-noPF --autoBin --smearerFit --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random&> tmp/debug.txt  
+./bin/ZFitter.exe -f data/validation/reference_25nsReco.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_corr --commonCut=Et_25-noPF --autoBin --smearerFit --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random &> tmp/debug.txt  
 ```
 *Se non trova da solo il minimo, guarda il profilo e passagli un initFile con parametri vicini al minimo, cosi' da imbeccarlo
 ```
