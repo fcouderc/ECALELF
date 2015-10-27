@@ -113,6 +113,17 @@ root -l -b
 .L tmp/fitOneProfile.C
 fitOneProfile("profile.root","outDir")
 ```
+
+* Plot Data/MC smearato per vedere se la minimizzazione della likelihood ha senso
+```
+cp test/dato/fitres/params-scaleStep0-Et_25-noPF.txt output.txt 
+rm test/dato/fitres/histos_ptRatio_pt2Sum_random_scaleStep0_Et_25r_noPF.root 
+./bin/ZFitter.exe -f data/validation/reference_25nsReco.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_corr --commonCut=Et_25-noPF --autoBin --smearerFit --plotOnly --profileOnly --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random &> tmp/debug.txt  
+root -l -b 
+.L macro/plot_data_mc.C+ 
+PlotMeanHist("test/dato/fitres/histos_ptRatio_pt2Sum_random_scaleStep0_Et_25_noPF.root") 
+.q 
+```
 ### Minimizzare la likelihood (manda 50 job e fitta la likelihood media)
 ```
 ./script/run50Minimization.sh ptRatio (opp ptRatio_ranom opp ptSum)
