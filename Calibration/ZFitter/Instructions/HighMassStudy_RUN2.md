@@ -97,13 +97,7 @@ root -l test/dato/fitres/outProfile_scaleStep0_Et_25_noPF.root
 ```
 ./bin/ZFitter.exe -f data/validation/reference_25nsReco.dat --regionsFile=data/regions/scaleStep0.dat --invMass_var=invMass_SC_corr --commonCut=Et_25-noPF --autoBin --smearerFit --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random &> tmp/debug.txt  
 ```
-*Se non trova da solo il minimo, guarda il profilo e passagli un initFile con parametri vicini al minimo, cosi' da imbeccarlo
-```
-cp test/dato/fitres/params-scaleStep0-Et_25-noPF.txt init_pt12.txt 
-e modifichi init_pt12.dat per avvicinare i parametri iniziali a quelli veri (allarghi i range se necessario) 
-A questo punto rigiri con quell'initFile e cerchi di imboccarlo 
---initFile=
-```
+
 * Plottare 1 solo profile della likelihood
 ```
 ./script/fit.sh path_to_profile (senza .root)
@@ -114,7 +108,19 @@ root -l -b
 fitOneProfile("profile.root","outDir")
 ```
 
-* Plot Data/MC smearato per vedere se la minimizzazione della likelihood ha senso
+*Se non trova da solo il minimo, guarda il profilo e passagli un initFile con parametri vicini al minimo, cosi' da imbeccarlo
+```
+cp test/dato/fitres/params-ptRatio_pt2Sum_random_scaleStep0-Et_25-noPF.txt init_RUN2.txt 
+e modifichi init_RUN2.txt per avvicinare i parametri iniziali a quelli veri (allarghi i range se necessario) 
+A questo punto rigiri con quell'initFile e cerchi di imboccarlo 
+./bin/ZFitter.exe -f data/validation/reference_25nsReco.dat --regionsFile=data/regions/scaleStep0.dat --initFile=init_RUN2.txt --invMass_var=invMass_SC_corr --commonCut=Et_25-noPF --autoBin --smearerFit --targetVariable=ptRatio*pt2Sum --targetVariable_min=0.5*0 --targetVariable_max=2*200 --targetVariable_binWidth=0.05*2 --configuration=random &> tmp/debug.txt  
+```
+* Plotta il profile della likelihood
+```
+./script/fit.sh path_to_profile (senza .root)
+```
+
+* Fai il plot Data/MC smearato per vedere se la minimizzazione della likelihood ha senso
 ```
 cp test/dato/fitres/params-ptRatio_pt2Sum_random_scaleStep0-Et_25-noPF.txt output.txt
 rm test/dato/fitres/histos_ptRatio_pt2Sum_random_scaleStep0_Et_25_noPF.root 
