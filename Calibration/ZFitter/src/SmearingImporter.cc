@@ -140,7 +140,7 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
     if(isToy==false || (externToy==true && isToy==true && isMC==false)){
       std::cout << "[STATUS] Adding electron energy smearing branch from friend" << std::endl;
       if(isMC) chain->SetBranchAddress("smearSigmaEle", smearEle_);//e' la sigma della gaussiana
-      else chain->SetBranchAddress("smearEle", smearEle_);//e' il numero gaussiana
+      else chain->SetBranchAddress("smearEle", smearEle_);//e' il numero gaussiano
       hasSmearEle=true;
     } 
   }
@@ -201,6 +201,7 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
     exit(1);
   }
   Long64_t entries = chain->GetEntryList()->GetN();
+  std::cout<<"[DEBUG] GetEntryList()->GetN() del chain in Import "<<chain->GetEntryList()->GetN()<<std::endl;
   if(nEvents>0 && nEvents<entries){
     std::cout << "[INFO] Importing only " << nEvents << " events" << std::endl;
     entries=nEvents;
@@ -211,50 +212,54 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 
   std::vector< std::pair<TTreeFormula*, TTreeFormula*> > catSelectors;
   if(hasSmearerCat==false){
-  for(std::vector<TString>::const_iterator region_ele1_itr = _regionList.begin();
-      region_ele1_itr != _regionList.end();
-      region_ele1_itr++){
-    for(std::vector<TString>::const_iterator region_ele2_itr = region_ele1_itr;
-	region_ele2_itr != _regionList.end();
-	region_ele2_itr++){
-
-      if(region_ele2_itr==region_ele1_itr){
-	TString region=*region_ele1_itr;
-	region.ReplaceAll(_commonCut,"");
-	TTreeFormula *selector = new TTreeFormula("selector"+(region), cutter.GetCut(region+oddString, isMC), chain);
-	catSelectors.push_back(std::pair<TTreeFormula*, TTreeFormula*>(selector,NULL));
-	//selector->Print();
-      } else if(!_onlyDiagonal){
-	TString region1=*region_ele1_itr;
-	TString region2=*region_ele2_itr;
-	region1.ReplaceAll(_commonCut,"");
-	region2.ReplaceAll(_commonCut,"");
-	TTreeFormula *selector1 = new TTreeFormula("selector1"+region1+region2, 
-						   cutter.GetCut(region1+oddString, isMC, 1) && 
-						   cutter.GetCut(region2+oddString, isMC, 2),
-						   chain);
-	TTreeFormula *selector2 = new TTreeFormula("selector2"+region1+region2,
-						   cutter.GetCut(region1+oddString, isMC, 2) && 
-						   cutter.GetCut(region2+oddString, isMC, 1),
-						   chain);
-	catSelectors.push_back(std::pair<TTreeFormula*, TTreeFormula*>(selector1,selector2));
-	//selector1->Print();
-	//selector2->Print();
+    for(std::vector<TString>::const_iterator region_ele1_itr = _regionList.begin();
+	region_ele1_itr != _regionList.end();
+	region_ele1_itr++){
+      for(std::vector<TString>::const_iterator region_ele2_itr = region_ele1_itr;
+	  region_ele2_itr != _regionList.end();
+	  region_ele2_itr++){
 	
-      } else catSelectors.push_back(std::pair<TTreeFormula*, TTreeFormula*>(NULL, NULL));
+	if(region_ele2_itr==region_ele1_itr){
+	  TString region=*region_ele1_itr;
+	  region.ReplaceAll(_commonCut,"");
+	  TTreeFormula *selector = new TTreeFormula("selector"+(region), cutter.GetCut(region+oddString, isMC), chain);
+	  catSelectors.push_back(std::pair<TTreeFormula*, TTreeFormula*>(selector,NULL));
+	  //selector->Print();
+	} else if(!_onlyDiagonal){
+	  TString region1=*region_ele1_itr;
+	  TString region2=*region_ele2_itr;
+	  region1.ReplaceAll(_commonCut,"");
+	  region2.ReplaceAll(_commonCut,"");
+	  TTreeFormula *selector1 = new TTreeFormula("selector1"+region1+region2, 
+						     cutter.GetCut(region1+oddString, isMC, 1) && 
+						     cutter.GetCut(region2+oddString, isMC, 2),
+						     chain);
+	  TTreeFormula *selector2 = new TTreeFormula("selector2"+region1+region2,
+						     cutter.GetCut(region1+oddString, isMC, 2) && 
+						     cutter.GetCut(region2+oddString, isMC, 1),
+						     chain);
+	  catSelectors.push_back(std::pair<TTreeFormula*, TTreeFormula*>(selector1,selector2));
+	  //selector1->Print();
+	  //selector2->Print();
+	  
+	} else catSelectors.push_back(std::pair<TTreeFormula*, TTreeFormula*>(NULL, NULL));
 	
+      }
     }
-  }
-  }
+  }//hasSmearerCat false
 
   TRandom3 rand(0);//Use a seed generated using machine clock (different every second)
   double rn;
-  int test_entries=1000;
+  int test_entries=5000;
+  std::cout<<"Starting the loop in Import"<<std::endl;
+  std::cout<<"entries are "<<entries<<std::endl;
   for(Long64_t jentry=0; jentry < entries; jentry++){
-  //for(Long64_t jentry=0; jentry < test_entries; jentry++){std::cout<<"WARNING!! you are running on test_entries in SmearingImporter::Import()"<<std::endl;
+    //for(Long64_t jentry=0; jentry < test_entries; jentry++){//std::cout<<"WARNING!! you are running on test_entries in SmearingImporter::Import()"<<std::endl;
+    //std::cout<<"jentry is "<<jentry<<std::endl;
     Long64_t entryNumber= chain->GetEntryNumber(jentry);
     chain->GetEntry(entryNumber);
     if(isToy){
+      std::cout<<"insideToys"<<std::endl;
       int divider=20;
       int modulo=eventNumber%divider;
       if(jentry<10){
@@ -264,9 +269,7 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 		  << std::endl;
 	
       }
-
-      int data_index=1;
-
+      int data_index=18;
       if(data_index > 1000){
 	//closure tests
 	//data --> 0,1 /5 //perche' c'e' continue
@@ -279,9 +282,9 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 	if(isMC && modulo==data_index) continue; //MC
 	if(!isMC && modulo!=data_index) continue; //dati
       }
-
     }//isToy
 
+    //std::cout<<"in SmearingImporter after toys"<<std::endl;
     // reject events:
     if(weight>3) continue;
 
@@ -298,6 +301,7 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 
     int evIndex=-1;
     bool _swap=false;
+    //std::cout<<"evIndex is "<<evIndex<<std::endl;
     if(!hasSmearerCat){
       for(std::vector< std::pair<TTreeFormula*, TTreeFormula*> >::const_iterator catSelector_itr = catSelectors.begin();
 	  catSelector_itr != catSelectors.end();
@@ -310,7 +314,6 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 	  if(sel2==NULL || sel2->EvalInstance()==false) continue;
 	  else _swap=true;
 	}
-
 	evIndex=catSelector_itr-catSelectors.begin();
       }
     }else{
@@ -318,26 +321,28 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
       _swap=smearerCat[1];
       if(jentry<2) std::cout << evIndex << "\t" << _swap << std::endl;
     }
+    //std::cout<<"evIndex is "<<evIndex<<std::endl;
     if(evIndex<0) continue; // event in no category
-
+    
     ZeeEvent event;
-
+    
     float t1=TMath::Exp(-etaEle[0]);
     float t2=TMath::Exp(-etaEle[1]);
     float t1q = t1*t1;
     float t2q = t2*t2;
     
     if(isMC && hasSmearEle){//MC is smeared with a Gaussian factor
-      //std::cout<<"isMC and hasSmearEle"<<std::endl;//It happens
+      //std::cout<<"smearEle[0] is "<<smearEle_[0]<<std::endl;
       smearEle_[0]=gen.Gaus(1,smearEle_[0]);
       smearEle_[1]=gen.Gaus(1,smearEle_[1]);
+      //std::cout<<"smearEle[0] after is "<<smearEle_[0]<<std::endl;
     }
 
     //------------------------------
     Ele1.SetPtEtaPhiE(event.energy_ele1/cosh(etaEle[0]),etaEle[0],phiEle[0],event.energy_ele1);
     Ele2.SetPtEtaPhiE(event.energy_ele2/cosh(etaEle[1]),etaEle[1],phiEle[1],event.energy_ele2);
     float ZPt=(Ele1+Ele2).Pt();
-
+    
     if(_swap){
       event.energy_ele2 = energyEle[0] * corrEle_[0] * smearEle_[0];
       event.energy_ele1 = energyEle[1] * corrEle_[1] * smearEle_[1];
@@ -345,12 +350,31 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
       event.energy_ele1 = energyEle[0] * corrEle_[0] * smearEle_[0];
       event.energy_ele2 = energyEle[1] * corrEle_[1] * smearEle_[1];
     }
-
+    
     Ele1.SetPtEtaPhiE(event.energy_ele1/cosh(etaEle[0]),etaEle[0],phiEle[0],event.energy_ele1);
     Ele2.SetPtEtaPhiE(event.energy_ele2/cosh(etaEle[1]),etaEle[1],phiEle[1],event.energy_ele2);
     float ZPt_after=(Ele1+Ele2).Pt();//corrections applied
-
+    //std::cout<<"I am doing something ZPt is <<"<<ZPt_after<<std::endl;
     if(ZPt_after > 10) continue; //only events with Pt < 10 GeV
+
+    std::ofstream smear_file_BB ("smear_applied_BB.txt", std::ofstream::app);
+    //std::ofstream smear_file_BE ("smear_applied_BE.txt", std::ofstream::app);
+    std::ofstream smear_file_EE ("smear_applied_EE.txt", std::ofstream::app);
+    std::ofstream corr_file_BB ("corr_applied_BB.txt", std::ofstream::app);
+    //std::ofstream corr_file_BE ("smear_applied_BE.txt", std::ofstream::app);
+    std::ofstream corr_file_EE ("corr_applied_EE.txt", std::ofstream::app);
+    if(evIndex==0){
+      smear_file_BB << smearEle_[0]<<std::endl;
+      smear_file_BB << smearEle_[1]<<std::endl;
+      corr_file_BB << corrEle_[0]<<std::endl;
+      corr_file_BB << corrEle_[1]<<std::endl;
+    }else if(evIndex==2){
+      smear_file_EE << smearEle_[0]<<std::endl;
+      smear_file_EE << smearEle_[1]<<std::endl;
+      corr_file_EE << corrEle_[0]<<std::endl;
+      corr_file_EE << corrEle_[1]<<std::endl;
+    }
+
     //Different pt scenarios
     //if((ZPt_after < 10) || (ZPt_after>20)) continue;
     //if((ZPt_after < 20) || (ZPt_after>40)) continue;
@@ -377,142 +401,142 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 
     for(int var=0;((unsigned)var)<targets.size();var++){
       event.targetVariable[var]=-999;
-    if(targets[var]=="invMass"){
-      // to calculate the invMass: invMass = sqrt(2 * energy_ele1 * energy_ele2 * angle_eta_ele1_ele2)
-      //if(event.invMass < 70 || event.invMass > 110) continue;
-      //event.angle_eta_ele1_ele2=  (1-((1-t1q)*(1-t2q)+4*t1*t2*cos(phiEle[0]-phiEle[1]))/((1+t1q)*(1+t2q)));
-      event.targetVariable[var]= sqrt(2 * event.energy_ele1 * event.energy_ele2 *
-				  (1-((1-t1q)*(1-t2q)+4*t1*t2*cos(phiEle[0]-phiEle[1]))/((1+t1q)*(1+t2q)))
-				  );
-    }else if(targets[var]=="pt2Sum"){
-      double pt1=event.energy_ele1/cosh(etaEle[0]);
-      double pt2=event.energy_ele2/cosh(etaEle[1]);
-
-      if(GetConfiguration()=="leading"){
-	if(pt1 > pt2){
-	  event.pt1=pt1;
-	  event.pt2=pt2;
-	  event.isSwapped=false;
-	}else{
-	  event.pt1=pt2;
-	  event.pt2=pt1;
-	  event.isSwapped=true;
+      if(targets[var]=="invMass"){
+	// to calculate the invMass: invMass = sqrt(2 * energy_ele1 * energy_ele2 * angle_eta_ele1_ele2)
+	//if(event.invMass < 70 || event.invMass > 110) continue;
+	//event.angle_eta_ele1_ele2=  (1-((1-t1q)*(1-t2q)+4*t1*t2*cos(phiEle[0]-phiEle[1]))/((1+t1q)*(1+t2q)));
+	event.targetVariable[var]= sqrt(2 * event.energy_ele1 * event.energy_ele2 *
+					(1-((1-t1q)*(1-t2q)+4*t1*t2*cos(phiEle[0]-phiEle[1]))/((1+t1q)*(1+t2q)))
+					);
+      }else if(targets[var]=="pt2Sum"){
+	double pt1=event.energy_ele1/cosh(etaEle[0]);
+	double pt2=event.energy_ele2/cosh(etaEle[1]);
+	
+	if(GetConfiguration()=="leading"){
+	  if(pt1 > pt2){
+	    event.pt1=pt1;
+	    event.pt2=pt2;
+	    event.isSwapped=false;
+	  }else{
+	    event.pt1=pt2;
+	    event.pt2=pt1;
+	    event.isSwapped=true;
+	  }
+	}else if(GetConfiguration()=="random"){
+	  rn=rand.Uniform(0,1);
+	  if(rn<0.5){
+	    event.pt1=pt1;
+	    event.pt2=pt2;
+	    event.isSwapped=false;
+	  }else{
+	    event.pt1=pt2;
+	    event.pt2=pt1;
+	    event.isSwapped=true;
+	  }
 	}
-      }else if(GetConfiguration()=="random"){
-	rn=rand.Uniform(0,1);
-	if(rn<0.5){
-	  event.pt1=pt1;
-	  event.pt2=pt2;
-	  event.isSwapped=false;
-	}else{
-	  event.pt1=pt2;
-	  event.pt2=pt1;
-	  event.isSwapped=true;
-	}
-      }
-
-      event.targetVariable[var]=sqrt(pow(event.pt1,2)+pow(event.pt2,2));
-
-      if(event.isSwapped){
-	ofs<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[1]<<" "<<etaEle[0]<<std::endl;
-      }else{
-	ofs<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[0]<<" "<<etaEle[1]<<std::endl;
-      }
-      
-      if(evIndex==0){
+	
+	event.targetVariable[var]=sqrt(pow(event.pt1,2)+pow(event.pt2,2));
+	
 	if(event.isSwapped){
-	  ofs_0<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[1]<<" "<<etaEle[0]<<std::endl;
+	  ofs<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[1]<<" "<<etaEle[0]<<std::endl;
 	}else{
-	  ofs_0<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[0]<<" "<<etaEle[1]<<std::endl;
+	  ofs<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[0]<<" "<<etaEle[1]<<std::endl;
 	}
-      }else if(evIndex==1){
-	if(event.isSwapped){
-	  ofs_1<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[1]<<" "<<etaEle[0]<<std::endl;
-	}else{
-	  ofs_1<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[0]<<" "<<etaEle[1]<<std::endl;
+	
+	if(evIndex==0){
+	  if(event.isSwapped){
+	    ofs_0<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[1]<<" "<<etaEle[0]<<std::endl;
+	  }else{
+	    ofs_0<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[0]<<" "<<etaEle[1]<<std::endl;
+	  }
+	}else if(evIndex==1){
+	  if(event.isSwapped){
+	    ofs_1<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[1]<<" "<<etaEle[0]<<std::endl;
+	  }else{
+	    ofs_1<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[0]<<" "<<etaEle[1]<<std::endl;
+	  }
+	}else if(evIndex==2){
+	  if(event.isSwapped){
+	    ofs_2<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[1]<<" "<<etaEle[0]<<std::endl;
+	  }else{
+	    ofs_2<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[0]<<" "<<etaEle[1]<<std::endl;
+	  }
 	}
-      }else if(evIndex==2){
-	if(event.isSwapped){
-	  ofs_2<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[1]<<" "<<etaEle[0]<<std::endl;
-	}else{
-	  ofs_2<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[0]<<" "<<etaEle[1]<<std::endl;
+
+      }else if(targets[var]=="ptRatio"){
+	//if(ZPt_after>10){
+	//event.targetVariable[var]=-999;Checked: it works because Integral() avoids underflows and overflows
+	//}else{
+	
+	//Decide which is 1 and which is 2, in this case
+	//Option 1: 1 is the leading and 2 is the subleading
+	double pt1=event.energy_ele1/cosh(etaEle[0]);
+	double pt2=event.energy_ele2/cosh(etaEle[1]);
+	
+	if(GetConfiguration()=="leading"){
+	  if(pt1 > pt2){
+	    event.pt1=pt1;
+	    event.pt2=pt2;
+	    event.isSwapped=false;
+	  }else{
+	    event.pt1=pt2;
+	    event.pt2=pt1;
+	    event.isSwapped=true;
+	  }
+	}else if(GetConfiguration()=="random"){
+	  rn=rand.Uniform(0,1);
+	  if(rn<0.5){
+	    event.pt1=pt1;
+	    event.pt2=pt2;
+	    event.isSwapped=false;
+	  }else{
+	    event.pt1=pt2;
+	    event.pt2=pt1;
+	    event.isSwapped=true;
+	  }
 	}
+	
+	event.targetVariable[var]=(event.pt1/event.pt2);
+	ofs<<event.targetVariable[var]<<std::endl;
+	if(evIndex==0){
+	  ofs_0<<event.targetVariable[var]<<" ";
+	}else if(evIndex==1){
+	  ofs_1<<event.targetVariable[var]<<" ";
+	}else if(evIndex==2){
+	  ofs_2<<event.targetVariable[var]<<" ";
+	}
+      }else if(targets[var]=="ptSum"){
+	double pt1=event.energy_ele1/cosh(etaEle[0]);
+	double pt2=event.energy_ele2/cosh(etaEle[1]);
+	if(GetConfiguration()=="leading"){
+	  if(pt1 > pt2){
+	    event.pt1=pt1;
+	    event.pt2=pt2;
+	    event.isSwapped=false;
+	  }else{
+	    event.pt1=pt2;
+	    event.pt2=pt1;
+	    event.isSwapped=true;
+	  }
+	}else if(GetConfiguration()=="random"){
+	  rn=rand.Uniform(0,1);
+	  if(rn<0.5){
+	    event.pt1=pt1;
+	    event.pt2=pt2;
+	    event.isSwapped=false;
+	  }else{
+	    event.pt1=pt2;
+	    event.pt2=pt1;
+	    event.isSwapped=true;
+	  }
+	}
+
+	event.targetVariable[var]=(event.pt1 + event.pt2);
+
+	//event.targetVariable[var]=(pt1 + pt2);
+	//event.pt1=pt1;//Needed for RooSmearer::SetSmearedHisto
+	//event.pt2=pt2;
       }
-
-    }else if(targets[var]=="ptRatio"){
-      //if(ZPt_after>10){
-      //event.targetVariable[var]=-999;Checked: it works because Integral() avoids underflows and overflows
-      //}else{
-
-      //Decide which is 1 and which is 2, in this case
-      //Option 1: 1 is the leading and 2 is the subleading
-      double pt1=event.energy_ele1/cosh(etaEle[0]);
-      double pt2=event.energy_ele2/cosh(etaEle[1]);
-
-      if(GetConfiguration()=="leading"){
-	if(pt1 > pt2){
-	  event.pt1=pt1;
-	  event.pt2=pt2;
-	  event.isSwapped=false;
-	}else{
-	  event.pt1=pt2;
-	  event.pt2=pt1;
-	  event.isSwapped=true;
-	}
-      }else if(GetConfiguration()=="random"){
-	rn=rand.Uniform(0,1);
-	if(rn<0.5){
-	  event.pt1=pt1;
-	  event.pt2=pt2;
-	  event.isSwapped=false;
-	}else{
-	  event.pt1=pt2;
-	  event.pt2=pt1;
-	  event.isSwapped=true;
-	}
-      }
-
-      event.targetVariable[var]=(event.pt1/event.pt2);
-      ofs<<event.targetVariable[var]<<std::endl;
-      if(evIndex==0){
-	ofs_0<<event.targetVariable[var]<<" ";
-      }else if(evIndex==1){
-	ofs_1<<event.targetVariable[var]<<" ";
-      }else if(evIndex==2){
-	ofs_2<<event.targetVariable[var]<<" ";
-      }
-    }else if(targets[var]=="ptSum"){
-      double pt1=event.energy_ele1/cosh(etaEle[0]);
-      double pt2=event.energy_ele2/cosh(etaEle[1]);
-      if(GetConfiguration()=="leading"){
-	if(pt1 > pt2){
-	  event.pt1=pt1;
-	  event.pt2=pt2;
-	  event.isSwapped=false;
-	}else{
-	  event.pt1=pt2;
-	  event.pt2=pt1;
-	  event.isSwapped=true;
-	}
-      }else if(GetConfiguration()=="random"){
-	rn=rand.Uniform(0,1);
-	if(rn<0.5){
-	  event.pt1=pt1;
-	  event.pt2=pt2;
-	  event.isSwapped=false;
-	}else{
-	  event.pt1=pt2;
-	  event.pt2=pt1;
-	  event.isSwapped=true;
-	}
-      }
-
-      event.targetVariable[var]=(event.pt1 + event.pt2);
-
-      //event.targetVariable[var]=(pt1 + pt2);
-      //event.pt1=pt1;//Needed for RooSmearer::SetSmearedHisto
-      //event.pt2=pt2;
-    }
     }//loop over targetVariables
 
     if(_isSmearingEt){
@@ -527,63 +551,67 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 
     event.weight = 1.;
     if(_usePUweight) event.weight *= weight;
+    if(isMC){//remove this check
+      if(weight==0){
+	event.weight=1.; //puWeight seems to be 0
+      }
+    }    
     if(_useR9weight) event.weight *= r9weight[0]*r9weight[1];
     if(_usePtweight) event.weight *= ptweight[0]*ptweight[1];
     if(_useFSRweight) event.weight *= FSRweight;
     if(_useWEAKweight) event.weight *= WEAKweight;
     if(_useZPtweight && isMC && _pdfWeightIndex>0) event.weight *= zptweight[_pdfWeightIndex];
+
     if(!isMC && _pdfWeightIndex>0 && pdfWeights!=NULL){
       if(((unsigned int)_pdfWeightIndex) > pdfWeights->size()) continue;
       event.weight *= ((*pdfWeights)[0]<=0 || (*pdfWeights)[0]!=(*pdfWeights)[0] || (*pdfWeights)[_pdfWeightIndex]!=(*pdfWeights)[_pdfWeightIndex])? 0 : (*pdfWeights)[_pdfWeightIndex]/(*pdfWeights)[0];
-
-      
-#ifdef DEBUG      
-      //if(jentry<10 || event.weight!=event.weight || event.weight>1.3){
-      //	std::cout << "jentry = " << jentry 
-      //		  << "\tevent.weight = " << event.weight 
-      //		  << "\t" << r9weight[0] << " " << r9weight[1] 
-      //		  << "\t" << ptweight[0] << " " << ptweight[1]
-      //		  << "\t" << WEAKweight << "\t" << FSRweight
-      //		  << std::endl;
-      }
-#endif
-
     }else{
       if(!isMC && _pdfWeightIndex>0){
-      std::cerr << "[ERROR] requested pdfWeights but not set by getentry" << std::endl;
-      std::cerr << "[ERROR] jentry=" << jentry << "; chain: " << chain->GetName() << "\t" << chain->GetTitle()  << std::endl;
-      if(jentry<10) continue;
-      else exit(1);
+	std::cerr << "[ERROR] requested pdfWeights but not set by getentry" << std::endl;
+	std::cerr << "[ERROR] jentry=" << jentry << "; chain: " << chain->GetName() << "\t" << chain->GetTitle()  << std::endl;
+	if(jentry<10) continue;
+	else exit(1);
       }
     }
-    if(mcGenWeight != -1){
-      if(_useMCweight && !_excludeByWeight) event.weight *= mcGenWeight;
 
-      if(_excludeByWeight && mcGenWeight!=1){
-	float rnd = excludeGen.Rndm();
-	if(jentry < 10)  std::cout << "mcGen = " << mcGenWeight << "\t" << rnd << std::endl;
-	if(mcGenWeight < rnd){ /// \todo fix the reject by weight in case of pu,r9,pt reweighting
-	  
-	  excludedByWeight++;
-	  continue;
-	} // else event.weight=1;
+    //As simple as that                                                                                                                                                        
+    if(isMC){
+      if(mcGenWeight > 0){
+        event.weight *=1;
+      }else{
+        event.weight *=-1;
       }
     }
+
+    //This was for pythia
+//    if(mcGenWeight != -1){
+//      if(_useMCweight && !_excludeByWeight) event.weight *= mcGenWeight;
+//      
+//      if(_excludeByWeight && mcGenWeight!=1){
+//	float rnd = excludeGen.Rndm();
+//	if(jentry < 10)  std::cout << "mcGen = " << mcGenWeight << "\t" << rnd << std::endl;
+//	if(mcGenWeight < rnd){ /// \todo fix the reject by weight in case of pu,r9,pt reweighting
+//	  
+//	  excludedByWeight++;
+//	  continue;
+//	}// else event.weight=1;
+//      }
+//    }
 
 #ifdef DEBUG      
-      if(jentry<10 || event.weight!=event.weight || event.weight>2){
-	std::cout << "jentry = " << jentry 
-		  << "\tevent.weight = " << event.weight 
-		  << "\t" << weight << "\t" << mcGenWeight
-		  << "\t" << r9weight[0] << " " << r9weight[1] 
-		  << "\t" << ptweight[0] << " " << ptweight[1]
-		  << "\t" << zptweight[0] 
-		  << "\t" << WEAKweight << "\t" << FSRweight
-		  << std::endl;
-      }
+    if(jentry<10 || event.weight!=event.weight || event.weight>2){
+      std::cout << "jentry = " << jentry 
+		<< "\tevent.weight = " << event.weight 
+		<< "\t" << weight << "\t" << mcGenWeight
+		<< "\t" << r9weight[0] << " " << r9weight[1] 
+		<< "\t" << ptweight[0] << " " << ptweight[1]
+		<< "\t" << zptweight[0] 
+		<< "\t" << WEAKweight << "\t" << FSRweight
+		<< std::endl;
+    }
 #endif
-
-    if(event.weight<=0 || event.weight!=event.weight || event.weight>10) continue;
+    //if(event.weight<=0 || event.weight!=event.weight || event.weight>10) continue;
+    if(event.weight>10) continue;//negative weights are now possible
 
 #ifdef FIXEDSMEARINGS
     if(isMC){
@@ -603,14 +631,12 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
     includedEvents++;
     cache.at(evIndex).push_back(event);
     //(cache[evIndex]).push_back(event);
-  }
+  }//loop over entries
 
   std::cout << "[INFO] Importing events: " << includedEvents << "; events excluded by weight: " << excludedByWeight << std::endl;
   chain->ResetBranchAddresses();
   chain->GetEntry(0);
   return;
-
-
 }
 
 SmearingImporter::regions_cache_t SmearingImporter::GetCache(TChain *_chain, bool isMC, bool odd, Long64_t nEvents, bool isToy, bool externToy){
@@ -657,7 +683,6 @@ SmearingImporter::regions_cache_t SmearingImporter::GetCache(TChain *_chain, boo
   }
 
 
-
   for(std::vector<TString>::const_iterator region_ele1_itr = _regionList.begin();
       region_ele1_itr != _regionList.end();
       region_ele1_itr++){
@@ -673,7 +698,8 @@ SmearingImporter::regions_cache_t SmearingImporter::GetCache(TChain *_chain, boo
   evListName+="_all";
   TEntryList *oldList = _chain->GetEntryList();
   if(oldList==NULL){
-    std::cout << "[STATUS] Setting entry list: " << evListName << std::endl;
+    std::cout << "[STATUS] Setting entry list (commotCut screening): " << evListName << std::endl;
+    std::cout << "[STATUS] Marking events if "<<cutter.GetCut(_commonCut+"-"+eleID_,isMC)<<std::endl;
     _chain->Draw(">>"+evListName, cutter.GetCut(_commonCut+"-"+eleID_,isMC), "entrylist");
     //_chain->Draw(">>"+evListName, "", "entrylist");
     TEntryList *elist_all = (TEntryList*)gDirectory->Get(evListName);
@@ -691,7 +717,7 @@ SmearingImporter::regions_cache_t SmearingImporter::GetCache(TChain *_chain, boo
       cache.push_back(eventCache);
     }
   }
-
+  std::cout<<"nEvents just before Import (smearingImporeter::GetCache) is "<<nEvents<<std::endl;
   Import(_chain, cache, oddString, isMC, nEvents, isToy, externToy);
 #ifdef DEBUG
   int index=0;
