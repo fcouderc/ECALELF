@@ -254,7 +254,7 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
   std::cout<<"Starting the loop in Import"<<std::endl;
   std::cout<<"entries are "<<entries<<std::endl;
   for(Long64_t jentry=0; jentry < entries; jentry++){
-    //for(Long64_t jentry=0; jentry < test_entries; jentry++){//std::cout<<"WARNING!! you are running on test_entries in SmearingImporter::Import()"<<std::endl;
+  //for(Long64_t jentry=0; jentry < test_entries; jentry++){//std::cout<<"WARNING!! you are running on test_entries in SmearingImporter::Import()"<<std::endl;
     //std::cout<<"jentry is "<<jentry<<std::endl;
     Long64_t entryNumber= chain->GetEntryNumber(jentry);
     chain->GetEntry(entryNumber);
@@ -363,6 +363,9 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
     std::ofstream corr_file_BB ("corr_applied_BB.txt", std::ofstream::app);
     //std::ofstream corr_file_BE ("smear_applied_BE.txt", std::ofstream::app);
     std::ofstream corr_file_EE ("corr_applied_EE.txt", std::ofstream::app);
+
+    std::ofstream ofs_random ("random.txt", std::ofstream::app);
+#ifdef write_corr
     if(evIndex==0){
       smear_file_BB << smearEle_[0]<<std::endl;
       smear_file_BB << smearEle_[1]<<std::endl;
@@ -374,6 +377,7 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
       corr_file_EE << corrEle_[0]<<std::endl;
       corr_file_EE << corrEle_[1]<<std::endl;
     }
+#endif
 
     //Different pt scenarios
     //if((ZPt_after < 10) || (ZPt_after>20)) continue;
@@ -411,7 +415,10 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
       }else if(targets[var]=="pt2Sum"){
 	double pt1=event.energy_ele1/cosh(etaEle[0]);
 	double pt2=event.energy_ele2/cosh(etaEle[1]);
-	
+#ifdef ptcheck
+	std::cout<<"pt1 is "<<pt1<<std::endl;
+	std::cout<<"pt2 is "<<pt2<<std::endl;
+#endif
 	if(GetConfiguration()=="leading"){
 	  if(pt1 > pt2){
 	    event.pt1=pt1;
@@ -437,6 +444,8 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 	
 	event.targetVariable[var]=sqrt(pow(event.pt1,2)+pow(event.pt2,2));
 	
+
+#ifdef write_ev
 	if(event.isSwapped){
 	  ofs<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[1]<<" "<<etaEle[0]<<std::endl;
 	}else{
@@ -462,7 +471,7 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 	    ofs_2<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<etaEle[0]<<" "<<etaEle[1]<<std::endl;
 	  }
 	}
-
+#endif
       }else if(targets[var]=="ptRatio"){
 	//if(ZPt_after>10){
 	//event.targetVariable[var]=-999;Checked: it works because Integral() avoids underflows and overflows
@@ -485,6 +494,7 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 	  }
 	}else if(GetConfiguration()=="random"){
 	  rn=rand.Uniform(0,1);
+	  ofs_random<<rn<<std::endl;
 	  if(rn<0.5){
 	    event.pt1=pt1;
 	    event.pt2=pt2;
@@ -495,8 +505,18 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 	    event.isSwapped=true;
 	  }
 	}
-	
+
 	event.targetVariable[var]=(event.pt1/event.pt2);
+	
+	if(evIndex==0){
+	  ofs_0<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<event.isSwapped<<std::endl;
+	}else if(evIndex==1){
+	  ofs_1<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<event.isSwapped<<std::endl;
+	}else if(evIndex==2){
+	  ofs_2<<event.targetVariable[var]<<" "<<event.pt1<<" "<<event.pt2<<" "<<event.isSwapped<<std::endl;
+	}
+
+#ifdef write_ev	
 	ofs<<event.targetVariable[var]<<std::endl;
 	if(evIndex==0){
 	  ofs_0<<event.targetVariable[var]<<" ";
@@ -505,6 +525,7 @@ void SmearingImporter::Import(TTree *chain, regions_cache_t& cache, TString oddS
 	}else if(evIndex==2){
 	  ofs_2<<event.targetVariable[var]<<" ";
 	}
+#endif
       }else if(targets[var]=="ptSum"){
 	double pt1=event.energy_ele1/cosh(etaEle[0]);
 	double pt2=event.energy_ele2/cosh(etaEle[1]);
@@ -644,6 +665,10 @@ SmearingImporter::regions_cache_t SmearingImporter::GetCache(TChain *_chain, boo
   //std::cout << "[STATUS] --- Setting toy cache for data" << std::endl;
   //data_events_cache = importer.GetCache(_signal_chain, false, false, nEvents, true, externToy); //importer.GetCacheToy(nEvents, false);
   TString eleID_="eleID_"+_eleID;
+  if(isMC){
+    //remove this for correct ntuples
+    eleID_="";
+  }
 
   TString oddString;
   if(odd) oddString+="-odd";

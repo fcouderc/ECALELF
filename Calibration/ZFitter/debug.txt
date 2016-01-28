@@ -1,544 +1,331 @@
-22Jan2012-runDepMCAll_checkMee.dat
-scaleStep0
-ptRatio_pt2Sum
+============================== Z General Fitter
+Adding file: d1	selected	root://eoscms//eos/cms/store/group/dpg_ecal/alca_ecalcalib/ecalelf/ntuples/13TeV/MINIAODNTUPLE/74X_dataRun2_Prompt_v4/DoubleEG-ZSkim-Run2015C-rereco05Oct2015-MINIAOD/254227-255031/246908-260627-Prompt_25ns-v1-golden_silver/unmerged-allRange-miniAOD.root
+Adding file: d2	selected	root://eoscms//eos/cms/store/group/dpg_ecal/alca_ecalcalib/ecalelf/ntuples/13TeV/MINIAODNTUPLE/74X_dataRun2_Prompt_v4/DoubleEG-ZSkim-Run2015D-Prompt-v3-25nsReco-MINIAOD/256584-258158/246908-260627-Prompt_25ns-v1-golden_silver/unmerged-allRange-miniAOD.root
+Adding file: d3	selected	root://eoscms//eos/cms/store/group/dpg_ecal/alca_ecalcalib/ecalelf/ntuples/13TeV/MINIAODNTUPLE/74X_dataRun2_Prompt_v4/DoubleEG-ZSkim-Run2015D-Prompt-v4-25nsReco-MINIAOD/258159-260737/246908-260627-Prompt_25ns-v1-golden_silver/unmerged-allRange-miniAOD.root
+Adding file: s1	selected	/afs/cern.ch/work/g/gfasanel/CMSSW_7_4_15/src/Calibration/EcalAlCaRecoProducers/ntuple_400_800_1.root
+Adding file: s2	selected	/afs/cern.ch/work/g/gfasanel/CMSSW_7_4_15/src/Calibration/EcalAlCaRecoProducers/ntuple_400_800_2.root
+Adding file: s3	selected	/afs/cern.ch/work/g/gfasanel/CMSSW_7_4_15/src/Calibration/EcalAlCaRecoProducers/ntuple_400_800_3.root
+Adding file: s4	selected	/afs/cern.ch/work/g/gfasanel/CMSSW_7_4_15/src/Calibration/EcalAlCaRecoProducers/ntuple_400_800_4.root
+Adding file: d1	scaleEle_EtaR9	friends/others/scaleEle_EtaR9_d1-miniAOD_November2015.root
+Adding file: d2	scaleEle_EtaR9	friends/others/scaleEle_EtaR9_d2-miniAOD_November2015.root
+Adding file: d3	scaleEle_EtaR9	friends/others/scaleEle_EtaR9_d3-miniAOD_November2015.root
+Adding file: s1	smearEle_stochastic	friends/others/smearEle_stochastic_s1-miniAOD_highMass.root
+Adding file: s2	smearEle_stochastic	friends/others/smearEle_stochastic_s2-miniAOD_highMass.root
+Adding file: s3	smearEle_stochastic	friends/others/smearEle_stochastic_s3-miniAOD_highMass.root
+Adding file: s4	smearEle_stochastic	friends/others/smearEle_stochastic_s4-miniAOD_highMass.root
+Adding file: s1	smearerCat_scaleStep0_VeryhighMass	friends/smearerCat/smearerCat_scaleStep0_VeryhighMass_s1-miniAOD_highMass.root
+Adding file: s2	smearerCat_scaleStep0_VeryhighMass	friends/smearerCat/smearerCat_scaleStep0_VeryhighMass_s2-miniAOD_highMass.root
+Adding file: s3	smearerCat_scaleStep0_VeryhighMass	friends/smearerCat/smearerCat_scaleStep0_VeryhighMass_s3-miniAOD_highMass.root
+Adding file: s4	smearerCat_scaleStep0_VeryhighMass	friends/smearerCat/smearerCat_scaleStep0_VeryhighMass_s4-miniAOD_highMass.root
+Adding file: d1	smearerCat_scaleStep0_VeryhighMass	friends/smearerCat/smearerCat_scaleStep0_VeryhighMass_d1-miniAOD_highMass.root
+Adding file: d2	smearerCat_scaleStep0_VeryhighMass	friends/smearerCat/smearerCat_scaleStep0_VeryhighMass_d2-miniAOD_highMass.root
+Adding file: d3	smearerCat_scaleStep0_VeryhighMass	friends/smearerCat/smearerCat_scaleStep0_VeryhighMass_d3-miniAOD_highMass.root
+ - scaleEle_EtaR9	scaleEle_EtaR9	d1	127437
+ - selected	selected	d1	127437
+ - smearerCat_scaleStep0_VeryhighMass	smearerCat_scaleStep0_VeryhighMass	d1	127437
+ - scaleEle_EtaR9	scaleEle_EtaR9	d2	3645249
+ - selected	selected	d2	3645249
+ - smearerCat_scaleStep0_VeryhighMass	smearerCat_scaleStep0_VeryhighMass	d2	3645249
+ - scaleEle_EtaR9	scaleEle_EtaR9	d3	6041079
+ - selected	selected	d3	6041079
+ - smearerCat_scaleStep0_VeryhighMass	smearerCat_scaleStep0_VeryhighMass	d3	6041079
+ - selected	selected	s1	3723
+ - smearEle_stochastic	smearEle_stochastic	s1	3723
+ - smearerCat_scaleStep0_VeryhighMass	smearerCat_scaleStep0_VeryhighMass	s1	3723
+ - selected	selected	s2	15993
+ - smearEle_stochastic	smearEle_stochastic	s2	15993
+ - smearerCat_scaleStep0_VeryhighMass	smearerCat_scaleStep0_VeryhighMass	s2	15993
+ - selected	selected	s3	34355
+ - smearEle_stochastic	smearEle_stochastic	s3	34355
+ - smearerCat_scaleStep0_VeryhighMass	smearerCat_scaleStep0_VeryhighMass	s3	34355
+ - selected	selected	s4	10627
+ - smearEle_stochastic	smearEle_stochastic	s4	10627
+ - smearerCat_scaleStep0_VeryhighMass	smearerCat_scaleStep0_VeryhighMass	s4	10627
+In ZFitter.cpp, building names for your regions
+Inside ReadRegionsFromFile (in ZFitter.cpp)
+Reading file data/regions/scaleStep0_VeryhighMass.dat
+Inside ReadRegionsFromFile (in ZFitter.cpp)
+Reading file 
+Regions are EB-invMass_500_2000
+Regions are EE-invMass_500_2000
+check this EB-invMass_500_2000-Et_35-noPF
+check this EE-invMass_500_2000-Et_35-noPF
+[STATUS] In ZFitter.cpp, creating pileup weighting tree and saving it
+********* runMin = 0	pufileMC_tot.root
+Inside src/puWeights_class 
+[STATUS] Reading PU histograms from files: /afs/cern.ch/work/g/gfasanel/CMSSW_7_4_15/src/Calibration/ZFitter/pufileMC_tot.root	/afs/cern.ch/work/g/gfasanel/CMSSW_7_4_15/src/Calibration/ZFitter/pufileData_tot.root
+[STATUS] In ZFitter.cpp, creating a tree with per-event-weight
+[STATUS] In ZFitter.cpp, creating a tree with per-event-weight
+[STATUS] In ZFitter.cpp, creating a tree with per-event-weight
+[STATUS] In ZFitter.cpp, creating a tree with per-event-weight
+Inside GetTreeWeight
+[WARNING] nPU > nPU max for 3723 times
+[STATUS] In ZFitter.cpp, creating a tree with per-event-weight
+Inside GetTreeWeight
+[WARNING] nPU > nPU max for 19716 times
+[STATUS] In ZFitter.cpp, creating a tree with per-event-weight
+Inside GetTreeWeight
+[WARNING] nPU > nPU max for 54071 times
+[STATUS] In ZFitter.cpp, creating a tree with per-event-weight
+Inside GetTreeWeight
+[WARNING] nPU > nPU max for 64698 times
+------------------------------------------------------------
+[STATUS] Getting energy smearings from file: 
+[STATUS] Adding friend branch: scaleEle_EtaR9 to tag d1
+[STATUS] Adding friend branch: smearerCat_scaleStep0_VeryhighMass to tag d1
+[STATUS] Adding friend branch: scaleEle_EtaR9 to tag d2
+[STATUS] Adding friend branch: smearerCat_scaleStep0_VeryhighMass to tag d2
+[STATUS] Adding friend branch: scaleEle_EtaR9 to tag d3
+[STATUS] Adding friend branch: smearerCat_scaleStep0_VeryhighMass to tag d3
+[STATUS] Adding friend branch: pileup to tag s1
+[STATUS] Adding friend branch: smearEle_stochastic to tag s1
+[STATUS] Adding friend branch: smearerCat_scaleStep0_VeryhighMass to tag s1
+[STATUS] Adding friend branch: pileup to tag s2
+[STATUS] Adding friend branch: smearEle_stochastic to tag s2
+[STATUS] Adding friend branch: smearerCat_scaleStep0_VeryhighMass to tag s2
+[STATUS] Adding friend branch: pileup to tag s3
+[STATUS] Adding friend branch: smearEle_stochastic to tag s3
+[STATUS] Adding friend branch: smearerCat_scaleStep0_VeryhighMass to tag s3
+[STATUS] Adding friend branch: pileup to tag s4
+[STATUS] Adding friend branch: smearEle_stochastic to tag s4
+[STATUS] Adding friend branch: smearerCat_scaleStep0_VeryhighMass to tag s4
+==============================
+==============================
+s	s1	pileup	0x33d91e0	s1
+s	s1	selected	0x31c5ae0	s1
+s	s1	smearEle_stochastic	0x344bc30	s1
+s	s1	smearerCat_scaleStep0_VeryhighMass	0x344ef10	s1
+s	s2	pileup	0x3497ed0	s2
+s	s2	selected	0x31c5e10	s2
+s	s2	smearEle_stochastic	0x341af00	s2
+s	s2	smearerCat_scaleStep0_VeryhighMass	0x343d6b0	s2
+s	s3	pileup	0x34a2e10	s3
+s	s3	selected	0x3438d90	s3
+s	s3	smearEle_stochastic	0x341b670	s3
+s	s3	smearerCat_scaleStep0_VeryhighMass	0x3455930	s3
+s	s4	pileup	0x34dac20	s4
+s	s4	selected	0x34389c0	s4
+s	s4	smearEle_stochastic	0x344e190	s4
+s	s4	smearerCat_scaleStep0_VeryhighMass	0x341fd60	s4
+[STATUS] Adding friend branch: pileup to tag s
+[STATUS] Adding friend branch: smearEle_stochastic to tag s
+[STATUS] Adding friend branch: smearerCat_scaleStep0_VeryhighMass to tag s
+d	d1	scaleEle_EtaR9	0x344af90	d1
+d	d1	selected	0x7ca740	d1
+d	d1	smearerCat_scaleStep0_VeryhighMass	0x341d410	d1
+d	d2	scaleEle_EtaR9	0x344d130	d2
+d	d2	selected	0x2c16490	d2
+d	d2	smearerCat_scaleStep0_VeryhighMass	0x344f210	d2
+d	d3	scaleEle_EtaR9	0x344c4c0	d3
+d	d3	selected	0x31c5830	d3
+d	d3	smearerCat_scaleStep0_VeryhighMass	0x344fe30	d3
+[STATUS] Adding friend branch: scaleEle_EtaR9 to tag d
+[STATUS] Adding friend branch: smearerCat_scaleStep0_VeryhighMass to tag d
+------------------------------ Initial parameters
+scale_EE-invMass_500_2000-Et_35-noPF =  1.0000 +/- 0.0050000 L(0.95 - 1.05) // [GeV]
+scale_EB-invMass_500_2000-Et_35-noPF =  1.0000 +/- 0.0050000 L(0.95 - 1.05) // [GeV]
+constTerm_EE-invMass_500_2000-Et_35-noPF =  0.0000 +/- 0.030000 L(0 - 0.05) 
+constTerm_EB-invMass_500_2000-Et_35-noPF =  0.0000 +/- 0.030000 L(0 - 0.05) 
+alpha_EE-invMass_500_2000-Et_35-noPF =  0.0000 +/- 0.010000 C L(0 - 0.2) 
+alpha_EB-invMass_500_2000-Et_35-noPF =  0.0000 +/- 0.010000 C L(0 - 0.2) 
+ElectronCategory_class energy is energySCEle_corr
+Inside ElectronCategory_class::GetBranchNameNtuple
+Inside ElectronCategory_class::GetCutSet
+Region is EB-invMass_500_2000-Et_35-noPF
+Inside ElectronCategory_class::GetBranchNameNtuple
+Inside ElectronCategory_class::GetCutSet
+Region is EE-invMass_500_2000-Et_35-noPF
+In ZFitter.cpp this is the list of the activeBranchList
+[STATUS] This branch will be enabled: energySCEle_corr
+[STATUS] This branch will be enabled: etaEle
+[STATUS] This branch will be enabled: etaSCEle
+[STATUS] This branch will be enabled: invMass_SC_corr
+[STATUS] This branch will be enabled: recoFlagsEle
+[STATUS] Initializing fitter in bin/ZFitter.cpp
+nBins = 20	20
+RooRealVar::invMass_SC_corr = 90  L(80 - 100) B(10000) // [GeV/c^{2}]
+[SETTING SIGNAL PDF]: BW and CB convolution
+[SETTING] model = only signal
+After initializing ZFit_class
+[INFO] Setting fit type to 1
+[SETTING SIGNAL PDF]: BW and CB convolution
+[SETTING] model = only signal
+[STATUS] Parsing the arguments
+***********************************************
+***********************************************
+[INFO] Preliminary info:
+[INFO] # of variables for category: 2
+[INFO] var 0
+[INFO] targetVariable is: ptRatio
+[INFO] targetVariable_min is: 0.5
+[INFO] targetVariable_max is: 2
+[INFO] targetVariable_binWidth is: 0.001
+[INFO] Number of bins between min and max is: 1499
+[INFO] var 1
+[INFO] targetVariable is: pt2Sum
+[INFO] targetVariable_min is: 0
+[INFO] targetVariable_max is: 900
+[INFO] targetVariable_binWidth is: 6
+[INFO] Number of bins between min and max is: 150
+***********************************************
+***********************************************
+[INFO] You are not running Toys
+scale_EE-invMass_500_2000-Et_35-noPF =  1.0000 +/- 0.0050000 L(0.95 - 1.05) // [GeV]
+scale_EB-invMass_500_2000-Et_35-noPF =  1.0000 +/- 0.0050000 L(0.95 - 1.05) // [GeV]
+constTerm_EE-invMass_500_2000-Et_35-noPF =  0.0000 +/- 0.030000 L(0 - 0.05) 
+constTerm_EB-invMass_500_2000-Et_35-noPF =  0.0000 +/- 0.030000 L(0 - 0.05) 
+alpha_EE-invMass_500_2000-Et_35-noPF =  0.0000 +/- 0.010000 C L(0 - 0.2) 
+alpha_EB-invMass_500_2000-Et_35-noPF =  0.0000 +/- 0.010000 C L(0 - 0.2) 
+[STATUS] In RooSmearer::Init
+[INFO] in RooSmearer::Init nEvents is 0
+[INfo] commonCut is Et_35-noPF
+mcToy is 0
+externToy is 1
+_isDataSmeared is 0
+------------------------------------------------------------
+[STATUS] Importing cache events in RooSmearer::SetCache
+[STATUS] in RooSmearer::SetCache nEvents is 0
+[STATUS] --- Setting cache for data in RooSmearer::SetCache
+[STATUS] Preparing the cache and activating branches in SmearingImporter::GetCache
+[STATUS] Activating branch scaleEle
+Inside ElectronCategory_class::GetBranchNameNtuple
+Inside ElectronCategory_class::GetCutSet
+Region is Et_35-noPF-eleID_cutBasedElectronID|Spring15|25ns|V1|standalone|loose-EB-invMass_500_2000-Et_35-noPF
+Inside ElectronCategory_class::GetBranchNameNtuple
+Inside ElectronCategory_class::GetCutSet
+Region is Et_35-noPF-eleID_cutBasedElectronID|Spring15|25ns|V1|standalone|loose-EE-invMass_500_2000-Et_35-noPF
+[STATUS] Setting entry list (commotCut screening): evList_d_all
+Inside ElectronCategory_class::GetCutSet
+Region is Et_35-noPF-eleID_cutBasedElectronID|Spring15|25ns|V1|standalone|loose
+[STATUS] Marking events if ((((eleID[0] & 0x20000)==0x20000)&&((eleID[1] & 0x20000)==0x20000))&&((energySCEle_corr[0] * scaleEle[0]/cosh(etaSCEle[0]) >= 35)&&(energySCEle_corr[1] * scaleEle[1]/cosh(etaSCEle[1]) >= 35)))&&(recoFlagsEle[0] > 1 && recoFlagsEle[1] > 1)
+Inside ElectronCategory_class::GetCutSet
+Region is Et_35-noPF-eleID_cutBasedElectronID|Spring15|25ns|V1|standalone|loose
+nEvents just before Import (smearingImporeter::GetCache) is 0
+[STATUS] Importing the events in SmearingImporter::Import
+_energyBranchName in SmearingImporter is energySCEle_corr
+[STATUS] Adding electron energy correction branch from friend
+[STATUS] Getting mcGenWeight branch for tree: d
+[STATUS] Getting smearerCat branch for tree: d
+[DEBUG] GetEntryList()->GetN() del chain in Import 851851
+Starting the loop in Import
+entries are 851851
+-1	0
+-1	0
+[INFO] Importing events: 24; events excluded by weight: 0
+Real time 0:05:23, CP time 34.490
+[STATUS] --- Setting cache for mc in RooSmearer::SetCache
+[STATUS] Preparing the cache and activating branches in SmearingImporter::GetCache
+[STATUS] Activating branch smearEle
+Inside ElectronCategory_class::GetBranchNameNtuple
+Inside ElectronCategory_class::GetCutSet
+Region is Et_35-noPF--EB-invMass_500_2000-Et_35-noPF
+Inside ElectronCategory_class::GetBranchNameNtuple
+Inside ElectronCategory_class::GetCutSet
+Region is Et_35-noPF--EE-invMass_500_2000-Et_35-noPF
+[STATUS] Setting entry list (commotCut screening): evList_s_all
+Inside ElectronCategory_class::GetCutSet
+Region is Et_35-noPF-
+[STATUS] Marking events if ((energySCEle_corr[0]/cosh(etaSCEle[0]) >= 35)&&(energySCEle_corr[1]/cosh(etaSCEle[1]) >= 35))&&(recoFlagsEle[0] > 1 && recoFlagsEle[1] > 1)
+Inside ElectronCategory_class::GetCutSet
+Region is Et_35-noPF-
+nEvents just before Import (smearingImporeter::GetCache) is 0
+[STATUS] Importing the events in SmearingImporter::Import
+_energyBranchName in SmearingImporter is energySCEle_corr
+[STATUS] Adding electron energy smearing branch from friend
+[STATUS] Getting puWeight branch for tree: s
+[STATUS] Getting mcGenWeight branch for tree: s
+[STATUS] Getting smearerCat branch for tree: s
+[DEBUG] GetEntryList()->GetN() del chain in Import 60791
+Starting the loop in Import
+entries are 60791
+-1	0
+-1	0
+[INFO] Importing events: 2229; events excluded by weight: 0
+Real time 0:00:09, CP time 1.560
+[DEBUG] RooSmearer::SetCache --> Data events size: 3
+[DEBUG] RooSmearer::SetCache --> MC events size: 3
+[STATUS] In RooSmearer::InitCategories 
+RooSmearer::GetNumberVariables() says 2
+Setting histo names in RooSmearer::InitCategories
+EB-invMass_500_2000-Et_35-noPF EB-invMass_500_2000-Et_35-noPF
+SetHisto in RooSmearer
+[src/RooSmearer.cc] Check if the category must be deactivated
+[INFO] Category: 0
+	EB-invMass_500_2000-Et_35-noPF	EB-invMass_500_2000-Et_35-noPF
+	0	0
+	20
+	1
+	1442
+	16
+	1
+	1499
+	1442
+	16
 
-Processing tmp/haddFiles.C...
-hadding TGraphs
-outFile is test/dato/ptRatio_pt2Sum/fitres/outProfile_ptRatio*pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-size is 50
-File considered is test/dato/ptRatio_pt2Sum/1/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/10/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/11/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/12/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/13/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/14/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/15/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/16/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/17/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/18/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/19/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/2/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/20/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/21/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/22/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/23/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/24/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/25/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/26/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/27/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/28/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/29/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/3/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/30/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/31/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/32/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/33/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/34/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/35/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/36/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/37/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/38/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/39/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/4/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/40/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/41/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/42/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/43/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/44/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/45/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/46/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/47/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/48/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/49/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/5/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/50/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/6/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/7/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/8/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-File considered is test/dato/ptRatio_pt2Sum/9/fitres/outProfile_ptRatio_pt2Sum_random_scaleStep0_Et_25_trigger_noPF.root
-[STATUS] Making Likelihood plots
+	150
+	1442
+	16
 
-Processing tmp/fitProfiles_ptRatio*pt2Sum_random.C...
-EB_invMass_100_2000_Et_25_trigger_noPF constTerm	50
-Getting mean graph in macro/FitProfile2
-[INFO] n = 1513
-Calling macro_fit.C/MeanGraphNew
-Removing point 0.0011	9	54
-Removing point 0.0012	8	54
-Removing point 0.0013	9	54
-Removing point 0.0014	8	54
-Removing point 0.0016	10	54
-Removing point 0.0017	10	54
-Removing point 0.0018	10	54
-Removing point 0.0019	10	54
-Removing point 0.0021	11	54
-Removing point 0.0022	11	54
-Removing point 0.0023	12	54
-Removing point 0.0024	12	54
-Removing point 0.0026	9	54
-Removing point 0.0027	9	54
-Removing point 0.0028	8	54
-Removing point 0.0029	8	54
-Removing point 0.0031	7	54
-Removing point 0.0032	6	54
-Removing point 0.0033	5	54
-Removing point 0.0034	5	54
-Removing point 0.0036	3	54
-Removing point 0.0037	3	54
-Removing point 0.0038	3	54
-Removing point 0.0039	3	54
-Removing point 0.0041	2	54
-Removing point 0.0042	2	54
-Removing point 0.0043	1	54
-Removing point 0.0044	1	54
-Removing point 0.0046	1	54
-Removing point 0.0047	1	54
-Removing point 0.0048	1	54
-Removing point 0.0049	1	54
-Removing point 0.0055	13	54
-Removing point 0.006	13	54
-Removing point 0.0065	9	54
-Removing point 0.007	5	54
-Removing point 0.0075	3	54
-Removing point 0.008	1	54
-Removing point 0.0085	1	54
-[STATUS] Fitting iteratively for minumum and error estimation with macro_fit.C::IterMinimumFit
-adjusting ranges around 0.0001
-[FIT STATUS]: Preliminary fit to pol2. Range is [0,0.045]
- FCN=32288 FROM MIGRAD    STATUS=CONVERGED      55 CALLS          56 TOTAL
-                     EDM=1.12149e-16    STRATEGY= 1      ERROR MATRIX ACCURATE 
-  EXT PARAMETER                                   STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0           4.45074e+00   4.79277e-02   3.21526e-03   1.38605e-07
-   2  p1          -6.48241e+03   3.36187e+01   1.45905e+00   8.60216e-10
-   3  p2           1.11435e+06   1.22871e+03   6.00771e+01   1.99832e-11
-[INFO] Init parameters for asym fit------------------------------
-        minX: 0.0001
-        sigma: 0.000669844
-[FIT STATUS] Iter: 0 : Fit range: [ 0 : 0.045]
- FCN=2976.21 FROM MIGRAD    STATUS=CONVERGED     237 CALLS         238 TOTAL
-                     EDM=4.26437e-08    STRATEGY= 1  ERROR MATRIX UNCERTAINTY   1.6 per cent
-  EXT PARAMETER                                   STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0           8.91604e-01   3.72252e-02  -7.41691e-07   8.34109e-01
-   2  p1           7.84632e-03   3.29694e-05   1.80874e-07   1.09013e+00
-   3  p2           0.00000e+00   5.91477e+01   7.01036e-07** at limit **
-   4  p3           1.54394e+06   3.65250e+03  -1.94456e-08  -2.55592e+01
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[FIT STATUS] Iter: 1 : Fit range: [ 0 : 0.35]
- FCN=2976.21 FROM MIGRAD    STATUS=CONVERGED     128 CALLS         129 TOTAL
-                     EDM=3.73368e-09    STRATEGY= 1      ERROR MATRIX ACCURATE 
-  EXT PARAMETER                                   STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0           8.91597e-01   3.67485e-02   9.76363e-06  -1.84026e-01
-   2  p1           7.84632e-03   3.26712e-05   5.27845e-06   2.26586e-01
-   3  p2           0.00000e+00   5.90391e+01   4.09448e-06** at limit **
-   4  p3           1.54394e+06   3.63316e+03   7.37164e-07  -4.97692e+00
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-ITER to converge = 2
-[STATUS] Calling Plot of macro_fit.C
-[STATUS] You are plotting EB_invMass_100_2000_Et_25_trigger_noPF
-fun->GetXmin()-4.5*sigma -0.00321465
-fun->GetXmin()+4.5*sigma 0.0102854
-In Plot: range x is [0,0.05]
-fun->GetXmin() 0.00353535
-RooRealVar::constTerm_EB_invMass_100_2000_Et_25_trigger_noPF = 0.00784632 +/- inf  L(-INF - 0.00841539) 
-Shift = 0.007846 + 0.000569 - inf
-EE_invMass_100_2000_Et_25_trigger_noPF constTerm	50
-Getting mean graph in macro/FitProfile2
-[INFO] n = 1384
-Calling macro_fit.C/MeanGraphNew
-Removing point 0.001100	1	51
-Removing point 0.001200	2	51
-Removing point 0.001300	2	51
-Removing point 0.001400	2	51
-Removing point 0.001600	3	51
-Removing point 0.001700	3	51
-Removing point 0.001800	3	51
-Removing point 0.001900	3	51
-Removing point 0.002100	3	51
-Removing point 0.002200	3	51
-Removing point 0.002300	3	51
-Removing point 0.002400	3	51
-Removing point 0.002600	2	51
-Removing point 0.002700	2	51
-Removing point 0.002800	2	51
-Removing point 0.002900	2	51
-Removing point 0.003100	2	51
-Removing point 0.003200	1	51
-Removing point 0.003300	1	51
-Removing point 0.003400	1	51
-Removing point 0.005500	3	51
-Removing point 0.006000	3	51
-Removing point 0.006500	2	51
-Removing point 0.007000	1	51
-[STATUS] Fitting iteratively for minumum and error estimation with macro_fit.C::IterMinimumFit
-adjusting ranges around 0.000000
-[FIT STATUS]: Preliminary fit to pol2. Range is [0.000000,0.045000]
- FCN=3424.03 FROM MIGRAD    STATUS=CONVERGED      53 CALLS          54 TOTAL
-                     EDM=8.91191e-20    STRATEGY= 1      ERROR MATRIX ACCURATE 
-  EXT PARAMETER                                   STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0           1.58294e+00   3.43393e-02   8.41437e-04  -1.35110e-08
-   2  p1          -1.06625e+03   3.26279e+01   4.27987e-01  -1.06253e-11
-   3  p2           4.25828e+05   1.07473e+03   1.48295e+01  -2.29987e-13
-[INFO] Init parameters for asym fit------------------------------
-        minX: 0.001252
-        sigma: 0.001084
-[FIT STATUS] Iter: 0 : Fit range: [ 0.000000 : 0.045000]
- FCN=1982.68 FROM MIGRAD    STATUS=CONVERGED     162 CALLS         163 TOTAL
-                     EDM=4.11077e-07    STRATEGY= 1  ERROR MATRIX UNCERTAINTY   2.4 per cent
-  EXT PARAMETER                                   STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0           1.44979e+00   2.95457e-02   6.47674e-07   6.22967e-01
-   2  p1           3.46274e-03   7.96170e-05   8.04030e-06  -8.42115e-01
-   3  p2           3.27516e-05   1.20834e+02  -2.78148e-06** at limit **
-   4  p3           4.86228e+05   2.44529e+03   1.55352e-07   4.80086e+01
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[FIT STATUS] Iter: 1 : Fit range: [ 0.000000 : 0.043533]
- FCN=1884.52 FROM MIGRAD    STATUS=CONVERGED     120 CALLS         121 TOTAL
-                     EDM=5.23799e-07    STRATEGY= 1      ERROR MATRIX ACCURATE 
-  EXT PARAMETER                                   STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0           1.42872e+00   2.99285e-02   6.24466e-06  -2.54629e+00
-   2  p1           2.91070e-03   9.83233e-05   1.60226e-05  -2.22907e-01
-   3  p2           5.55112e-07   1.69285e+02   5.51731e-06** at limit **
-   4  p3           4.64226e+05   3.21851e+03   7.42516e-07   2.89982e+00
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-ITER to converge = 2
-[STATUS] Calling Plot of macro_fit.C
-[STATUS] You are plotting EE_invMass_100_2000_Et_25_trigger_noPF
-fun->GetXmin()-4.5*sigma -0.003839
-fun->GetXmin()+4.5*sigma 0.009661
-In Plot: range x is [0.000000,0.050000]
-fun->GetXmin() 0.002911
-RooRealVar::constTerm_EE_invMass_100_2000_Et_25_trigger_noPF = 0.002911 +/- 474.531847  L(-949.059746 - 0.003949) 
-Shift = 0.002911 + 0.001038 - 949.062656
-EB_invMass_100_2000_Et_25_trigger_noPF scale	50
-Getting mean graph in macro/FitProfile2
-[INFO] n = 2347
-Calling macro_fit.C/MeanGraphNew
-Removing point 0.992200	1	57
-Removing point 0.992500	1	57
-Removing point 0.992700	2	57
-Removing point 0.992800	3	57
-Removing point 0.992900	2	57
-Removing point 0.993000	2	57
-Removing point 0.993100	7	57
-Removing point 0.993200	6	57
-Removing point 0.993300	6	57
-Removing point 0.993400	8	57
-Removing point 0.993500	8	57
-Removing point 0.993600	10	57
-Removing point 0.993700	9	57
-Removing point 0.993800	10	57
-Removing point 0.993900	8	57
-Removing point 0.994000	11	57
-Removing point 0.994100	10	57
-Removing point 0.994200	9	57
-Removing point 0.994300	10	57
-Removing point 0.994400	8	57
-Removing point 0.994500	11	57
-Removing point 0.994600	10	57
-Removing point 0.994700	9	57
-Removing point 0.994800	10	57
-Removing point 0.994900	8	57
-Removing point 0.995100	10	57
-Removing point 0.995200	9	57
-Removing point 0.995300	10	57
-Removing point 0.995400	8	57
-Removing point 0.995500	13	57
-Removing point 0.995600	10	57
-Removing point 0.995700	9	57
-Removing point 0.995800	10	57
-Removing point 0.995900	8	57
-Removing point 0.996000	13	57
-Removing point 0.996100	10	57
-Removing point 0.996200	9	57
-Removing point 0.996300	10	57
-Removing point 0.996400	8	57
-Removing point 0.996500	13	57
-Removing point 0.996600	10	57
-Removing point 0.996700	10	57
-Removing point 0.996800	11	57
-Removing point 0.996900	9	57
-Removing point 0.997000	15	57
-Removing point 0.997100	12	57
-Removing point 0.997200	11	57
-Removing point 0.997300	16	57
-Removing point 0.997400	16	57
-Removing point 0.999100	17	57
-Removing point 0.999200	12	57
-Removing point 0.999300	13	57
-Removing point 0.999400	8	57
-Removing point 0.999500	15	57
-Removing point 0.999600	12	57
-Removing point 0.999700	11	57
-Removing point 0.999800	12	57
-Removing point 0.999900	10	57
-Removing point 1.000100	12	57
-Removing point 1.000200	11	57
-Removing point 1.000300	12	57
-Removing point 1.000400	8	57
-Removing point 1.000500	13	57
-Removing point 1.000600	10	57
-Removing point 1.000700	9	57
-Removing point 1.000800	10	57
-Removing point 1.000900	8	57
-Removing point 1.001000	13	57
-Removing point 1.001100	10	57
-Removing point 1.001200	9	57
-Removing point 1.001300	10	57
-Removing point 1.001400	8	57
-Removing point 1.001500	13	57
-Removing point 1.001600	10	57
-Removing point 1.001700	9	57
-Removing point 1.001800	10	57
-Removing point 1.001900	8	57
-Removing point 1.002000	13	57
-Removing point 1.002100	10	57
-Removing point 1.002200	8	57
-Removing point 1.002300	10	57
-Removing point 1.002400	6	57
-Removing point 1.002500	11	57
-Removing point 1.002600	3	57
-Removing point 1.002700	3	57
-Removing point 1.002800	4	57
-Removing point 1.003000	5	57
-Removing point 1.003500	5	57
-Removing point 1.004000	2	57
-[STATUS] Fitting iteratively for minumum and error estimation with macro_fit.C::IterMinimumFit
-[FIT STATUS]: Preliminary fit to pol2. Range is [0.960000,1.040000]
- FCN=25127 FROM HESSE     STATUS=NOT POSDEF     16 CALLS         117 TOTAL
-                     EDM=1.27451e-15    STRATEGY= 1      ERR MATRIX NOT POS-DEF
-  EXT PARAMETER                APPROXIMATE        STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0           2.28185e+06   6.51378e-01   5.44035e-01   7.55748e-07
-   2  p1          -4.57132e+06   6.53048e-01   1.08989e+00   6.84910e-07
-   3  p2           2.28948e+06   6.53538e-01   5.45854e-01   7.22202e-07
-[INFO] Init parameters for asym fit------------------------------
-        minX: 0.998400
-        sigma: 0.000467
-[FIT STATUS] Iter: 0 : Fit range: [ 0.960000 : 1.040000]
- FCN=17968.2 FROM MIGRAD    STATUS=CONVERGED     118 CALLS         119 TOTAL
-                     EDM=8.01281e-08    STRATEGY= 1      ERROR MATRIX ACCURATE 
-  EXT PARAMETER                                   STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0          -1.12832e+00   5.78231e-02   2.86209e-05   5.99510e-02
-   2  p1           9.97510e-01   1.11078e-05   7.66148e-06   2.93812e+00
-   3  p2           2.50031e+06   2.79219e+03   7.33934e-07   3.06494e+01
-   4  p3           2.15901e+06   1.71389e+03   7.35001e-07  -3.03801e+01
-[FIT STATUS] Iter: 1 : Fit range: [ 0.990802 : 1.002322]
- FCN=16.6271 FROM MIGRAD    STATUS=CONVERGED     146 CALLS         147 TOTAL
-                     EDM=1.0472e-07    STRATEGY= 1  ERROR MATRIX UNCERTAINTY   5.3 per cent
-  EXT PARAMETER                                   STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0           8.64171e-02   4.74215e-02   4.57074e-08  -7.89365e-01
-   2  p1           9.98377e-01   3.34725e-05  -1.04639e-06   6.00278e-02
-   3  p2           2.39420e+06   6.33272e+04   3.86651e-07   4.16188e-01
-   4  p3           2.47670e+06   1.67621e+05   1.28261e-07  -4.82728e-01
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-ITER to converge = 2
-[STATUS] Calling Plot of macro_fit.C
-[STATUS] You are plotting EB_invMass_100_2000_Et_25_trigger_noPF
-In Plot: range x is [0.996549,1.000205]
-8.000000
-8.275679
-1.811237
-6.621887
-In Plot: range y is [-1.086417,8.275679]
-RooRealVar::scale_EB_invMass_100_2000_Et_25_trigger_noPF = 0.998377 +/- 0.000453  L(0.997920 - 0.998826) 
-Shift = 0.998377 + 0.000449 - 0.000457
-EE_invMass_100_2000_Et_25_trigger_noPF scale	50
-Getting mean graph in macro/FitProfile2
-[INFO] n = 2285
-Calling macro_fit.C/MeanGraphNew
-Removing point 0.995900	1	58
-Removing point 0.996400	2	58
-Removing point 0.996600	1	58
-Removing point 0.996700	1	58
-Removing point 0.996900	3	58
-Removing point 0.997100	1	58
-Removing point 0.997200	1	58
-Removing point 0.997300	1	58
-Removing point 0.997400	6	58
-Removing point 0.997500	2	58
-Removing point 0.997600	1	58
-Removing point 0.997700	4	58
-Removing point 0.997800	1	58
-Removing point 0.997900	8	58
-Removing point 0.998000	5	58
-Removing point 0.998100	2	58
-Removing point 0.998200	6	58
-Removing point 0.998300	2	58
-Removing point 0.998400	9	58
-Removing point 0.998500	9	58
-Removing point 0.998600	5	58
-Removing point 0.998700	9	58
-Removing point 0.998800	4	58
-Removing point 0.998900	9	58
-Removing point 0.999000	9	58
-Removing point 0.999100	6	58
-Removing point 0.999200	11	58
-Removing point 0.999300	5	58
-Removing point 0.999400	11	58
-Removing point 0.999500	12	58
-Removing point 0.999600	7	58
-Removing point 0.999700	12	58
-Removing point 0.999800	5	58
-Removing point 0.999900	11	58
-Removing point 1.000100	7	58
-Removing point 1.000200	12	58
-Removing point 1.000300	5	58
-Removing point 1.000400	11	58
-Removing point 1.000500	14	58
-Removing point 1.000600	8	58
-Removing point 1.000700	13	58
-Removing point 1.000800	6	58
-Removing point 1.000900	11	58
-Removing point 1.001000	17	58
-Removing point 1.001100	9	58
-Removing point 1.001200	15	58
-Removing point 1.001300	8	58
-Removing point 1.001400	13	58
-Removing point 1.001600	10	58
-Removing point 1.001700	15	58
-Removing point 1.001800	8	58
-Removing point 1.001900	14	58
-Removing point 1.002100	14	58
-Removing point 1.002300	13	58
-Removing point 1.002400	17	58
-Removing point 1.004100	17	58
-Removing point 1.004300	15	58
-Removing point 1.004600	14	58
-Removing point 1.004800	10	58
-Removing point 1.004900	13	58
-Removing point 1.005100	8	58
-Removing point 1.005200	13	58
-Removing point 1.005300	6	58
-Removing point 1.005400	11	58
-Removing point 1.005500	15	58
-Removing point 1.005600	10	58
-Removing point 1.005700	15	58
-Removing point 1.005800	8	58
-Removing point 1.005900	11	58
-Removing point 1.006000	15	58
-Removing point 1.006100	8	58
-Removing point 1.006200	13	58
-Removing point 1.006300	7	58
-Removing point 1.006400	8	58
-Removing point 1.006500	15	58
-Removing point 1.006600	6	58
-Removing point 1.006700	11	58
-Removing point 1.006800	4	58
-Removing point 1.006900	5	58
-Removing point 1.007000	13	58
-Removing point 1.007100	6	58
-Removing point 1.007200	8	58
-Removing point 1.007300	4	58
-Removing point 1.007400	3	58
-Removing point 1.007500	10	58
-Removing point 1.007600	5	58
-Removing point 1.007700	6	58
-Removing point 1.007800	3	58
-Removing point 1.007900	2	58
-Removing point 1.008000	6	58
-Removing point 1.008100	2	58
-Removing point 1.008200	3	58
-Removing point 1.008300	1	58
-Removing point 1.008400	2	58
-Removing point 1.008500	6	58
-Removing point 1.008600	1	58
-Removing point 1.008700	1	58
-Removing point 1.009000	3	58
-Removing point 1.009500	3	58
-[STATUS] Fitting iteratively for minumum and error estimation with macro_fit.C::IterMinimumFit
-[FIT STATUS]: Preliminary fit to pol2. Range is [0.960000,1.040000]
- FCN=1880.32 FROM HESSE     STATUS=NOT POSDEF     16 CALLS         153 TOTAL
-                     EDM=2.12555e-07    STRATEGY= 1      ERR MATRIX NOT POS-DEF
-  EXT PARAMETER                APPROXIMATE        STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0           1.15455e+06   1.50108e+00   2.75265e-01   6.45995e-03
-   2  p1          -2.30244e+06   1.50065e+00   5.48945e-01   6.48139e-03
-   3  p2           1.14791e+06   1.49116e+00   2.73682e-01   6.50400e-03
-[INFO] Init parameters for asym fit------------------------------
-        minX: 1.003600
-        sigma: 0.000660
-[FIT STATUS] Iter: 0 : Fit range: [ 0.960000 : 1.040000]
- FCN=184.008 FROM MIGRAD    STATUS=CONVERGED     118 CALLS         119 TOTAL
-                     EDM=1.3315e-07    STRATEGY= 1      ERROR MATRIX ACCURATE 
-  EXT PARAMETER                                   STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0           7.53243e-01   1.09556e-01   6.70646e-06   2.09251e-01
-   2  p1           1.00404e+00   3.11746e-05   2.06322e-06   7.20979e-01
-   3  p2           1.06052e+06   2.25305e+03   7.39193e-07  -1.23684e+00
-   4  p3           1.28595e+06   3.79572e+03   7.38199e-07  -2.32601e+01
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[FIT STATUS] Iter: 1 : Fit range: [ 0.993743 : 1.030278]
- FCN=42.2591 FROM MIGRAD    STATUS=CONVERGED      85 CALLS          86 TOTAL
-                     EDM=1.25113e-07    STRATEGY= 1      ERROR MATRIX ACCURATE 
-  EXT PARAMETER                                   STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0           9.32499e-01   1.06045e-01   3.26180e-06  -5.02955e-02
-   2  p1           1.00372e+00   4.70144e-05   1.60454e-06   7.56562e-01
-   3  p2           1.16158e+06   2.31976e+04   7.38735e-07   1.20558e+00
-   4  p3           1.24395e+06   6.62155e+03   7.38377e-07  -1.63225e+01
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-[WARNING] Incrementing ranges by 20% because less than 10 points in range
-ITER to converge = 2
-[STATUS] Calling Plot of macro_fit.C
-[STATUS] You are plotting EE_invMass_100_2000_Et_25_trigger_noPF
-In Plot: range x is [1.001096,1.006344]
-7.999999
-8.567263
-6.796467
-3.278104
-In Plot: range y is [-1.932499,8.567263]
-RooRealVar::scale_EE_invMass_100_2000_Et_25_trigger_noPF = 1.003720 +/- 0.000645  L(1.003064 - 1.004354) 
-Shift = 1.003720 + 0.000634 - 0.000656
-RooArgSet:: = (constTerm_EB_invMass_100_2000_Et_25_trigger_noPF,constTerm_EE_invMass_100_2000_Et_25_trigger_noPF,scale_EB_invMass_100_2000_Et_25_trigger_noPF,scale_EE_invMass_100_2000_Et_25_trigger_noPF)
+RooSmearer::GetNumberVariables() says 2
+Setting histo names in RooSmearer::InitCategories
+EB-invMass_500_2000-Et_35-noPF EE-invMass_500_2000-Et_35-noPF
+SetHisto in RooSmearer
+[src/RooSmearer.cc] Check if the category must be deactivated
+[INFO] Category: 1
+	EB-invMass_500_2000-Et_35-noPF	EE-invMass_500_2000-Et_35-noPF
+	0	1
+	20
+	1
+	574
+	6
+	1
+	1499
+	574
+	6
+
+	150
+	574
+	6
+
+RooSmearer::GetNumberVariables() says 2
+Setting histo names in RooSmearer::InitCategories
+EE-invMass_500_2000-Et_35-noPF EE-invMass_500_2000-Et_35-noPF
+SetHisto in RooSmearer
+[src/RooSmearer.cc] Check if the category must be deactivated
+[INFO] Category: 2
+	EE-invMass_500_2000-Et_35-noPF	EE-invMass_500_2000-Et_35-noPF
+	1	1
+	20
+	1
+	213
+	2
+	1
+	1499
+	213
+	2
+
+	150
+	213
+	2
+
+TFile: name=tmp/outside_init.root, title=, option=CREATE
+in RooSmearer _isDataSmeared is 0
+TFile: name=tmp/outside_init2.root, title=, option=CREATE
+[INFO] In RooSmearer::Init ==> Time for first eval: 
+Real time 0:00:00, CP time 0.000
+Real time 0:00:00, CP time 0.000
+[DUMP NLL] Cat1	Cat2	NLL	Nevt mc	Nevt data	isActive	Nevt mc	Nevt data
+[DUMP NLL] 0 0	131.9238003	1442	16	0	1442	16
+[DUMP NLL] 0 1	58.4315124	574	6	0	574	6
+[DUMP NLL] 1 1	20.05887427	213	2	0	213	2
+************************************************
+************************************************
+[INFO] minimType is profile
+************************************************
+************************************************
+[INFO] Info from bin/ZFitter.cpp ==> Likelihood Minimization time: 	
+Real time 0:00:00, CP time 0.000
+[INFO] in bin/ZFitter.cpp: Saving the histograms
+TFile: name=test/dato/fitres/histos_ptRatio_pt2Sum_random_scaleStep0_VeryhighMass_Et_35_noPF.root, title=, option=CREATE
+[INFO] Total elapsed time: Real time 0:05:39, CP time 41.030
+[STATUS] DESTROY ZFitter

@@ -63,6 +63,7 @@ public:
   bool _roofitNameAsNtuple;
   TString energyBranchName;
   bool _corrEle;
+  bool _smearEle;
   //------------------------------ 
   TCut GetCut(TString region, bool isMC, int nEle=0, bool corrEle=false); ///< Returns the TCut correspoding to the categories
 

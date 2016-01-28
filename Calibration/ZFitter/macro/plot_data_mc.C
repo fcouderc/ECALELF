@@ -114,7 +114,7 @@ void PlotCanvas(TCanvas *c, TH1F *mc, TH1F *data, TH1F *mcSmeared){
 
 
 
-void Plot(TCanvas *c, TH1F *data, TH1F *mc, TH1F *mcSmeared=NULL, TLegend *legend=NULL, TString region="", TString filename="",  TString energy="8 TeV", TString lumi="", bool ratio=true){
+void Plot(TCanvas *c, TH1F *data, TH1F *mc, TH1F *mcSmeared=NULL, TLegend *legend=NULL, TString region="", TString filename="",  TString energy="", TString lumi="", bool ratio=true){
 
   c->Clear();
   TPad * pad1 = new TPad("pad1", "pad1",0.00,0.25, 1,1.);  
@@ -125,7 +125,6 @@ void Plot(TCanvas *c, TH1F *data, TH1F *mc, TH1F *mcSmeared=NULL, TLegend *legen
   float xscale=1;
   std::cout<<"Starting plotting. Method Plot of plot_data_mc.C"<<endl;
   if(ratio){
-
 
   pad1->SetRightMargin(0.15);
   pad1->SetBottomMargin(0.01);
@@ -163,13 +162,23 @@ void Plot(TCanvas *c, TH1F *data, TH1F *mc, TH1F *mcSmeared=NULL, TLegend *legen
   mc->SetFillColor(kRed);
   
   mc->Draw();
-  
+  std::cout<<"MC name is"<<mc->GetTitle()<<std::endl;
+  double x_min=0.;
+  double x_max=2.;
   if(mc->GetXaxis()->GetXmax()<3){
     mc->GetXaxis()->SetTitle("ptRatio");
+    x_min=0.5;
+    x_max=1.5;
+    mc->GetXaxis()->SetRangeUser(x_min,x_max);
   }else if(mc->GetXaxis()->GetXmax()<150){
     mc->GetXaxis()->SetTitle("M_{ee} (GeV/c^{2})");
   }else if(mc->GetXaxis()->GetXmax()>150){
     mc->GetXaxis()->SetTitle("pt2Sum (GeV/c^{2})");
+    x_min=20;
+    //x_max=120;//Mee>100
+    x_max=300;//Mee>200
+    //x_max=800;//Mee>500
+    mc->GetXaxis()->SetRangeUser(x_min,x_max);
   }
 
   char ylabel[100];
@@ -184,10 +193,19 @@ void Plot(TCanvas *c, TH1F *data, TH1F *mc, TH1F *mcSmeared=NULL, TLegend *legen
   
   mcSmeared->SetLineWidth(3);
   TH1* mcSmeared_norm = mcSmeared->DrawNormalized("same hist",data->Integral());
- 
   data->Draw("E same");
 
-  
+  //TString mc_title=mc->GetXaxis()->GetTitle();
+  //if(mc_title=="ptRatio"){
+  //  mc->GetXaxis()->SetLimits(0.5,1.5);
+  //  data->GetXaxis()->SetLimits(0.5,1.5);
+  //  mcSmeared_norm->GetXaxis()->SetLimits(0.5,1.5);
+  //}else{
+  //  mc->GetXaxis()->SetLimits(20,120);
+  //  data->GetXaxis()->SetLimits(20,120);
+  //  mcSmeared_norm->GetXaxis()->SetLimits(20,120);
+  //}
+
   legend->Clear();
   legend->AddEntry(mc,"MC","f");
   legend->AddEntry(mcSmeared,"MC smeared","l");
@@ -216,58 +234,60 @@ void Plot(TCanvas *c, TH1F *data, TH1F *mc, TH1F *mcSmeared=NULL, TLegend *legen
   //  legend->SetFillColor(0); // colore di riempimento bianco
   legend->SetMargin(0.4);  // percentuale della larghezza del simbolo
   //    SetLegendStyle(legend);
+  
+  legend->SetBorderSize(0);
+  legend->SetFillColor(0);
+  legend->SetFillStyle(1001);
+  legend->Draw();
+  
+  
+  if(ratio){
+    TH1F *sRatio = (TH1F*) data->Clone("sRatio");
+    sRatio->Divide(mcSmeared_norm);
     
-    legend->SetBorderSize(0);
-    legend->SetFillColor(0);
-    legend->SetFillStyle(1001);
-    legend->Draw();
+    pad2->cd();
+    sRatio->Draw();
 
-
-    if(ratio){
-      TH1F *sRatio = (TH1F*) data->Clone("sRatio");
-      sRatio->Divide(mcSmeared_norm);
-
-      pad2->cd();
-      sRatio->Draw();
-
-      TGraphErrors *ratioGraph = new TGraphErrors(sRatio);
-      ratioGraph->SetMarkerColor(kBlue);
-      ratioGraph->Draw("AP");
-      ratioGraph->GetXaxis()->SetRangeUser(data->GetXaxis()->GetXmin(),data->GetXaxis()->GetXmax());//To set limits correctly               
-      ratioGraph->GetXaxis()->SetTitle(mc->GetXaxis()->GetTitle());
-      ratioGraph->GetYaxis()->SetTitle("Data/MC");
-      
-      ratioGraph->GetYaxis()->SetTitleSize(sRatio->GetYaxis()->GetTitleSize()*yscale);
-      //ratioGraph->GetYaxis()->SetTitleOffset(sRatio->GetYaxis()->GetTitleOffset()/yscale);
-      ratioGraph->GetYaxis()->SetTitleOffset(0.3);
-      ratioGraph->GetYaxis()->SetLabelSize(sRatio->GetYaxis()->GetLabelSize()*yscale);
-      ratioGraph->GetYaxis()->SetLabelOffset(sRatio->GetYaxis()->GetLabelOffset()*yscale);
-      ratioGraph->GetXaxis()->SetTitleSize(sRatio->GetYaxis()->GetTitleSize() *yscale   );
-      ratioGraph->GetXaxis()->SetTitleOffset(0.92);
-      ratioGraph->GetXaxis()->SetLabelSize(sRatio->GetYaxis()->GetLabelSize() *yscale   );
-      ratioGraph->GetXaxis()->SetLabelOffset(sRatio->GetYaxis()->GetLabelOffset());
-      
-      ratioGraph->GetYaxis()->SetRangeUser(1- 2*ratioGraph->GetRMS(2),1+2*ratioGraph->GetRMS(2));
-      ratioGraph->GetYaxis()->SetNdivisions(5);
-      
-      c->cd();
-    }
-
-    std::cout<<"Saving the plots"<<std::endl;
-    c->SaveAs(img_filename(filename, region, ".eps"));
-    c->SaveAs(img_filename(filename, region, ".png"));
-    c->SaveAs(img_filename(filename, region, ".C"));
-    delete mc;
-    mc=NULL;
-    delete data;
-    data=NULL;
-    delete mcSmeared;
-    mcSmeared=NULL;
+    TGraphErrors *ratioGraph = new TGraphErrors(sRatio);
+    ratioGraph->SetMarkerColor(kBlue);
+    ratioGraph->Draw("AP");
+    //ratioGraph->GetXaxis()->SetRangeUser(data->GetXaxis()->GetXmin(),data->GetXaxis()->GetXmax());//To set limits correctly               
+    //ratioGraph->GetXaxis()->SetRangeUser(mc->GetXaxis()->GetXmin(),mc->GetXaxis()->GetXmax());//To set limits correctly               
+    ratioGraph->GetXaxis()->SetRangeUser(x_min,x_max);//To set limits correctly               
+    ratioGraph->GetXaxis()->SetTitle(mc->GetXaxis()->GetTitle());
+    ratioGraph->GetYaxis()->SetTitle("Data/MC");
+    
+    ratioGraph->GetYaxis()->SetTitleSize(sRatio->GetYaxis()->GetTitleSize()*yscale);
+    //ratioGraph->GetYaxis()->SetTitleOffset(sRatio->GetYaxis()->GetTitleOffset()/yscale);
+    ratioGraph->GetYaxis()->SetTitleOffset(0.3);
+    ratioGraph->GetYaxis()->SetLabelSize(sRatio->GetYaxis()->GetLabelSize()*yscale);
+    ratioGraph->GetYaxis()->SetLabelOffset(sRatio->GetYaxis()->GetLabelOffset()*yscale);
+    ratioGraph->GetXaxis()->SetTitleSize(sRatio->GetYaxis()->GetTitleSize() *yscale   );
+    ratioGraph->GetXaxis()->SetTitleOffset(0.92);
+    ratioGraph->GetXaxis()->SetLabelSize(sRatio->GetYaxis()->GetLabelSize() *yscale   );
+    ratioGraph->GetXaxis()->SetLabelOffset(sRatio->GetYaxis()->GetLabelOffset());
+    
+    ratioGraph->GetYaxis()->SetRangeUser(1- 2*ratioGraph->GetRMS(2),1+2*ratioGraph->GetRMS(2));
+    ratioGraph->GetYaxis()->SetNdivisions(5);
+    
+    c->cd();
+  }
+  
+  std::cout<<"Saving the plots"<<std::endl;
+  c->SaveAs(img_filename(filename, region, ".eps"));
+  c->SaveAs(img_filename(filename, region, ".png"));
+  c->SaveAs(img_filename(filename, region, ".C"));
+  delete mc;
+  mc=NULL;
+  delete data;
+  data=NULL;
+  delete mcSmeared;
+  mcSmeared=NULL;
 }
 
 
 
-void PlotMeanHist(TString filename, TString energy="8TeV", TString lumi="", int rebin=0, TString myRegion=""){
+void PlotMeanHist(TString filename, TString energy="13 TeV", TString lumi="", int rebin=0, TString myRegion=""){
   
   TH2F eventFraction("eventFraction", "", 10, 0, 9, 10, 0, 9);
   int index_max=0;

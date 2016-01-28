@@ -58,7 +58,7 @@ typedef std::map< TString, chain_map_t > tag_chain_map_t;
 
 
 std::vector<TString> ReadRegionsFromFile(TString fileName){
-  std::cout<<"Inside ReadRegionsFromFile (in ZFitter.cpp"<<std::endl;
+  std::cout<<"Inside ReadRegionsFromFile (in ZFitter.cpp)"<<std::endl;
   std::cout<<"Reading file "<<fileName<<std::endl;
   ifstream file(fileName);
   std::vector<TString> regions;
@@ -178,6 +178,7 @@ std::string energyBranchNameFromInvMassName(std::string invMass_var){
   else if(invMass_var=="invMass_SC_regrCorr_pho") energyBranchName = "energySCEle_regrCorr_pho";
   else if(invMass_var=="invMass_regrCorr_fra") energyBranchName = "energyEle_regrCorr_fra";
   else if(invMass_var=="invMass_regrCorr_egamma") energyBranchName = "energyEle_regrCorr_egamma";
+  else if(invMass_var=="invMass") energyBranchName = "energyEle";
   else if(invMass_var=="invMass_SC") energyBranchName = "energySCEle";
   else if(invMass_var=="invMass_SC_corr") energyBranchName = "energySCEle_corr";
   else if(invMass_var=="invMass_SC_regrCorrSemiParV4_ele") energyBranchName = "energySCEle_regrCorrSemiParV4_ele";
@@ -234,7 +235,8 @@ int main(int argc, char **argv) {
   std::string initFileName;
   //  bool savePUweightTree;
   std::string imgFormat="eps", outDirFitResMC="test/MC/fitres", outDirFitResData="test/dato/fitres", outDirImgMC="test/MC/img", outDirImgData="test/dato/img", outDirTable="test/dato/table", selection;
-  TString eleID="";
+  //TString eleID="";
+  TString eleID="cutBasedElectronID|Spring15|25ns|V1|standalone|";
   //std::vector<std::string> signalFiles, bkgFiles, dataFiles;
   std::string commonCut;
   std::string corrEleFile, corrEleType;
@@ -363,8 +365,8 @@ int main(int argc, char **argv) {
     ("plotOnly", "active if you don't want to do the smearing")
     ("profileOnly", "")
     ("numIter", po::value<unsigned int>(&nIter)->default_value(300), "number of MCMC steps")
-    ("nEventsMinDiag", po::value<unsigned int>(&nEventsMinDiag)->default_value(1000), "min num events in diagonal categories")
-    ("nEventsMinOffDiag", po::value<unsigned int>(&nEventsMinOffDiag)->default_value(2000), "min num events in off-diagonal categories")
+    ("nEventsMinDiag", po::value<unsigned int>(&nEventsMinDiag)->default_value(1), "min num events in diagonal categories")
+    ("nEventsMinOffDiag", po::value<unsigned int>(&nEventsMinOffDiag)->default_value(1), "min num events in off-diagonal categories")
     ("onlyScale",    "fix the smearing to constant")
     ("constTermFix", "constTerm not depending on Et")
     ("alphaGoldFix", "alphaTerm for gold electrons fixed to the low eta region")
@@ -764,7 +766,7 @@ int main(int argc, char **argv) {
       std::cerr << "[ERROR] Nor pileup mc tree configured in chain list file either dataPU histograms are not provided" << std::endl;
       return 1;
     }else if( !vm.count("runToy") && (vm.count("dataPU")!=0 || (!dataPUFileNameVec.empty() && ((tagChainMap.count("s")==0) || (tagChainMap["s"]).count("pileup")==0)))){
-      std::cout << "[STATUS] Creating pileup weighting tree and saving it" << std::endl;
+      std::cout << "[STATUS] In ZFitter.cpp, creating pileup weighting tree and saving it" << std::endl;
       for(unsigned int i=0; i < mcPUFileNameVec.size(); i++){
 	TString mcPUFileName_=mcPUFileNameVec[i];
 	TString dataPUFileName_=dataPUFileNameVec[i];
@@ -787,6 +789,8 @@ int main(int argc, char **argv) {
       for(tag_chain_map_t::const_iterator tag_chain_itr=tagChainMap.begin();
 	  tag_chain_itr!=tagChainMap.end();
 	  tag_chain_itr++){
+
+	std::cout<<"[STATUS] In ZFitter.cpp, creating a tree with per-event-weight"<<std::endl;
 	if(tag_chain_itr->first.CompareTo("s")==0 || !tag_chain_itr->first.Contains("s")) continue;
 	TChain *ch = (tag_chain_itr->second.find("selected"))->second;
 	if((tag_chain_itr->second.count("pileup"))) continue;
@@ -1727,24 +1731,26 @@ int main(int argc, char **argv) {
     std::cout<<"***********************************************"<<std::endl;
 
     if(vm.count("runToy")){
-	  smearer.SetPuWeight(false);
-	  smearer.SetToyScale(1, constTermToy);
-
-	  //if(vm.count("initFile")) {smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"), true,initFileName.c_str());}
-	  //else {smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"));}//ORIGINAL. That "true" is bool externToy (it doesn't make sense)
-	  if(vm.count("initFile")) {smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"), false,initFileName.c_str());}
-	  else {smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"));}
-
-	  std::cout << "[DEBUG] " << constTermToy << std::endl;
-	} else{//not runToy
-	  if(vm.count("initFile")){
-	    std::cout << "[INFO] Reading init file: " << initFileName << std::endl;
-	    args.readFromFile(initFileName.c_str());
-	  }
-	  args.writeToStream(std::cout, kFALSE);
-	  smearer.Init(commonCut.c_str(), eleID);
-	}
-
+      std::cout<<"[INFO] You are running Toys"<<std::endl;
+      smearer.SetPuWeight(false);
+      smearer.SetToyScale(1, constTermToy);
+      
+      //if(vm.count("initFile")) {smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"), true,initFileName.c_str());}
+      //else {smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"));}//ORIGINAL. That "true" is bool externToy (it doesn't make sense)
+      if(vm.count("initFile")) {smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"), false,initFileName.c_str());}
+      else {smearer.Init(commonCut.c_str(), eleID, nEventsPerToy, vm.count("runToy"));}
+      
+      std::cout << "[DEBUG] " << constTermToy << std::endl;
+    } else{//not runToy
+      std::cout<<"[INFO] You are not running Toys"<<std::endl;
+      if(vm.count("initFile")){
+	std::cout << "[INFO] Reading init file: " << initFileName << std::endl;
+	args.readFromFile(initFileName.c_str());
+      }
+      args.writeToStream(std::cout, kFALSE);
+      smearer.Init(commonCut.c_str(), eleID);
+    }
+    
 	myClock.Start();
 	smearer.evaluate();
 	myClock.Stop();
@@ -1757,7 +1763,7 @@ int main(int argc, char **argv) {
 	std::cout<<"[INFO] minimType is "<<minimType<<std::endl;
 	std::cout<<"************************************************"<<std::endl;
 	std::cout<<"************************************************"<<std::endl;
-	int data_index=1;
+	int data_index=18;
 	std::string data_index_string;
 	if(data_index <1000){
 	  data_index_string=std::to_string(data_index);
@@ -1822,8 +1828,11 @@ int main(int argc, char **argv) {
 	  //Saving histos plots
 	  std::cout<<"[INFO] in bin/ZFitter.cpp: Saving the histograms"<<std::endl;
 
-	  //TFile *f = new TFile(outDirFitResData+"/histos_"+full_variable+configuration+"_"+r+"_"+TString(commonCut.c_str()).ReplaceAll("-","_")+".root", "recreate");
-	  TFile *f = new TFile(outDirFitResData+"/histos_"+full_variable+configuration+TString(data_index_string)+"_"+r+"_"+TString(commonCut.c_str()).ReplaceAll("-","_")+".root", "RECREATE");
+	  TFile *f = new TFile(outDirFitResData+"/histos_"+full_variable+configuration+"_"+r+"_"+TString(commonCut.c_str()).ReplaceAll("-","_")+".root", "RECREATE");
+	  if(vm.count("runToy")){
+	      TFile *f = new TFile(outDirFitResData+"/histos_"+full_variable+configuration+TString(data_index_string)+"_"+r+"_"+TString(commonCut.c_str()).ReplaceAll("-","_")+".root", "RECREATE");
+	    }
+
 	  f->Print();
 	  f->cd();
 
@@ -1849,7 +1858,11 @@ int main(int argc, char **argv) {
 	  std::cout <<"==================Creating the profiles in bin/ZFitter.cpp (if you haven't minimized the likelihood, it doesn't do it for you. Minimization must be done before this point)=================="<<endl;
 	  //create profiles
 	  TString outFile=outDirFitResData.c_str();
-	  outFile+="/outProfile_"+full_variable+configuration+TString(data_index_string)+"_";
+	  if(vm.count("runToy")){
+	      outFile+="/outProfile_"+full_variable+configuration+TString(data_index_string)+"_";
+	    }else{
+	      outFile+="/outProfile_"+full_variable+configuration+"_";
+	    }
 	  outFile+=r+"_"+TString(commonCut.c_str())+".root";
 	  outFile.ReplaceAll("-","_");
 	  TFile *fOutProfile = new TFile(outFile,"RECREATE");

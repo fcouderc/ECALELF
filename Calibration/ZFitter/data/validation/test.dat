@@ -1,5 +1,58 @@
-############### This file is equivalent to Winter13-powheg.dat but with new trees with trigger and new selection
-########### standard MC
-##### Madgraph
-#d1	scaleEle_HggRunEta	ciao.root
-#d1      smearerCat_validation data/smearerCat/smearerCat_scaleStep4smearing_2_d1-22Jan2012-runDepMC.root
+# list of files to run on
+# type	treeName	fileName
+# files are added to the same chain if they have the same treeName and the same type
+# chain with the same type are added as friends
+# only three type are admitted: s (signal), b (bkg), d (data)
+# all treeName are admitted, but some are mandatory:
+# selected
+# some are special: pileup, scaleEleHggRunEta, scaleEleHggRunEtaR9
+
+#05 Oct rereco per RunC, Prompt per RunD
+#golden + silver json
+d1     selected	    root://eoscms//eos/cms/store/group/dpg_ecal/alca_ecalcalib/ecalelf/ntuples/13TeV/MINIAODNTUPLE/74X_dataRun2_Prompt_v4/DoubleEG-ZSkim-Run2015C-rereco05Oct2015-MINIAOD/254227-255031/246908-260627-Prompt_25ns-v1-golden_silver/unmerged-allRange-miniAOD.root
+d2     selected    root://eoscms//eos/cms/store/group/dpg_ecal/alca_ecalcalib/ecalelf/ntuples/13TeV/MINIAODNTUPLE/74X_dataRun2_Prompt_v4/DoubleEG-ZSkim-Run2015D-Prompt-v3-25nsReco-MINIAOD/256584-258158/246908-260627-Prompt_25ns-v1-golden_silver/unmerged-allRange-miniAOD.root
+d3     selected    root://eoscms//eos/cms/store/group/dpg_ecal/alca_ecalcalib/ecalelf/ntuples/13TeV/MINIAODNTUPLE/74X_dataRun2_Prompt_v4/DoubleEG-ZSkim-Run2015D-Prompt-v4-25nsReco-MINIAOD/258159-260737/246908-260627-Prompt_25ns-v1-golden_silver/unmerged-allRange-miniAOD.root
+
+s1     selected		    root:://eoscms//eos/cms/store/group/dpg_ecal/alca_ecalcalib/ecalelf/ntuples/13TeV/MINIAODNTUPLE/74X_mcRun2_asymptotic_v2/DYJets_amctnlo-RunIISpring15MiniAODv2-Asym25ns-miniAOD/allRange/DYJets_amctnlo-RunIISpring15MiniAODv2-Asym25ns-miniAOD-allRange-miniAOD.root
+s2     selected		    root:://eoscms//eos/cms/store/group/dpg_ecal/alca_ecalcalib/ecalelf/ntuples/13TeV/MINIAODNTUPLE/74X_mcRun2_asymptotic_v2/DYJets_madgraph-RunIISpring15MiniAODv2-Asym25ns-miniAOD/allRange/DYJets_madgraph-RunIISpring15MiniAODv2-Asym25ns-miniAOD-allRange-miniAOD.root
+#s3     selected		    root:://eoscms//eos/cms/store/group/dpg_ecal/alca_ecalcalib/ecalelf/ntuples/13TeV/MINIAODNTUPLE/74X_mcRun2_asymptotic_v2/DYToEE_powheg-RunIISpring15MiniAODv2-Asym25ns-miniAOD/allRange/DYToEE_powheg-RunIISpring15MiniAODv2-Asym25ns-miniAOD-allRange-miniAOD.root
+#s4     selected		    root:://eoscms//eos/cms/store/group/dpg_ecal/alca_ecalcalib/ecalelf/ntuples/13TeV/MINIAODNTUPLE/74X_mcRun2_asymptotic_v2/DYToEE_amcatnlo-RunIISpring15MiniAODv2-Asym25ns-miniAOD/allRange/DYToEE_amcatnlo-RunIISpring15MiniAODv2-Asym25ns-miniAOD-allRange-miniAOD.root
+
+#d	pileupHist	 /afs/cern.ch/work/g/gfasanel/CMSSW_7_4_15/src/Calibration/ZFitter/pufileData_tot.root
+#s	pileupHist	 /afs/cern.ch/work/g/gfasanel/CMSSW_7_4_15/src/Calibration/ZFitter/pufileMC_tot.root
+
+s1	pileup		 data/pu/mc/mcPUtrees1.root
+s2	pileup		 data/pu/mc/mcPUtrees2.root
+#s3	pileup		 data/pu/mc/mcPUtrees3.root
+
+
+s1      smearerCat_scaleStep0_highMass     friends/smearerCat/smearerCat_scaleStep0_highMass_s1-miniAOD_November2015.root
+s2      smearerCat_scaleStep0_highMass     friends/smearerCat/smearerCat_scaleStep0_highMass_s2-miniAOD_November2015.root
+#s3      smearerCat_scaleStep0_highMass     friends/smearerCat/smearerCat_scaleStep0_highMass_s3-miniAOD_November2015.root
+#s4      smearerCat_scaleStep0_highMass     friends/smearerCat/smearerCat_scaleStep0_highMass_s4-miniAOD_November2015.root
+d1      smearerCat_scaleStep0_highMass     friends/smearerCat/smearerCat_scaleStep0_highMass_d1-miniAOD_November2015.root
+d2      smearerCat_scaleStep0_highMass     friends/smearerCat/smearerCat_scaleStep0_highMass_d2-miniAOD_November2015.root
+d3      smearerCat_scaleStep0_highMass     friends/smearerCat/smearerCat_scaleStep0_highMass_d3-miniAOD_November2015.root
+
+s1      smearerCat_scaleStep0_mediumMass    friends/smearerCat/smearerCat_scaleStep0_mediumMass_s1-miniAOD_November2015.root
+s2      smearerCat_scaleStep0_mediumMass    friends/smearerCat/smearerCat_scaleStep0_mediumMass_s2-miniAOD_November2015.root
+#s3      smearerCat_scaleStep0_mediumMass    friends/smearerCat/smearerCat_scaleStep0_mediumMass_s3-miniAOD_November2015.root
+d1      smearerCat_scaleStep0_mediumMass    friends/smearerCat/smearerCat_scaleStep0_mediumMass_d1-miniAOD_November2015.root
+d2      smearerCat_scaleStep0_mediumMass    friends/smearerCat/smearerCat_scaleStep0_mediumMass_d2-miniAOD_November2015.root
+d3      smearerCat_scaleStep0_mediumMass    friends/smearerCat/smearerCat_scaleStep0_mediumMass_d3-miniAOD_November2015.root
+
+
+#s1      smearerCat_scaleStep0     friends/smearerCat/smearerCat_scaleStep0_s1-miniAOD_November2015.root
+#s2      smearerCat_scaleStep0    friends/smearerCat/smearerCat_scaleStep0_s2-miniAOD_November2015.root
+#s3      smearerCat_scaleStep0    friends/smearerCat/smearerCat_scaleStep0_s3-miniAOD_November2015.root
+#s4      smearerCat_scaleStep0    friends/smearerCat/smearerCat_scaleStep0_s4-miniAOD_November2015.root
+#d1      smearerCat_scaleStep0    friends/smearerCat/smearerCat_scaleStep0_d1-miniAOD_November2015.root
+#d2      smearerCat_scaleStep0    friends/smearerCat/smearerCat_scaleStep0_d2-miniAOD_November2015.root
+#d3      smearerCat_scaleStep0    friends/smearerCat/smearerCat_scaleStep0_d3-miniAOD_November2015.root
+
+d1      scaleEle_EtaR9            friends/others/scaleEle_EtaR9_d1-miniAOD_November2015.root
+d2      scaleEle_EtaR9            friends/others/scaleEle_EtaR9_d2-miniAOD_November2015.root
+d3      scaleEle_EtaR9            friends/others/scaleEle_EtaR9_d3-miniAOD_November2015.root
+s1      smearEle_stochastic     friends/others/smearEle_stochastic_s1-miniAOD_November2015.root
+s2      smearEle_stochastic     friends/others/smearEle_stochastic_s2-miniAOD_November2015.root
+#s3      smearEle_stochastic     friends/others/smearEle_stochastic_s3-miniAOD_November2015.root

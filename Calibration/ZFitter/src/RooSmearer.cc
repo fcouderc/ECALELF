@@ -68,6 +68,7 @@ void RooSmearer::SetCache(Long64_t nEvents, bool cacheToy, bool externToy){
   //regions_cache_t GetCache(TChain *_chain, bool isMC, bool odd, Long64_t nEvents=0, bool isToy=false, bool externToy=true, TString targetVariable="invMass");
   std::cout << "------------------------------------------------------------" << std::endl;
   std::cout << "[STATUS] Importing cache events in RooSmearer::SetCache" << std::endl;
+  std::cout << "[STATUS] in RooSmearer::SetCache nEvents is " <<nEvents<< std::endl;
 
   if(data_events_cache.empty()){
     if(cacheToy){
@@ -93,10 +94,10 @@ void RooSmearer::SetCache(Long64_t nEvents, bool cacheToy, bool externToy){
   }
 
 
-#ifdef DEBUG
-  std::cout << "[DEBUG] Data events size:" << data_events_cache.size() << std::endl;
-  std::cout << "[DEBUG] MC events size:" << data_events_cache.size() << std::endl;
-#endif
+  //#ifdef DEBUG
+    std::cout << "[DEBUG] RooSmearer::SetCache --> Data events size: " << data_events_cache.size() << std::endl;
+    std::cout << "[DEBUG] RooSmearer::SetCache --> MC events size: " << data_events_cache.size() << std::endl;
+    //#endif
 
   return;
 }
@@ -172,37 +173,41 @@ void RooSmearer::InitCategories(bool mcToy){ //bool mcToy not used before
       }
       cat.smearHist_data[0]->SaveAs("tmp/after"+cat.categoryName1+cat.categoryName2+".root");
 
-      std::cout<<"Check if the category must be deactivated"<<std::endl;
+      std::cout<<"[src/RooSmearer.cc] Check if the category must be deactivated"<<std::endl;
       //------------------------------ deactivating category in case a targetVariable has few events/bad shape (a shoulder)
       cat.active=true;
-      unsigned int deactiveMinEvents = 1000; //_deactive_minEventsDiag;
-      for(int var=0;var<cat.GetNumberVariables();var++){
-	if(cat.categoryIndex1 != cat.categoryIndex2) // not diagonal category
-	  deactiveMinEvents=1500; //_deactive_minEventsOffDiag;
-	if(cat.hist_mc[var]->Integral() < deactiveMinEvents){
-	  std::cout << "[INFO] Category: " << ZeeCategories.size() 
-		    << ": " << cat.categoryName1 << "\t" << cat.categoryName2
-		    << " has been deactivated (nEvents < "; 
-	  if(cat.categoryIndex1 != cat.categoryIndex2) std::cout << _deactive_minEventsOffDiag << ")";
-	  else std::cout << _deactive_minEventsDiag << ")";
-	  std::cout << " nEvents mc targetVariable: " << cat.hist_mc[var]->Integral()
-		    << std::endl;
-	  cat.active=false;
-	}     
-	//shoulder check
-	float max=(cat.hist_mc[var])->GetMaximum();
-	float left=(cat.hist_mc[var])->GetBinContent(1);
-	float right=(cat.hist_mc[var])->GetBinContent((cat.hist_mc[var])->GetNbinsX());
-	//if(targetVariable_=="invMass"){
-	//deactivate for high shoulder (irregular shape)
-	if((right - left)/max > 0.2 || (left - right)/max > 0.4){
-	  cat.active=false;
-	  std::cout << "[INFO] Category: " << ZeeCategories.size() 
-		    << ": " << cat.categoryName1 << "\t" << cat.categoryName2
-		    << " has been deactivated for high shoulder (in the MC distribution): " << right << " " << left << " " << max 
-		    << std::endl;
-	}
-      }//end loop deactivate cat
+      //LOOP DEACTIVATING CATEGORY
+      //unsigned int deactiveMinEvents = 1000; 
+      //unsigned int deactiveMinEvents = 1;
+      //r(int var=0;var<cat.GetNumberVariables();var++){
+      //if(cat.categoryIndex1 != cat.categoryIndex2) // not diagonal category
+      //  //deactiveMinEvents=1500; //_deactive_minEventsOffDiag;
+      //if(cat.hist_mc[var]->Integral() < deactiveMinEvents){
+      //  std::cout<<"[INFO] Not enough MC!: "<<cat.hist_mc[var]->Integral()<<std::endl;
+      //  std::cout << "[INFO] Category: " << ZeeCategories.size() 
+      //	    << ": " << cat.categoryName1 << "\t" << cat.categoryName2
+      //	    << " has been deactivated (nEvents < "; 
+      //  if(cat.categoryIndex1 != cat.categoryIndex2) std::cout << _deactive_minEventsOffDiag << ")";
+      //  else std::cout << _deactive_minEventsDiag << ")";
+      //  std::cout << " nEvents mc targetVariable: " << cat.hist_mc[var]->Integral()
+      //	    << std::endl;
+      //  cat.active=false;
+      //}     
+
+      //shoulder check
+//	float max=(cat.hist_mc[var])->GetMaximum();
+//	float left=(cat.hist_mc[var])->GetBinContent(1);
+//	float right=(cat.hist_mc[var])->GetBinContent((cat.hist_mc[var])->GetNbinsX());
+//	//if(targetVariable_=="invMass"){
+//	//deactivate for high shoulder (irregular shape)
+//	if((right - left)/max > 0.2 || (left - right)/max > 0.4){
+//	  cat.active=false;
+//	  std::cout << "[INFO] Category: " << ZeeCategories.size() 
+//		    << ": " << cat.categoryName1 << "\t" << cat.categoryName2
+//		    << " has been deactivated for high shoulder (in the MC distribution): " << right << " " << left << " " << max 
+//		    << std::endl;
+//	}
+//      }//end loop deactivate cat
 
       if (_autoBin){
 	AutoNBins(cat);
@@ -324,11 +329,11 @@ void RooSmearer::SetHisto(const zee_events_t& cache, std::vector<TH1F *> hist) c
       event_itr++){
     for(int var=0;var<hist.size();var++){
       hist[var]->Fill(event_itr->targetVariable[var],event_itr->weight);
-      //if(event_itr->targetVariable[var]<0.5){//Because they must be swapped
-      //	std::cout<<"hei, pt leading is "<<event_itr->pt2<<std::endl;
-      //	std::cout<<"hei, pt subleading is "<<event_itr->pt1<<std::endl;
-      //	std::cout<<"hei, energy leading is "<<event_itr->energy_ele2<<std::endl;
-      //	std::cout<<"hei, energy subleading is "<<event_itr->energy_ele1<<std::endl;
+      //if(event_itr->targetVariable[1]<40){
+      //std::cout<<"hei, pt 2 is "<<event_itr->pt2<<std::endl;
+      //std::cout<<"hei, pt 1 is "<<event_itr->pt1<<std::endl;
+      //std::cout<<"hei, energy 2 is "<<event_itr->energy_ele2<<std::endl;
+      //std::cout<<"hei, energy 1 is "<<event_itr->energy_ele1<<std::endl;
       //
       //}
     }
@@ -477,13 +482,14 @@ double RooSmearer::getLogLikelihood(std::vector<TH1F*> data, std::vector<TH1F*> 
       {
 	
 	if(prob[var]->GetBinContent(ibin)==0 && data[var]->GetBinContent(ibin)!=0){
+	  //PENALTY TERM
 	  //flag_empty=1;
 	  logL+=data[var]->GetBinContent(ibin)* ROOT::Math::Util::EvalLog(1./(prob[var]->GetBinContent(0)));//underflows contains the MC normalization (initial)
 	  //std::cout<<"probabilita' era zero ****"<<std::endl;
 	  //std::cout<<"normalization "<<prob[var]->GetBinContent(0)<<std::endl;
 	  //std::cout<<"1 over is "<<(1./prob[var]->GetBinContent(0))<<std::endl;
 	  //std::cout<<"contribution is "<<data[var]->GetBinContent(ibin)* ROOT::Math::Util::EvalLog(1./(prob[var]->GetBinContent(0)))<<std::endl;
-	}else if(prob[var]->GetBinContent(ibin)!=0){
+	}else if(prob[var]->GetBinContent(ibin)>0){//less than zero if possible for mcGenWeight<0, but then ln(p) is a random rumber
 	  //double weight= 	(data[var]->GetBinContent(ibin)>0) ? data[var]->GetBinError(ibin) * data[var]->GetBinError(ibin) / data[var]->GetBinContent(ibin) : 1;
 	  double weight= 1.;
 	//	std::cout << "weight = " << weight << std::endl;
@@ -501,7 +507,7 @@ double RooSmearer::getLogLikelihood(std::vector<TH1F*> data, std::vector<TH1F*> 
 #endif
 	} 
       }
-  }// loop over var for each category
+  }// loop over var for each varible of the targetVariable
   //std::cout<<"In RooSmearer::getLogLikelihood, the negative loglikelihood of the specific category is "<<-logL<<std::endl;
 
   //if(flag_empty==1){
@@ -566,6 +572,7 @@ Double_t RooSmearer::evaluate() const
   //evaluate gives the chi2: i.e. the minimization parameter. The Chi2 is the sum of the NLL of the categories
   //update last result
   double comp_mean = getCompatibility();//comp_mean IS the chi2
+  //std::cout<<"Chi2 is "<<comp_mean<<std::endl;
   RooSmearer* myClass=(RooSmearer *) this;
   double weight=(nllBase*2-comp_mean);
   if(weight<0) weight=1;
@@ -971,6 +978,8 @@ void RooSmearer::SetNSmear(unsigned int n_smear, unsigned int nlltoy){
 
 void RooSmearer::Init(TString commonCut, TString eleID, Long64_t nEvents, bool mcToy, bool externToy, TString initFile){
   std::cout<<"[STATUS] In RooSmearer::Init"<<std::endl;
+  std::cout<<"[INFO] in RooSmearer::Init nEvents is "<<nEvents<<std::endl;
+  std::cout<<"[INfo] commonCut is "<<commonCut<<std::endl;
   std::cout<<"mcToy is "<<mcToy<<std::endl;
   if(mcToy) _isDataSmeared=!externToy; //mcToy;//externToy means that you have a root file with the corrections you want to apply
   std::cout<<"externToy is "<<externToy<<std::endl;

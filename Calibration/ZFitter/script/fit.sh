@@ -1,6 +1,9 @@
 ##Qui non fai haddTGraph per avere un .root file con tutti i vari profili che hai fatto
 ##Vuoi fittare un preciso .root file
 
+#Usage
+#./script/fit.sh test/dato/fitres/Stat_check/outProfile_ptRatio_pt2Sum_random1bis_scaleStep0_Et_25_trigger_noPF (senza .root alla fine)
+
 echo "[STATUS] Fitting NLL"
 echo "{" > tmp/my_fitProfile.C
 echo "gROOT->ProcessLine(\".include $ROOFITSYS/include\");" >> tmp/my_fitProfile.C

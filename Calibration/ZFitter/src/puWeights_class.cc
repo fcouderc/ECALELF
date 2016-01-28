@@ -102,6 +102,7 @@ void puWeights_class::ReadFromFile(std::string filename){
 
 void puWeights_class::ReadFromFiles(std::string mcPUFile, std::string dataPUFile, int runMin){
   PUWeightsRunDepMap_t::iterator weights_itr = PUWeightsRunDepMap.find(runMin);
+  std::cout<<"Inside src/puWeights_class "<<std::endl;
   if(weights_itr==PUWeightsRunDepMap.end()){
     PUweights_t PUWeights;
     weights_itr = (PUWeightsRunDepMap.insert(std::pair<int,PUweights_t>(runMin,PUWeights))).first;
@@ -205,6 +206,7 @@ void puWeights_class::ReadFromFiles(std::string mcPUFile, std::string dataPUFile
 // tree is the input MC tree
 // fastLoop = false if for any reason you don't want to change the branch status of the MC tree
 TTree *puWeights_class::GetTreeWeight(TChain *tree,  bool fastLoop, TString nPUbranchName){
+  std::cout<<"Inside GetTreeWeight"<<std::endl;
   TString runNumberBranchName="runNumber";
 
   Float_t weight=0;

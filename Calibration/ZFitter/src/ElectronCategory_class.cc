@@ -17,7 +17,9 @@ ElectronCategory_class::ElectronCategory_class(bool isRooFit_, bool roofitNameAs
   _roofitNameAsNtuple(roofitNameAsNtuple_),
   //energyBranchName("energySCEle_regrCorrSemiParV5_pho"),
   //energyBranchName("energySCEle"),
-  energyBranchName("energySCEle_regrCorrSemiParV5_ele"),
+  //energyBranchName("energySCEle_regrCorrSemiParV5_ele"),//The one I used in RUN1
+  energyBranchName("energySCEle_corr"),
+  _smearEle(false),
   _corrEle(false){
   //std::cout<<"Default energy branch name in ElectronCategory_class is "<<energyBranchName<<std::endl;
   return;
@@ -67,8 +69,10 @@ TCut ElectronCategory_class::GetCut(TString region, bool isMC, int nEle, bool co
       cut_string.ReplaceAll("invMass_var",invMassName);
       if(isMC==false && (corrEle || _corrEle)){//Data
       cut_string.ReplaceAll(invMassName,invMassName+"*sqrt(scaleEle_ele1 * scaleEle_ele2)");
-      }else if(isMC==true /*(smearEle || _smearEle)*/){//MC
+      }else if(isMC==true && _smearEle){//MC
 	cut_string.ReplaceAll(invMassName,invMassName+"*sqrt(smearEle_ele1 * smearEle_ele2)");
+      }else if (isMC==true){//MC, but no smearing
+	cut_string.ReplaceAll(invMassName,invMassName);
       }
     }
 
@@ -403,6 +407,22 @@ std::set<TString> ElectronCategory_class::GetCutSet(TString region){
 
 
     //--------------- ETA
+    if(string.Contains("DeltaEta")){
+      TObjArray *splitted = string.Tokenize("_");
+      if(splitted->GetEntries() < 2){
+	std::cerr << "ERROR: incomplete absEta region definition" << std::endl;
+	continue;
+      } 
+      TObjString *Objstring1 = (TObjString *) splitted->At(1);
+      
+      TString string1 = Objstring1->GetString();
+      
+      TCut Delta("abs(etaEle_ele1 - etaEle_ele2) <= "+string1);
+      cutSet.insert(TString(Delta));
+      delete splitted;
+      continue;
+    }
+
     if(string.Contains("absEta")){
       TObjArray *splitted = string.Tokenize("_");
       if(splitted->GetEntries() < 3){
@@ -782,6 +802,7 @@ std::set<TString> ElectronCategory_class::GetCutSet(TString region){
       else if(string1=="loose50nsRun2") string1="1024";
       else if(string1=="medium50nsRun2") string1="3072";
       else if(string1=="tight50nsRun2") string1="7168";
+      else if(string1=="cutBasedElectronID|Spring15|25ns|V1|standalone|loose") string1="0x20000";
 
       TCut cutEle1("(eleID_ele1 & "+string1+")=="+string1);
       TCut cutEle2("(eleID_ele2 & "+string1+")=="+string1);

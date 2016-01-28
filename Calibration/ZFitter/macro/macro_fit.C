@@ -942,6 +942,7 @@ void Plot(TCanvas *c, TGraphErrors *g, TF1 *fun, TPaveText *pt, bool isScale, bo
   cout<<"[STATUS] You are plotting "<<g->GetTitle()<<endl;
   //so, with the name of g you can change the plot style for a specific g
   gStyle->SetOptTitle(0);  
+  //gStyle->SetOptTitle(1);  
   //std::cout<<"fun->GetParameter(2) "<<fun->GetParameter(2)<<std::endl;
   //std::cout<<"fun->GetParameter(3) "<<fun->GetParameter(3)<<std::endl;
   float sigma=1./(sqrt(2* std::min(fun->GetParameter(2),fun->GetParameter(3)))); //asym Parabola
@@ -960,8 +961,10 @@ void Plot(TCanvas *c, TGraphErrors *g, TF1 *fun, TPaveText *pt, bool isScale, bo
     Double_t yMax = rangeWithPoints(g, 3, &xMin, &xMax);
     xMin=0.96;
     xMax=1.04;
-    xMin=std::max(fun->GetMinimumX()-4*sigma,0.96);
-    xMax=std::min(fun->GetMinimumX()+4*sigma,1.04);
+    xMin=std::max(fun->GetMinimumX()-6*sigma,0.96);//4*sigma
+    xMax=std::min(fun->GetMinimumX()+6*sigma,1.04);
+    //xMin=1.00;//by hand
+    //xMax=1.02;//
     yMin=TMath::MinElement(g->GetN(),g->GetY());
 
     std::cout<<"In Plot: range x is ["<<xMin<<","<<xMax<<"]"<<std::endl;
@@ -994,19 +997,43 @@ void Plot(TCanvas *c, TGraphErrors *g, TF1 *fun, TPaveText *pt, bool isScale, bo
     line_sigma->SetLineWidth(2);
     line_sigma->Draw();
   }else {//not scale
+    double xMin=0.0;
+    double xMax=0.045;
+    xMin=std::max(0.,fun->GetMinimumX()-1.5*sigma);//4*sigma
+    xMax=std::min(fun->GetMinimumX()+10*sigma,0.045);
+    //xMin=0.0;//by hand
+    xMax=0.045;//by hand
     double yMin=TMath::MinElement(g->GetN(),g->GetY());
+
+    std::cout<<"In Plot: range x is ["<<xMin<<","<<xMax<<"]"<<std::endl;
+    g->GetXaxis()->SetRangeUser(xMin,xMax);
+    //Settare la x in un grafico NON cambia i range in Y
+    int kmin=-1;
+    for(kmin=0; kmin<g->GetN(); kmin++){
+      if(g->GetX()[kmin]> xMin){//punto in x subito dopo xMin
+      break;}
+    }
+    int kmax=-1;
+    for(kmax=g->GetN() -1; kmax>0; kmax--){
+      if(g->GetX()[kmax]< xMax){//punto in x subito prima xMax
+      break;}
+    }
+    double ymax_set=std::max(fun->Eval(xMin),fun->Eval(xMax));
+    ymax_set=std::max(ymax_set,g->GetY()[kmin]);
+    ymax_set=std::max(ymax_set,g->GetY()[kmax]);
+    g->GetYaxis()->SetRangeUser(yMin -1,ymax_set);
+    //double yMin=TMath::MinElement(g->GetN(),g->GetY());
     //double xMin=std::max(fun->GetMinimumX()-4.5*sigma,0.);
     //double xMax= std::min(fun->GetMinimumX()+4.5*sigma,0.045);
-    double xMin=0;
-    double xMax=0.05;
-    std::cout<<"fun->GetXmin()-4.5*sigma "<<fun->GetMinimumX()-4.5*sigma<<std::endl;
-    std::cout<<"fun->GetXmin()+4.5*sigma "<<fun->GetMinimumX()+4.5*sigma<<std::endl;
-    std::cout<<"In Plot: range x is ["<<xMin<<","<<xMax<<"]"<<std::endl;
-    std::cout<<"fun->GetXmin() "<<fun->GetMinimumX()<<std::endl;
-    g->GetXaxis()->SetRangeUser(xMin,xMax);
+    //double xMin=0;
+    //double xMax=0.05;
+    //std::cout<<"fun->GetXmin()-4.5*sigma "<<fun->GetMinimumX()-4.5*sigma<<std::endl;
+    //std::cout<<"fun->GetXmin()+4.5*sigma "<<fun->GetMinimumX()+4.5*sigma<<std::endl;
+    //std::cout<<"In Plot: range x is ["<<xMin<<","<<xMax<<"]"<<std::endl;
+    //std::cout<<"fun->GetXmin() "<<fun->GetMinimumX()<<std::endl;
+    //g->GetXaxis()->SetRangeUser(xMin,xMax);
     //g->GetYaxis()->SetRangeUser(yMin-1, std::max(fun->Eval(xMin), fun->Eval(xMax)));
-    g->GetYaxis()->SetRangeUser(yMin-1,300);
-
+    //g->GetYaxis()->SetRangeUser(yMin-1,300);
     //cout<<"yMax is "<<std::max(fun->Eval(xMin),fun->Eval(xMax))<<endl;
     //cout<<"fun a xMin is "<<fun->Eval(xMin)<<endl;
     //cout<<"fun a xMax is "<<fun->Eval(xMax)<<endl;
@@ -1112,12 +1139,12 @@ void FitProfile2(TString filename, TString energy="8 TeV", TString lumi="", bool
   pt->SetTextSize(0.05);
   pt->SetFillColor(0);
   pt->SetBorderSize(0);
-  TPaveText pave(0.182,0.92,0.48,0.99, "ndc");
+  TPaveText pave(0.1,0.92,0.48,0.99, "ndc");
   pave.SetFillColor(0);
   pave.SetTextAlign(12);
   pave.SetBorderSize(0);
   pave.SetTextSize(0.04);
-  pave.AddText("CMS Preliminary");
+  pave.AddText("CMS Preliminary #sqrt{s}= 13 TeV L=2.4 fb^{-1}");
   //if(lumi.Sizeof()>1)  pave.AddText("#sqrt{s}="+energy+"   L="+lumi+" fb^{-1}");
   //else   pave.AddText("#sqrt{s}=8 TeV");
   //gPad->SetTopMargin(0.08391608);
@@ -1201,8 +1228,8 @@ void FitProfile2(TString filename, TString energy="8 TeV", TString lumi="", bool
       ffout << variable << " " <<  region  << " " 
 	    //<< fun->GetParameter(0) << " " 
 	    << fun->GetParameter(1) << " " 
-	    << 1./(sqrt(fun->GetParameter(2))) << " " 
-	    << 1./(sqrt(fun->GetParameter(3))) <<  std::endl;
+	    << 1./(sqrt(2*fun->GetParameter(2))) << " " 
+	    << 1./(sqrt(2*fun->GetParameter(3))) <<  std::endl;
 
       Plot(c, g, fun, pt, isScale, isPhi,variable);
       string title=g->GetTitle();

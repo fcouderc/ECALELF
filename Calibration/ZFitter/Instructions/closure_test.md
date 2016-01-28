@@ -33,6 +33,14 @@ test/dato/fitres/toys/scaleStep0/
 
 Nota che prima viene fatto il fit e poi il plot e che quindi il range del plot puo' NON coincidere con il range del fit
 
+Metti che vuoi vedere il risultato di un singolo fit, fai cosi'
+
+```
+root -l -b -q test/dato/fitres/toys/scaleStep0/0.00_0.00_0.99/EB/fitProfiles.C > debug_fit.txt
+cp test/dato/fitres/toys/scaleStep0/0.00_0.00_0.99/EB/*.png ~/scratch1/www/Pt1Pt2/closure_test/EB/
+emacs test/dato/fitres/toys/scaleStep0/0.00_0.00_0.99/EB/outProfile_ptRatio_pt2Sum_random_0.99_0.00_scaleStep0_Et_25_trigger_noPF-FitResult.config
+```
+
 
 Come hai fatto a scoprire il doppio minimo
 
