@@ -35,9 +35,9 @@ mv tmp/smearEle_Zcorr_s*-${file}.root friends/others/
 
 for tag in `grep "^d" data/validation/${file}.dat | grep selected | awk -F" " ' { print $1 } '`
 do  
-    echo "${tag} scale_Zcorr friends/others/scaleEle_Zcorr_${tag}-${file}.root" >> data/validation/${file}.dat 
+    echo "${tag} scaleEle_Zcorr friends/others/scaleEle_Zcorr_${tag}-${file}.root" >> data/validation/${file}.dat 
 done
 for tag in `grep "^s" data/validation/${file}.dat | grep selected | awk -F" " ' { print $1 } '`
 do
-    echo "${tag} smear_Zcorr friends/others/smearEle_Zcorr_${tag}-${file}.root" >> data/validation/${file}.dat 
+    echo "${tag} smearEle_Zcorr friends/others/smearEle_Zcorr_${tag}-${file}.root" >> data/validation/${file}.dat 
 done
