@@ -51,9 +51,9 @@ mv tmp/smearEle_${smear_corr_name}_s*-${file}.root friends/others/
 #
 for tag in `grep "^d" data/validation/${file}.dat | grep selected | awk -F" " ' { print $1 } '`
 do  
-    echo "${tag} ${scale_corr_name} friends/others/scaleEle_${scale_corr_name}_${tag}-${file}.root" >> data/validation/${file}.dat 
+    echo "${tag} scaleEle_${scale_corr_name} friends/others/scaleEle_${scale_corr_name}_${tag}-${file}.root" >> data/validation/${file}.dat 
 done
 for tag in `grep "^s" data/validation/${file}.dat | grep selected | awk -F" " ' { print $1 } '`
 do
-    echo "${tag} ${smear_corr_name} friends/others/smearEle_${smear_corr_name}_${tag}-${file}.root" >> data/validation/${file}.dat 
+    echo "${tag} smearEle_${smear_corr_name} friends/others/smearEle_${smear_corr_name}_${tag}-${file}.root" >> data/validation/${file}.dat 
 done
