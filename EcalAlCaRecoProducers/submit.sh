@@ -2,45 +2,46 @@
 
 #source ../initCmsEnvCRAB2.sh
 
+##createOnly -> submitOnly -> check
 #option=--createOnly
 #option=--submitOnly
 option=--check
 #To force the hadd of ntuple create the file "finished" in the res directory of your jobs
-#touch ...../res/finisched and then --chek again
+#touch ...../res/finished and then --chek again
 #option=--submit
 
 data(){
 ##DATI
 where=caf
-#where=remoteGlidein #for data use caf (datasets are at CERN)
-#json=/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt
-#json=/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-274240_13TeV_PromptReco_Collisions16_JSON.txt 
-json=/afs/cern.ch/work/g/gfasanel/80_ECALELF_ntuples_new/CMSSW_8_0_8/src/Calibration/EcalAlCaRecoProducers/json_files_2016/myJson_274241_274421.txt
-jsonName=274241-274421_golden
-jsonName=Golden_json_10June
-tag=config/reRecoTags/80X_dataRun2_Prompt_v8.py
+tag=config/reRecoTags/80X_dataRun2_Prompt_v9.py
+#where=remoteGlidein #if dataset is at CERN, use caf => much faster
+#json=/afs/cern.ch/work/g/gfasanel/80_ECALELF_ntuples_new/CMSSW_8_0_8/src/Calibration/EcalAlCaRecoProducers/json_files_2016/official_jsons/Cert_271036-277148_13TeV_PromptReco_Collisions16_JSON.txt
+json=/afs/cern.ch/work/g/gfasanel/80_ECALELF_ntuples_new/CMSSW_8_0_8/src/Calibration/EcalAlCaRecoProducers/json_files_2016/diff_10August_4August.txt 
+jsonName=GoldenJson_10August
+runMin=277166
+
 #
 
+parseDatasetFile.sh alcareco_datasets.dat | grep DoubleEG-Run2016E| grep ${runMin}
+#parseDatasetFile.sh alcareco_datasets.dat | grep DoubleEG-Run2016D| grep ${runMin}
 #while [ "1" == "1" ];do 
-    #v1 has no runs in the json
-./scripts/prodNtuples.sh `parseDatasetFile.sh alcareco_datasets.dat | grep DoubleEG-Run2016B-PromptReco-v2-miniAOD_10June| grep 274421` --type MINIAOD -t ${tag} --scheduler=${where} --json=${json} --json_name=${jsonName} $option
-
-
-    #sleep 20m
+#    #v1 has no runs in the json
+   ./scripts/prodNtuples.sh `parseDatasetFile.sh alcareco_datasets.dat | grep DoubleEG-Run2016E| grep ${runMin}` --type MINIAOD -t ${tag} --scheduler=${where} --json=${json} --json_name=${jsonName} $option -s noSkim
+#    sleep 5m
 #done
 
 }
 
 mc(){
-#while [ "1" == "1" ];do sleep 1h; 
-    where=remoteGlidein
-    #where=caf
+while [ "1" == "1" ];do  
+    #where=remoteGlidein
+    where=caf
     json=No_json_for_MC
-    tag_MC=config/reRecoTags/80X_mcRun2_asymptotic_2016_v3.py
-    ./scripts/prodNtuples.sh `parseDatasetFile.sh alcareco_datasets.dat | grep ZToEE_NNPDF30-powheg-Spring16` --type MINIAOD -t ${tag_MC} --json=${json} --json_name="RunII-2016" --scheduler=${where} ${option} --isMC
+    tag_MC=config/reRecoTags/80X_mcRun2_asymptotic_2016_miniAODv2_v0.py
+    ./scripts/prodNtuples.sh `parseDatasetFile.sh alcareco_datasets.dat | grep DYJetsToEE_M-50_LTbinned_5To75` --type MINIAOD -t ${tag_MC} --json=${json} --json_name="LT" --scheduler=${where} ${option} --isMC
     #./scripts/prodNtuples.sh `parseDatasetFile.sh alcareco_datasets.dat | grep DYToEE_NNPDF30_13TeV-powheg-pythia8` --type MINIAOD -t ${tag_MC} --json=${json} --json_name="RunII-2016" --scheduler=${where} ${option} --isMC
-#    sleep 20m
-#done    
+    sleep 5m
+done    
 
 }
 
