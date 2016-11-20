@@ -16,7 +16,9 @@ ElectronCategory_class::~ElectronCategory_class(){
 ElectronCategory_class::ElectronCategory_class(bool isRooFit_, bool roofitNameAsNtuple_):
   _isRooFit(isRooFit_),
   _roofitNameAsNtuple(roofitNameAsNtuple_),
-  energyBranchName("energyEle"),
+  energyBranchName("energySCEle_corr"),
+  //energyBranchName("energySCEle_pho_regrCorr"),
+  //energyBranchName("energySCEle_must_regrCorr_ele"),
   _corrEle(false){
 
   return;
@@ -762,7 +764,18 @@ std::set<TString> ElectronCategory_class::GetCutSet(TString region){
       } 
 
       TObjString *Objstring1 = (TObjString *) splitted->At(1);
+      //usually the cut is EtLeading_32, so string 1 is 32
       TString string1 = Objstring1->GetString();
+      
+      //Case mass dep: EtLeading_MassOver3
+      //string1 is MassOver3
+      TObjArray * splitted_string1 = string1.Tokenize("Over"); //In case you want a mass dep cut
+      TString ismass_dep = ((TObjString *) splitted_string1->At(0))->GetString();
+      if(ismass_dep=="Mass"){
+	std::cout<<"mass dep cut"<<std::endl;
+	TString fraction = ((TObjString *) splitted_string1->At(1))->GetString();
+	string1= "invMass_SC_pho_regrCorr/"+fraction;
+      }
       TCut cutEle1(""+energyBranchName+"_ele1/cosh(etaSCEle_ele1) >= "+"( "+energyBranchName+"_ele1/cosh(etaSCEle_ele1) >"+energyBranchName+"_ele2/cosh(etaSCEle_ele2) )*"+string1);
       TCut cutEle2(""+energyBranchName+"_ele2/cosh(etaSCEle_ele2) >= "+"( "+energyBranchName+"_ele2/cosh(etaSCEle_ele2) >"+energyBranchName+"_ele1/cosh(etaSCEle_ele1) )*"+string1);
 	
@@ -781,6 +794,14 @@ std::set<TString> ElectronCategory_class::GetCutSet(TString region){
 
       TObjString *Objstring1 = (TObjString *) splitted->At(1);
       TString string1 = Objstring1->GetString();
+      //as for the Leading, you may want to apply Mass dep cut
+      TObjArray * splitted_string1 = string1.Tokenize("Over"); //In case you want a mass dep cut
+      TString ismass_dep = ((TObjString *) splitted_string1->At(0))->GetString();
+      if(ismass_dep=="Mass"){
+	std::cout<<"mass dep cut"<<std::endl;
+	TString fraction = ((TObjString *) splitted_string1->At(1))->GetString();
+	string1= "invMass_SC_pho_regrCorr/"+fraction;
+      }
       TCut cutEle1(""+energyBranchName+"_ele1/cosh(etaSCEle_ele1) >= "+"( "+energyBranchName+"_ele1/cosh(etaSCEle_ele1) <"+energyBranchName+"_ele2/cosh(etaSCEle_ele2) )*"+string1);
       TCut cutEle2(""+energyBranchName+"_ele2/cosh(etaSCEle_ele2) >= "+"( "+energyBranchName+"_ele2/cosh(etaSCEle_ele2) <"+energyBranchName+"_ele1/cosh(etaSCEle_ele1) )*"+string1);
 	
@@ -852,8 +873,8 @@ std::set<TString> ElectronCategory_class::GetCutSet(TString region){
       continue;
     }
 
-    //--------------- energySC
-    if(string.Contains("energySC")){
+    //--------------- energy cut
+    if(string.Contains("energy")){
       TObjArray *splitted = string.Tokenize("_");
       if(splitted->GetEntries() < 3){
 	std::cerr << "ERROR: incomplete energySC region definition" << std::endl;
@@ -865,10 +886,43 @@ std::set<TString> ElectronCategory_class::GetCutSet(TString region){
       TString string1 = Objstring1->GetString();
       TString string2 = Objstring2->GetString();
       
-      TCut cutEle1_1("energySCEle_ele1 >= "+string1);
-      TCut cutEle1_2("energySCEle_ele1 <  "+string2);
-      TCut cutEle2_1("energySCEle_ele2 >= "+string1);
-      TCut cutEle2_2("energySCEle_ele2 <  "+string2);
+      TCut cutEle1_1("energySCEle_corr_ele1 >= "+string1);
+      TCut cutEle1_2("energySCEle_corr_ele1 <  "+string2);
+      TCut cutEle2_1("energySCEle_corr_ele2 >= "+string1);
+      TCut cutEle2_2("energySCEle_corr_ele2 <  "+string2);
+
+      TCut ele1_cut = cutEle1_1 && cutEle1_2;
+      TCut ele2_cut = cutEle2_1 && cutEle2_2;
+
+      if(string.Contains("SingleEle")){
+	cut_string += ele1_cut || ele2_cut;
+	cutSet.insert(TString(ele1_cut || ele2_cut));
+      } else {
+	cut_string+=ele1_cut && ele2_cut;
+	cutSet.insert(TString(ele1_cut && ele2_cut));
+      }
+
+      delete splitted;
+      continue;
+    }
+
+    //--------------- energy cut
+    if(string.Contains("seedEnergy")){
+      TObjArray *splitted = string.Tokenize("_");
+      if(splitted->GetEntries() < 3){
+	std::cerr << "ERROR: incomplete energySC region definition" << std::endl;
+	continue;
+      } 
+      TObjString *Objstring1 = (TObjString *) splitted->At(1);
+      TObjString *Objstring2 = (TObjString *) splitted->At(2);
+      
+      TString string1 = Objstring1->GetString();
+      TString string2 = Objstring2->GetString();
+      
+      TCut cutEle1_1("seedEnergySCEle_ele1 >= "+string1);
+      TCut cutEle1_2("seedEnergySCEle_ele1 <  "+string2);
+      TCut cutEle2_1("seedEnergySCEle_ele2 >= "+string1);
+      TCut cutEle2_2("seedEnergySCEle_ele2 <  "+string2);
 
       TCut ele1_cut = cutEle1_1 && cutEle1_2;
       TCut ele2_cut = cutEle2_1 && cutEle2_2;
@@ -886,7 +940,7 @@ std::set<TString> ElectronCategory_class::GetCutSet(TString region){
     }
 
 
-    //--------------- energySC
+    //--------------- nHitsSCEle
     if(string.Contains("nHitsSCEle")){
       TObjArray *splitted = string.Tokenize("_");
       if(splitted->GetEntries() < 3){
