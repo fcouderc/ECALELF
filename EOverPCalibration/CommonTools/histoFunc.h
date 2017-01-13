@@ -14,26 +14,23 @@ public:
 
 
 	//! ctor
-	histoFunc(TH1F* histo)
-	{
+	histoFunc(TH1F* histo) {
 		histo_p = histo;
 	};
 
 
 	//! dtor
-	~histoFunc()
-	{};
+	~histoFunc() {
+	};
 
 	//norm histo
-	double GetIntegral()
-	{
+	double GetIntegral() {
 		double nn = histo_p -> Integral();
 		return(nn);
 	}
 
 	//! operator()
-	double operator()(double* x, double* par)
-	{
+	double operator()(double* x, double* par) {
 		double xx = par[1] * (x[0] - par[2]);
 
 		double xMin = histo_p -> GetBinCenter(1);

@@ -1,5 +1,5 @@
 #include "../interface/runDivide_class.hh"
-//#define DEBUG
+#define DEBUG
 #include <cassert>
 #ifdef DEBUG
 #include <TStopwatch.h>
@@ -37,7 +37,10 @@ void runDivide_class::ReadRunRangeLimits(std::string fileName)
 			file.get();
 			continue;
 		}
-
+		while(file.peek() == 32) { // space
+			file.get();
+			continue;
+		}
 		if(file.peek() == 35) { // comment, the rest of the line can be skipped
 			file.ignore(1000, 10);
 			continue;
@@ -62,7 +65,7 @@ void runDivide_class::LoadRunEventNumbers(TChain *tree, std::string runNumber_br
 	TStopwatch w;
 	w.Start();
 #endif
-	Int_t runNumber;
+	run_t runNumber;
 	time_t runTime;
 
 	tree->SetBranchStatus("*", 0);
@@ -80,7 +83,7 @@ void runDivide_class::LoadRunEventNumbers(TChain *tree, std::string runNumber_br
 		tree->GetEntry(ientry);
 		auto itr = _runMap.find(runNumber);
 		if( itr == _runMap.end()) {
-			_runMap.insert(itr, std::make_pair<run_t, line>(runNumber, line(runTime, runNumber)));
+			_runMap.insert(itr, std::make_pair(runNumber, line(runTime, runNumber)));
 		} else {
 			itr->second.update(runTime);
 		}
