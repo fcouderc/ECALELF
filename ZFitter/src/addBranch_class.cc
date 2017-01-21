@@ -520,6 +520,7 @@ TTree* addBranch_class::AddBranch_scaleEle(TChain* originalChain, TString treena
   //Add flexibility in .dat file name
   //Add flexibility in branch names
   //how to change doScale BEFORE creating escaler (otherwise default is false and if doScale is false correction file is not parsed)-->can't we just change doScale=true by default
+  //
   EnergyScaleCorrection_class eScaler("Calibration/ZFitter/ScalesSmearings/Winter_2016_reReco_v1_ele",0,true,false);
   originalChain->SetBranchStatus("*",0);
   originalChain->SetBranchStatus("runNumber",1);

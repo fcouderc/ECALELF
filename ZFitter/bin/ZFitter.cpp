@@ -886,7 +886,7 @@ int main(int argc, char **argv)
 			}
 
 			////////////////////////////****///////////////////////////////////////
-			//-> Put this in a function?
+			//-> Put this in a function?//
 			//GetCorrTree does not exist anymore in EnergyScaleCorrection_class
 			Float_t scaleEle_[3];
 			TTree *corrTree = new TTree(treeName,""); //treeName is scaleEle_corrEleType
